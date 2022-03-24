@@ -7,6 +7,9 @@ import 'package:letter_shelf/models/emailMessage.dart';
 import 'package:letter_shelf/utils/OAuthClient.dart';
 import 'package:letter_shelf/utils/Utils.dart';
 
+import 'package:hive/hive.dart';
+import 'package:letter_shelf/utils/hive_services.dart';
+
 import '../utils/CreateLoggedinUser.dart';
 import 'HomeScreenListTile.dart';
 
@@ -42,6 +45,8 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
   late ScrollController controller;
   late String queryString = '';
 
+  final HiveServices hiveService = HiveServices( );
+
   int currentIndex = 0;
   int maxResults = 500;
   bool executeOnTap = true;
@@ -61,26 +66,35 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
   Future<void> init() async {
     // first creating a logged in user account, to indicate that the sign up process was successful
     CreateLoggedinUser(api: widget.gmailApi);
+
+    // opening Hive Box
+    await hiveService.openHiveBox("CachedMessages");
+
     await _getEmailMessages( false );
   }
 
   void handleBottomListScrolling() {
-    // if the list has been scrolled down to the en
+    // if the list has been scrolled down to the end
     if (controller.position.maxScrollExtent == controller.offset) {
+      debugPrint('load more');
       _loadEmailMessages(currentIndex + 10);
     }
   }
 
   Future<void> _loadEmailMessages(int limit) async {
     try {
-      // debugPrint( '_loadEmailMessages'  + widget.breakLoop.toString() );
+      List<dynamic> cacheList = [];
+
 
       if (widget.loaded) {
         return;
       }
-      widget.loaded = true;
 
-      // debugPrint('-----');
+      setState(() {
+        widget.loaded = true;
+      });
+
+      int batchCount=0;
 
       while (currentIndex < limit && currentIndex < maxResults - 1 ) {
 
@@ -89,8 +103,6 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
           widget.breakLoop = false;
           return;
         }
-
-        // debugPrint('here ' + currentIndex.toString() );
 
         final String msgId = tempMsgIds.elementAt(currentIndex);
         gmail.Message msg = await widget.gmailApi.users.messages.get('me', msgId, format: "metadata");
@@ -109,7 +121,12 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
         } // headers loop ends here
 
         if( !widget.breakLoop ) {
-          setState(() {
+          if( batchCount > 5 ) {
+            batchCount=0;
+
+            setState(() { });
+          }
+          // setState(() {
             // creating an object of EmailMessage
             EmailMessage msg = EmailMessage(
                 msgId: tempMsgIds.elementAt(currentIndex),
@@ -118,14 +135,21 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
                 subject: subject,
                 image: '');
 
+            cacheList.add(msg.toJson());
             visibleMessages.addAll({tempMsgIds.elementAt(currentIndex): msg});
-          });
+          // });
 
           currentIndex += 1;
         }
       }
 
-      widget.loaded = false;
+
+      // adding json to hive for caching
+      await hiveService.addBoxes( cacheList, "CachedMessages");
+
+      setState(() {
+        widget.loaded = false;
+      });
     }
     catch( e, stacktrace ) {
       debugPrint( e.toString() );
@@ -139,7 +163,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
     }
     widget.queryStringBuilt = true;
 
-    // loading the newslettersfile from memory
+    // loading the newsletters file from memory
     final localPath = await Utils.localPath;
     final String username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
 
@@ -151,59 +175,95 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
     String queryString = '{';
 
     for (var json in jsonList) {
-      if (json['email'] != null) {
-        queryString += 'from:' + json['email'] + ' ';
+      if (json['email'] != null ) {
+        if(  json['enabled'] == true) {
+          queryString += 'from: "' + json['name'] + '" ';
+        }
       }
     }
     queryString += '}';
+
+    // checking queryString is empty
+    if( queryString.length == 2 ) {
+      queryString = "{from: _}";
+    }
 
     return queryString;
   }
 
   Future<void> _getEmailMessages( bool _breakLoop ) async {
     try {
-      String result = '' ;
+      // checking if emailmessages are already cached
+      bool exists = await hiveService.isExists(boxName: "CachedMessages");
 
-      if ( queryString.isEmpty ) {
-        queryString = await _createQueryString();
+      // checking if user has internet connection
+      bool hasInternet = await Utils.hasNetwork();
+
+      if (exists || !hasInternet) {
+
+        List<dynamic> tempList = await hiveService.getBoxes("CachedMessages");
+
+        for( var msg in tempList ) {
+         setState(() {
+           // creating string for from feild
+           String _from = "${msg['from']} <${msg['emailId']}>";
+
+           // creating an object of EmailMessage
+           EmailMessage _msg = EmailMessage(
+               msgId: msg['msgId'],
+               from: _from,
+               date: msg['date'],
+               subject: msg['subject'],
+               image: msg['image']);
+
+           visibleMessages.addAll( {msg['msgId'] : _msg} );
+         });
+        }
+
       }
-      result = queryString;
+      else {
+        String result = '' ;
 
-      // debugPrint("HomeScreenList - " + widget.queryStringAddOn + queryString);
+        if ( queryString.isEmpty ) {
+          queryString = await _createQueryString();
+        }
+        result = queryString;
 
-      gmail.ListMessagesResponse clientMessages = await widget.gmailApi.users.messages.list('me', maxResults: maxResults, q: widget.queryStringAddOn + result );
+        gmail.ListMessagesResponse clientMessages = await widget.gmailApi.users.messages.list('me', maxResults: maxResults, q: widget.queryStringAddOn + result );
 
-      tempMsgIds = clientMessages.messages!.map((message) {
-        return message.id.toString();
-      }).toSet();
+        if( clientMessages.messages == null ) {
+          return;
+        }
 
-      if( _breakLoop ) {
-        widget.breakLoop = false;
+        tempMsgIds = clientMessages.messages!.map((message) {
+          return message.id.toString();
+        }).toSet();
+
+        if( _breakLoop ) {
+          widget.breakLoop = false;
+        }
+
+        _loadEmailMessages(10);
       }
-
-      _loadEmailMessages(25);
-    } catch (e) {
+    } catch (e, stacktrace) {
       debugPrint(e.toString());
+      debugPrint(stacktrace.toString());
     }
   }
 
   void addElementToTop(EmailMessage msg) {
-    debugPrint('addElementToTop');
     setState(() {
       top.add(msg);
     });
   }
 
   void removeElement(String msgId) {
-    debugPrint('removeElement');
     // EmailMessage msg = visibleMessages[msgId];
 
     setState(() {
       visibleMessages.removeWhere((key, value) => key == msgId);
     });
   }
-
-  CustomScrollView? _tempView;
 
   @override
   Widget build(BuildContext context) {
@@ -215,12 +275,19 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
 
     int messagesLength = visibleMessages.length;
 
-    // debugPrint("HomeScreenList - loaded" + widget.loaded.toString() );
-
     return RefreshIndicator(
       onRefresh: () async {
-        // checking if there are any new messages..
-        widget.loaded = false;
+        setState(() {
+          widget.loaded = false;
+        });
+
+        // removing the current box from hive ( so the messages from api are loaded instead of the cached messages )
+
+        // getting required box
+        Box _box = await Hive.openBox("CachedMessages");
+
+        _box.deleteAll(_box.keys);
+
         widget.breakLoop = true;
 
         setState(() {
@@ -231,6 +298,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
         await _getEmailMessages( true );
       },
       child: CustomScrollView(
+        controller: controller,
         center: centerKey,
         slivers: [
           SliverList(
@@ -247,7 +315,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
               childCount: top.length,
             ),
           ),
-          SliverList(
+          visibleMessages.values.isNotEmpty ? SliverList(
             // Key parameter makes this list grow bottom
             key: centerKey,
             delegate: SliverChildBuilderDelegate(
@@ -262,45 +330,23 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
               },
               childCount: messagesLength,
             ),
+          ) : widget.loaded == false ? SliverToBoxAdapter(
+              key: centerKey,
+              child: Container(
+                  margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
+                  alignment: Alignment.center,
+                  child: const Text("no current messages"),
+              ),
+          ) : SliverToBoxAdapter(
+            key: centerKey,
+            child: Container(
+              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
+              alignment: Alignment.center,
+              child: const CircularProgressIndicator(),
+            ),
           ),
         ],
       ),
-
-      // child: CustomScrollView(
-      //   center: centerKey,
-      //   slivers: [
-      //     SliverList(
-      //       delegate: SliverChildBuilderDelegate(
-      //         (BuildContext context, int index) {
-      //           return HomeScreenListTile(
-      //             listKey: widget.key.toString(),
-      //             gmailApi: widget.gmailApi,
-      //             emailMessage: top[index],
-      //             addToListMethod: widget.addToListMethod,
-      //             removeFromListMethod: removeElement,
-      //           );
-      //         },
-      //         childCount: top.length,
-      //       ),
-      //     ),
-      //     SliverList(
-      //       // Key parameter makes this list grow bottom
-      //       key: centerKey,
-      //       delegate: SliverChildBuilderDelegate(
-      //         (BuildContext context, int index) {
-      //           return HomeScreenListTile(
-      //             listKey: widget.key.toString() ,
-      //             gmailApi: widget.gmailApi,
-      //             emailMessage: visibleMessages.values.toList()[index],
-      //             addToListMethod: widget.addToListMethod,
-      //             removeFromListMethod: removeElement,
-      //           );
-      //         },
-      //         childCount: messagesLength,
-      //       ),
-      //     ),
-      //   ],
-      // ),
     );
   }
 }

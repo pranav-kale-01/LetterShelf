@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
+import 'package:googleapis/people/v1.dart' as people;
+
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:letter_shelf/screen_loaders/screenCheckLoader.dart';
 import 'package:letter_shelf/screens/HomeScreen.dart';
@@ -34,20 +36,24 @@ class _NewsletterslistCheckLoaderState extends State<NewsletterslistCheckLoader>
   @override
   Future<void> init() async {
     try {
-      AutoRefreshingAuthClient? authClient = await OAuthClient(username: widget.username).getClient( );
-      gmail.GmailApi api = gmail.GmailApi(authClient);
-      await checkForFile(api);
+      OAuthClient client = OAuthClient(username: widget.username);
+      AutoRefreshingAuthClient? authClient = await client.getClient();
+
+      gmail.GmailApi gmailApi = client.getGmailApi( authClient );
+      people.PeopleServiceApi peopleApi = client.getPeopleApi( authClient );
+
+      await checkForFile(gmailApi, peopleApi);
     }
-    catch (exc) {
+    catch (exc, stacktrace) {
       debugPrint(exc.toString());
+      debugPrint(stacktrace.toString());
     }
   }
 
   @override
-  Future<void> checkForFile(gmail.GmailApi? api) async {
+  Future<void> checkForFile(gmail.GmailApi? gmailApi, people.PeopleServiceApi? peopleApi) async {
     final bool exists = await fileExists();
-    redirectedScreen =
-        exists ? HomeScreen(gmailApi: api!) : SetupScreen(gmailApi: api!);
+    redirectedScreen = exists ? HomeScreen(gmailApi: gmailApi!, peopleApi: peopleApi! ) : SetupScreen(gmailApi: gmailApi!, peopleApi: peopleApi!,);
   }
 
   @override

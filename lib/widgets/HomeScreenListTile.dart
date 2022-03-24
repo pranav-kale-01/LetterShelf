@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:letter_shelf/models/emailMessage.dart';
 
@@ -43,6 +42,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
   };
 
   late BuildContext ctx;
+  String circleAvatarText = "";
   bool executeOnTap = true;
 
   void loadMessage() {
@@ -65,6 +65,24 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
     );
 
     executeOnTap = true;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // generating text for circle-Avatar using the Name of the newsletter
+    // separating each word of the name
+    List<String> wordsList = widget.emailMessage.from.split(" ");
+
+    // taking first or first two letters from the list
+    int index=0;
+    while( index<wordsList.length && index<2 ) {
+      // taking the first letter of every Word
+      circleAvatarText += wordsList[index][0];
+
+      index+=1;
+    }
   }
 
   @override
@@ -105,11 +123,11 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: CircleAvatar(
                   radius: 26,
-                  child: Text('A'),
+                  child: Text(circleAvatarText),
                 ),
               ),
               SizedBox(

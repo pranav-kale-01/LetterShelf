@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
+import 'package:googleapis/people/v1.dart' as people;
+import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:letter_shelf/widgets/SelectAccountListTile.dart';
+
 import 'package:url_launcher/url_launcher.dart';
 
 import '../screen_loaders/newsletterslistCheckLoader.dart';
@@ -22,6 +25,7 @@ class _SelectAccountState extends State<SelectAccount> {
   bool loaded = false;
 
   late gmail.GmailApi gmailApi;
+  late people.PeopleServiceApi peopleApi;
   late http.Client client;
 
   void callOnLoad(Function methodToCall) {
@@ -122,13 +126,13 @@ class _SelectAccountState extends State<SelectAccount> {
                     ),
                   ),
                   onPressed: () async {
-                    OAuthClient client = OAuthClient(username: '');
-                    bool successful = await client.obtainCredentials(
-                        context: context, prompt: _prompt);
-                    gmailApi = client.getApi();
-                    String userName = await client.getCurrentUserName();
+                    OAuthClient _client = OAuthClient(username: '');
+                    bool successful = await _client.obtainCredentials( context: context, prompt: _prompt);
 
                     if (successful) {
+                      // getting the autoRefreshingClient
+                      String userName = await _client.getCurrentUserName();
+
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
                           builder: (context) => NewsletterslistCheckLoader(

@@ -5,13 +5,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' show BuildContext;
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:googleapis_auth/auth_io.dart';
+import 'package:googleapis/people/v1.dart' as people;
 import 'package:http/http.dart' as http;
 
 import 'Utils.dart';
 
 class OAuthClient {
-  final String username;
-  late gmail.GmailApi _gmailApi;
+  String username;
+  gmail.GmailApi? _gmailApi;
+  people.PeopleServiceApi? _peopleServiceApi;
   late http.Client _client;
 
   OAuthClient({required this.username});
@@ -22,8 +24,27 @@ class OAuthClient {
   }
 
   // returns the reference to Gmail api
-  gmail.GmailApi getApi() {
-    return _gmailApi;
+  gmail.GmailApi getGmailApi( AutoRefreshingAuthClient _authClient ) {
+    gmail.GmailApi _api;
+    if( _gmailApi == null  ){
+      _api = gmail.GmailApi( _authClient);
+    }
+    else {
+      _api = _gmailApi!;
+    }
+    return _api;
+  }
+
+  people.PeopleServiceApi getPeopleApi( AutoRefreshingAuthClient _authClient ) {
+    people.PeopleServiceApi _api;
+    if( _peopleServiceApi == null ) {
+      _api = people.PeopleServiceApi( _authClient );
+    }
+    else {
+      _api = _peopleServiceApi!;
+    }
+
+    return _api;
   }
 
   // if present, creates a reference to the credentials file stored in the documents directory
@@ -34,8 +55,16 @@ class OAuthClient {
 
   // returns the current authenticated client's username
   Future<String> getCurrentUserName() async {
-    gmail.Profile userProfile = await _gmailApi.users.getProfile('me');
-    return userProfile.emailAddress!;
+    try {
+      gmail.Profile userProfile = await _gmailApi!.users.getProfile('me');
+      return userProfile.emailAddress!;
+    }
+    catch( e, stacktrace ) {
+      debugPrint( e.toString() );
+      debugPrint( stacktrace.toString() );
+
+      return "exception occoured";
+    }
   }
 
   static Future<String> getCurrentUserNameFromApi(gmail.GmailApi api) async {
@@ -58,14 +87,16 @@ class OAuthClient {
         [
           gmail.GmailApi.gmailReadonlyScope,
           gmail.GmailApi.gmailModifyScope,
+          people.PeopleServiceApi.userinfoProfileScope,
         ],
         (url) => prompt(url, context),
       );
 
       _gmailApi = gmail.GmailApi(authClient);
+      _peopleServiceApi = people.PeopleServiceApi(authClient);
 
       final path = (await Utils.localPath).path;
-      final username = await getCurrentUserName();
+      username = await getCurrentUserName();
       File file = File(path + '/credentials_' + username + '.json');
       await file.writeAsString(jsonEncode(authClient.credentials));
 

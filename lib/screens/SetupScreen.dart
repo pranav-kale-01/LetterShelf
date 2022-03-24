@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
+import 'package:googleapis/people/v1.dart' as people;
 import 'package:letter_shelf/screens/HomeScreen.dart';
 import 'package:letter_shelf/screens/SelectAccount.dart';
 import 'package:letter_shelf/widgets/SetupScreenList.dart';
@@ -12,8 +13,9 @@ import '../utils/Utils.dart';
 
 class SetupScreen extends StatefulWidget {
   final gmail.GmailApi gmailApi;
+  final people.PeopleServiceApi peopleApi;
 
-  const SetupScreen({Key? key, required this.gmailApi}) : super(key: key);
+  const SetupScreen({Key? key, required this.gmailApi, required this.peopleApi}) : super(key: key);
 
   @override
   SetupScreenState createState() => SetupScreenState();
@@ -23,6 +25,7 @@ class SetupScreenState extends State<SetupScreen> {
   String nextButtonText = 'manually add later';
   bool setupListLoadingComplete = false;
   List<SubscribedNewsletter> subscribedNewsletters = [];
+  List<SubscribedNewsletter> allNewsletters = [];
 
   void onLoadingComplete(List<SubscribedNewsletter> subscribedNewsletters) {
     setState(() {
@@ -46,12 +49,13 @@ class SetupScreenState extends State<SetupScreen> {
 
     // adding all the selected newsletters
     for (SubscribedNewsletter newsletter in subscribedNewsletters) {
-      if (newsletter.enabled) {
+      // if (newsletter.enabled) {
         jsonList.add({
           "name": newsletter.name,
-          "email": newsletter.email
+          "email": newsletter.email,
+          "enabled": newsletter.enabled
         });
-      }
+      // }
     }
 
     // writing the json into newsletter-list file
@@ -59,8 +63,7 @@ class SetupScreenState extends State<SetupScreen> {
     final username = await getCurrentUserName();
 
     // File name will be newsletterlist_<Current User Email>.json
-    File file = File(
-        '$path/newsletterslist_' + username + '.json');
+    File file = File( '$path/newsletterslist_' + username + '.json');
     await file.create();
 
     file.writeAsString(json.encode(jsonList));
@@ -70,6 +73,7 @@ class SetupScreenState extends State<SetupScreen> {
       MaterialPageRoute(
         builder: (context) => HomeScreen(
           gmailApi: widget.gmailApi,
+          peopleApi: widget.peopleApi,
         ),
       ),
     );
@@ -144,6 +148,7 @@ class SetupScreenState extends State<SetupScreen> {
                     api: widget.gmailApi,
                     onLoadingComplete: onLoadingComplete,
                     subscribedNewsletters: subscribedNewsletters,
+                    allNewsletters: allNewsletters,
                   ),
                 ),
               ),
@@ -207,12 +212,6 @@ class SetupScreenState extends State<SetupScreen> {
                           // loading process is completed, continue without prompting
                           saveNewsletters();
                         }
-
-                        // if (setupListLoadingComplete) {
-                          // saveNewsletters();
-                        // } else {
-                          // debugPrint(subscribedNewsletters.length.toString());
-                        // }
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,

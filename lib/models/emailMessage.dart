@@ -15,16 +15,16 @@ class EmailMessage {
     this.from = from.substring( 0, index-1 );
     emailId = from.substring( index+1, from.length - 1 );
 
-    final dateFormat =  DateFormat( 'EEE, d MMM y H:m:s' );
+    if( date.runtimeType == DateTime ) {
+      this.date = date;
+    }
+    else {
+      final dateFormat =  DateFormat( 'EEE, d MMM y H:m:s' );
+      this.date = dateFormat.parse( date );
+    }
+  }
 
-    this.date = dateFormat.parse( date );
-
-    // var timeZoneOffset = DateTime.now().timeZoneOffset;
-
-    // print( this.date );
-    //
-    // print( '${this.date.hour}:${this.date.minute}');
-    // print( this.date.add(timeZoneOffset).millisecondsSinceEpoch / 1000 );
-    // print( this.subject );
+  Map<String, dynamic> toJson() {
+    return { 'msgId' : msgId, 'image': image, 'subject': subject, 'date': date, 'emailId': emailId, 'from' : from, 'unread': unread };
   }
 }

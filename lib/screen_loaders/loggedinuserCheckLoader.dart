@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:googleapis/gmail/v1.dart' as gmail;
+import 'package:googleapis/people/v1.dart' as people;
+
 import 'package:flutter/material.dart';
 import 'package:letter_shelf/screen_loaders/newsletterslistCheckLoader.dart';
 import 'package:letter_shelf/screen_loaders/screenCheckLoader.dart';
@@ -28,11 +30,11 @@ class _LoggedinUserCheckLoaderState extends State<LoggedinUserCheckLoader> imple
 
   @override
   Future<void> init() async {
-    await checkForFile( null );
+    await checkForFile( null, null );
   }
 
   @override
-  Future<void> checkForFile( gmail.GmailApi? api ) async {
+  Future<void> checkForFile( gmail.GmailApi? gmailApi, people.PeopleServiceApi? peopleApi  ) async {
     redirectedScreen = await fileExists() ? NewsletterslistCheckLoader(username: userName) : const SelectAccount() ;
   }
 

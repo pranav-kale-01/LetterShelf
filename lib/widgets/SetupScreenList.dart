@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
-import 'package:http/http.dart' as http;
 import 'package:letter_shelf/models/subscribed_newsletters.dart';
 import 'package:letter_shelf/widgets/SetupScreenListTile.dart';
 
@@ -17,6 +16,7 @@ class SetupScreenList extends StatefulWidget {
   bool breakLoop = false;
   int uniqueItems = 0;
   int count = 0;
+  List<SubscribedNewsletter> allNewsletters;
   List<SubscribedNewsletter> subscribedNewsletters;
   final Function onLoadingComplete;
 
@@ -24,7 +24,8 @@ class SetupScreenList extends StatefulWidget {
       {Key? key,
       required this.api,
       required this.onLoadingComplete,
-      required this.subscribedNewsletters})
+      required this.subscribedNewsletters,
+      required this.allNewsletters})
       : super(key: key);
 
   @override
@@ -65,23 +66,12 @@ class _SetupScreenListState extends State<SetupScreenList> {
 
       List<dynamic> data = await utils.getData();
 
-      // // getting a list of subscribed emails from the server database
-      // const String url =
-      //     "https://test-pranav-kale.000webhostapp.com/scripts/newsletter_app/getNameAndEmails.php?table=newsletters_list&condition=";
-      // http.Response response = await http.get(Uri.parse(url));
-      //
-      // debugPrint(response.body);
-      //
-      // List<dynamic> data = jsonDecode(response.body);
-
       Map<String, String> serverList = {};
 
       for (var i in data) {
         Map<String, dynamic> decodedData = jsonDecode(i);
         serverList.addAll({decodedData['newsletter_name']: decodedData['email']});
       }
-
-      // debugPrint( serverList.toString() );
 
       List<String> tempMsgIds = clientMessages.messages!.map((message) {
         return message.id.toString();
@@ -135,6 +125,9 @@ class _SetupScreenListState extends State<SetupScreenList> {
       } // messages loop ends here
 
       loadingComplete = true;
+
+      debugPrint( "SetupScreenList : " + jsonEncode( subscribedEmails) );
+
       widget.onLoadingComplete(widget.subscribedNewsletters);
     } catch (e, stacktrace) {
 
@@ -150,7 +143,6 @@ class _SetupScreenListState extends State<SetupScreenList> {
       padding: const EdgeInsets.all(4),
       child: ListView.builder(
         itemBuilder: (BuildContext context, int index) {
-          // return SetupScreenListTile(msgTitle:  subscribedEmails.keys.toList()[index] , msgSubject: subscribedEmails.values.toList()[index],);
           return SetupScreenListTile(
             newsletter: widget.subscribedNewsletters[index],
           );

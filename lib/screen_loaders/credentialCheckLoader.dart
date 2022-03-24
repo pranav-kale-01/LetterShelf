@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
+import 'package:googleapis/people/v1.dart' as people;
+
 import 'package:letter_shelf/screen_loaders/loggedinuserCheckLoader.dart';
 import 'package:letter_shelf/screen_loaders/screenCheckLoader.dart';
 
@@ -27,11 +29,11 @@ class _CredentialCheckLoaderState extends State<CredentialCheckLoader> implement
 
   @override
   Future<void> init() async {
-    await checkForFile( null );
+    await checkForFile( null, null );
   }
 
   @override
-  Future<void> checkForFile( gmail.GmailApi? api ) async {
+  Future<void> checkForFile( gmail.GmailApi? gmailApi, people.PeopleServiceApi? peoplApi ) async {
     redirectedScreen = await fileExists() ? const LoggedinUserCheckLoader() : const SignInScreen() ;
   }
 

@@ -68,7 +68,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
     CreateLoggedinUser(api: widget.gmailApi);
 
     // opening Hive Box
-    await hiveService.openHiveBox("CachedMessages");
+    await hiveService.openHiveBox( widget.queryStringAddOn + "CachedMessages");
 
     await _getEmailMessages( false );
   }
@@ -145,7 +145,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
 
 
       // adding json to hive for caching
-      await hiveService.addBoxes( cacheList, "CachedMessages");
+      await hiveService.addBoxes( cacheList, widget.queryStringAddOn + "CachedMessages");
 
       setState(() {
         widget.loaded = false;
@@ -194,14 +194,14 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
   Future<void> _getEmailMessages( bool _breakLoop ) async {
     try {
       // checking if emailmessages are already cached
-      bool exists = await hiveService.isExists(boxName: "CachedMessages");
+      bool exists = await hiveService.isExists(boxName: widget.queryStringAddOn + "CachedMessages");
 
       // checking if user has internet connection
       bool hasInternet = await Utils.hasNetwork();
 
-      if (exists || !hasInternet) {
 
-        List<dynamic> tempList = await hiveService.getBoxes("CachedMessages");
+      if ( (!Utils.firstHomeScreenLoad && exists) || (!hasInternet) ) {
+        List<dynamic> tempList = await hiveService.getBoxes( widget.queryStringAddOn + "CachedMessages");
 
         for( var msg in tempList ) {
          setState(() {
@@ -222,6 +222,14 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
 
       }
       else {
+        // removing the current box from hive ( so the messages from api are loaded instead of the cached messages )
+        // getting required box
+        Box _box = await Hive.openBox( widget.queryStringAddOn + "CachedMessages");
+
+        _box.deleteAll(_box.keys);
+
+        Utils.firstHomeScreenLoad = false;
+
         String result = '' ;
 
         if ( queryString.isEmpty ) {
@@ -281,12 +289,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
           widget.loaded = false;
         });
 
-        // removing the current box from hive ( so the messages from api are loaded instead of the cached messages )
-
-        // getting required box
-        Box _box = await Hive.openBox("CachedMessages");
-
-        _box.deleteAll(_box.keys);
+        Utils.firstHomeScreenLoad = true;
 
         widget.breakLoop = true;
 

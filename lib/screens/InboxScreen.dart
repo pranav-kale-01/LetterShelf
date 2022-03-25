@@ -38,6 +38,9 @@ class _InboxScreenState extends State<InboxScreen>
       backgroundColor: Colors.white,
       elevation: 0,
       titleTextStyle: const TextStyle(color: Colors.black, fontSize: 22),
+      iconTheme: const IconThemeData(
+        color: Colors.black,
+      ),
     );
 
     homeScreenTabsList = [

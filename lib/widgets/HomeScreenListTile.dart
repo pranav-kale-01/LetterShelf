@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:letter_shelf/models/emailMessage.dart';
 
+import '../utils/Utils.dart';
 import 'MessageBody.dart';
 
 class HomeScreenListTile extends StatefulWidget {
@@ -71,18 +72,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
   void initState() {
     super.initState();
 
-    // generating text for circle-Avatar using the Name of the newsletter
-    // separating each word of the name
-    List<String> wordsList = widget.emailMessage.from.split(" ");
-
-    // taking first or first two letters from the list
-    int index=0;
-    while( index<wordsList.length && index<2 ) {
-      // taking the first letter of every Word
-      circleAvatarText += wordsList[index][0];
-
-      index+=1;
-    }
+    circleAvatarText = Utils.getInitials(widget.emailMessage.from);
   }
 
   @override

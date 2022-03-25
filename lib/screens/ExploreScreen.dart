@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:letter_shelf/screens/popular_categories.dart';
+import 'package:letter_shelf/screens/top_25.dart';
+import 'package:letter_shelf/widgets/category_card.dart';
+import 'package:letter_shelf/widgets/explore_newsletter_card.dart';
 
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({Key? key}) : super(key: key);
@@ -27,7 +31,7 @@ class ExploreScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20)),
                     elevation: 4,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: 10),
                       child: Row(
                         children: [
                           Icon(
@@ -54,106 +58,57 @@ class ExploreScreen extends StatelessWidget {
                 height: 20,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Popular Category",
+                      "Popular Categories",
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => PopularCategories(),
+                          )
+                        );
+                      },
                       icon: Icon(Icons.arrow_forward_ios_sharp),
                     )
                   ],
                 ),
               ),
+
               Container(
                 height: MediaQuery.of(context).size.height * 0.16,
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
-                      child: Container(
-                        margin: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Business',
-                          style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400),
-                        ),
-                      ),
+                      child: CategoryCard(text: 'Business', backgroundColor: Colors.redAccent, ),
                     ),
                     Expanded(
-                      child: Container(
-                        margin: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Education',
-                          style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400),
-                        ),
-                      ),
+                      child: CategoryCard(text: 'Education', backgroundColor: Colors.blue, ),
                     ),
                   ],
                 ),
               ),
               Container(
                 height: MediaQuery.of(context).size.height * 0.16,
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
-                      child: Container(
-                        margin: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.greenAccent,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Politics',
-                          style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w400),
-                        ),
-                      ),
+                      child: CategoryCard(text: 'Politics', backgroundColor: Colors.green, ),
                     ),
                     Expanded(
-                      child: Container(
-                        margin: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.amberAccent,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          'Tech',
-                          style: TextStyle(
-                              fontSize: 20,
-                              color: Colors.black,
-                              fontWeight: FontWeight.w400),
-                        ),
-                      ),
+                      child: CategoryCard( text: 'Tech', backgroundColor: Colors.amber, ),
                     ),
                   ],
                 ),
@@ -164,242 +119,36 @@ class ExploreScreen extends StatelessWidget {
                 height: 20,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Top 10",
+                      "Top 25",
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const Top25(),
+                          ),
+                        );
+                      },
                       icon: Icon(Icons.arrow_forward_ios_sharp),
                     )
                   ],
                 ),
               ),
 
-              Container(
-                height: 90,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 2,
-                  child: Row(
-                    children: [
-                      // Organization Image
-                      Padding(
-                        padding: const EdgeInsets.symmetric( horizontal: 8.0),
-                        child: CircleAvatar(
-                          radius: 32,
-                          backgroundColor: Colors.greenAccent,
-                          child: Text("MB"),
-                        ),
-                      ),
+              ExploreNewsletterCard(title: 'Morning Brew', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
+              ExploreNewsletterCard(title: 'Pocket', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
+              ExploreNewsletterCard(title: 'Medium Daily Digest', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
+              ExploreNewsletterCard(title: 'Emerging Tech Brew', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
 
-                      // Organization Details
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                'Morning Brew',
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                            ),
-                            Text(
-                                'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.',
-                                overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // More Details
-                      IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                              Icons.arrow_forward_ios_sharp,
-
-                          ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              Container(
-                height: 90,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 2,
-                  child: Row(
-                    children: [
-                      // Organization Image
-                      Padding(
-                        padding: const EdgeInsets.symmetric( horizontal: 8.0),
-                        child: CircleAvatar(
-                          radius: 32,
-                          backgroundColor: Colors.deepOrange,
-                          child: Text("P"),
-                        ),
-                      ),
-
-                      // Organization Details
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Pocket',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.',
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // More Details
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.arrow_forward_ios_sharp,
-
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              Container(
-                height: 90,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 2,
-                  child: Row(
-                    children: [
-                      // Organization Image
-                      Padding(
-                        padding: const EdgeInsets.symmetric( horizontal: 8.0),
-                        child: CircleAvatar(
-                          radius: 32,
-                          backgroundColor: Colors.cyan,
-                          child: Text("MD"),
-                        ),
-                      ),
-
-                      // Organization Details
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Medium Daily Digest',
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.',
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // More Details
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.arrow_forward_ios_sharp,
-
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              Container(
-                height: 90,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  elevation: 2,
-                  child: Row(
-                    children: [
-                      // Organization Image
-                      Padding(
-                        padding: const EdgeInsets.symmetric( horizontal: 8.0),
-                        child: CircleAvatar(
-                          radius: 32,
-                          backgroundColor: Colors.amberAccent,
-                          child: Text("ET"),
-                        ),
-                      ),
-
-                      // Organization Details
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Emerging Tech Brew',
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.',
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // More Details
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(
-                          Icons.arrow_forward_ios_sharp,
-
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ],
           ),
         ),

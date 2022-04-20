@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class Utils {
-  static bool firstHomeScreenLoad = true;
+  static bool firstHomeScreenLoadUnread = true;
+  static bool firstHomeScreenLoadRead = true;
+  static bool firstProfileScreenLoad = true;
 
   // returns the local path to the documents directory
   static Future<Directory> get localPath async {

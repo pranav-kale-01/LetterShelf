@@ -28,21 +28,27 @@ class _PopularCategoriesState extends State<PopularCategories> {
       ),
       body: SafeArea(
         child: Container(
-          alignment: Alignment.center,
           child: SingleChildScrollView(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   height: MediaQuery.of(context).size.height * 0.16,
                   padding: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.limeAccent, ),
+                        child: CategoryCard(
+                          text: 'Business',
+                          backgroundColor: Colors.red,
+                        ),
                       ),
                       Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.grey, textColor: Colors.black ),
+                        child: CategoryCard(
+                            text: 'Lifestyle',
+                            backgroundColor: Colors.blue,
+                        ),
                       ),
                     ],
                   ),
@@ -54,131 +60,17 @@ class _PopularCategoriesState extends State<PopularCategories> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.redAccent, ),
+                        child: CategoryCard(
+                          text: 'Politics',
+                          backgroundColor: Colors.green,
+                        ),
                       ),
                       Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.blue, ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.greenAccent, ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.purpleAccent, ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.blueAccent, ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.deepOrangeAccent, ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.greenAccent, ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.purpleAccent, ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.blueAccent, ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.deepOrangeAccent, ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.redAccent, ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.blue, ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.greenAccent, ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.purpleAccent, ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.blueAccent, ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.deepOrangeAccent, ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: CategoryCard(text: 'Business', backgroundColor: Colors.greenAccent, ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(text: 'Education', backgroundColor: Colors.purpleAccent, ),
+                        child: CategoryCard(
+                          text: 'Tech',
+                          backgroundColor: Colors.amber,
+                          textColor: Colors.black,
+                        ),
                       ),
                     ],
                   ),

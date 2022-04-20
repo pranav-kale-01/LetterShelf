@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:letter_shelf/widgets/top_newsletter_tile.dart';
 
 class Top25 extends StatelessWidget {
   const Top25({Key? key}) : super(key: key);
@@ -19,11 +20,19 @@ class Top25 extends StatelessWidget {
             ),
         ),
       ),
-      body: SafeArea(
-        child: Container(
-          alignment: Alignment.center,
-          child: Text('test'),
-        )
+      body: Container(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                TopNewsletterTile(newsletterData: {'id' : 'Eater Austin', 'organization' : 'Eater'}),
+                TopNewsletterTile(newsletterData: {'id' : 'Emerging Tech Brew', 'organization' : 'Morning Brew'}),
+                TopNewsletterTile(newsletterData: {'id' : 'Medium Daily Digest', 'organization' : 'Medium'}),
+                TopNewsletterTile(newsletterData: {'id' : 'Morning Brew', 'organization' : 'Morning Brew'}),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -91,6 +91,12 @@ class SetupScreenState extends State<SetupScreen> {
                 onPressed: () async {
                   final path = (await Utils.localPath).path;
                   final file = File(path + '/currentUser.json');
+
+                  // resetting all the flags for the new user
+                  Utils.firstProfileScreenLoad = true;
+                  Utils.firstHomeScreenLoadRead = true;
+                  Utils.firstHomeScreenLoadUnread = true;
+
                   file.delete();
 
                   Navigator.of(context).pushReplacement(

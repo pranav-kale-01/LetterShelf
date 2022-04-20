@@ -9,6 +9,8 @@ import 'package:letter_shelf/utils/Utils.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:letter_shelf/widgets/manage_newsletters_list.dart';
 
+import 'add_new_newsletters.dart';
+
 class UserNewsletterList extends StatefulWidget {
   final gmail.GmailApi gmailApi;
 
@@ -59,6 +61,25 @@ class _UserNewsletterListState extends State<UserNewsletterList> {
             color: Colors.black,
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric( horizontal: 8.0),
+            child: IconButton(
+              icon: Icon( Icons.add ),
+              onPressed: () async {
+                List<dynamic> result = await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => AddNewNewsletters( gmailApi: widget.gmailApi ),
+                  )
+                );
+
+                setState(() {
+                  jsonObject = result;
+                });
+              },
+            ),
+          )
+        ],
       ),
       body: FutureBuilder(
         future: loadingCompleted,

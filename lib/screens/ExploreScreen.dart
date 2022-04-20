@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:letter_shelf/screens/popular_categories.dart';
 import 'package:letter_shelf/screens/top_25.dart';
 import 'package:letter_shelf/widgets/category_card.dart';
-import 'package:letter_shelf/widgets/explore_newsletter_card.dart';
+import 'package:letter_shelf/widgets/top_newsletter_card.dart';
 
 class ExploreScreen extends StatelessWidget {
   const ExploreScreen({Key? key}) : super(key: key);
@@ -93,7 +93,7 @@ class ExploreScreen extends StatelessWidget {
                       child: CategoryCard(text: 'Business', backgroundColor: Colors.redAccent, ),
                     ),
                     Expanded(
-                      child: CategoryCard(text: 'Education', backgroundColor: Colors.blue, ),
+                      child: CategoryCard(text: 'Lifestyle', backgroundColor: Colors.blue, ),
                     ),
                   ],
                 ),
@@ -144,11 +144,20 @@ class ExploreScreen extends StatelessWidget {
                 ),
               ),
 
-              ExploreNewsletterCard(title: 'Morning Brew', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
-              ExploreNewsletterCard(title: 'Pocket', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
-              ExploreNewsletterCard(title: 'Medium Daily Digest', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
-              ExploreNewsletterCard(title: 'Emerging Tech Brew', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
-
+              Container(
+                width: MediaQuery.of(context).size.width,
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      TopNewsletterCard(newsletterData: {'id': 'Morning Brew', 'organization': 'Morning Brew'},),
+                      TopNewsletterCard(newsletterData: {'id': 'Medium Daily Digest', 'organization': 'Medium'},),
+                      TopNewsletterCard(newsletterData: {'id': 'Emerging Tech Brew', 'organization': 'Morning Brew'},),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),

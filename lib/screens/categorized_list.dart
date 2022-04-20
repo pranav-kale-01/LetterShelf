@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:letter_shelf/firebase_operations/firebase_utils.dart';
 
 import '../widgets/explore_newsletter_card.dart';
 
@@ -12,34 +14,130 @@ class CategorizedList extends StatefulWidget {
 }
 
 class _CategorizedListState extends State<CategorizedList> {
+  late List<dynamic> newsletters;
+  late Future<void> _future;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _future = init();
+  }
+
+  Future<void> init() async {
+    newsletters = await getNewslettersByKeyword();
+  }
+
+  Future<List<dynamic>> getNewslettersByKeyword(  ) async {
+    List<dynamic> data = [];
+
+    // getting all the newsletter that fall under the invoked category from firebase database
+    try {
+      FirebaseFirestore db = FirebaseFirestore.instance;
+
+      CollectionReference newslettersRefrence = db.collection("newsletters_list");
+
+      QuerySnapshot snapshot = await newslettersRefrence.where( "category", arrayContains: widget.keyword ).get();
+
+      for( var i in snapshot.docs ) {
+        Map<String, dynamic> json = {};
+
+        json.addAll( { "id" : i.id } );
+        json.addAll( { "category" : i.get("category")} );
+        json.addAll( { "email" : i.get("email")} );
+        json.addAll( { "description" : i.get("description")} );
+        json.addAll( { "organization" : i.get("organization")} );
+
+        data.add(json);
+      }
+    }
+    catch( e, stacktrace ) {
+      debugPrint( e.toString() );
+      debugPrint( stacktrace.toString() );
+
+    }
+
+    return data;
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color.fromRGBO(251, 251, 251, 1),
-        elevation: 0,
-        iconTheme: IconThemeData(
-          color: Colors.black,
-        ),
-        title: Text(
-          widget.keyword,
-          style: TextStyle(
-            color: Colors.black,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              ExploreNewsletterCard(title: 'Morning Brew', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
-              ExploreNewsletterCard(title: 'Pocket', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
-              ExploreNewsletterCard(title: 'Medium Daily Digest', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
-              ExploreNewsletterCard(title: 'Emerging Tech Brew', description: 'The daily email newsletter covering the latest news from Wall St. to Silicon Valley.' ),
-            ],
-          ),
-        ),
-      ),
+    return FutureBuilder(
+      future: _future,
+      builder: (context, snapshot) {
+        if( snapshot.connectionState == ConnectionState.done ) {
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Color.fromRGBO(251, 251, 251, 1),
+              elevation: 0,
+              iconTheme: IconThemeData(
+                color: Colors.black,
+              ),
+              title: Text(
+                widget.keyword,
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            body: SafeArea(
+              child: ListView.builder(
+                  itemBuilder: (ctx, index) {
+                    return ExploreNewsletterCard( newsletterData: newsletters[index], );
+                  },
+                  itemCount: newsletters.length,
+              ),
+            ),
+          );
+        }
+        else if( snapshot.hasError ) {
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Color.fromRGBO(251, 251, 251, 1),
+              elevation: 0,
+              iconTheme: IconThemeData(
+                color: Colors.black,
+              ),
+              title: Text(
+                widget.keyword,
+                style: TextStyle(
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            body: SafeArea(
+              child: Container(
+                alignment: Alignment.center,
+                child: Text( snapshot.error.toString() ),
+              )
+            ),
+          );
+        }
+        else {
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Color.fromRGBO(251, 251, 251, 1),
+              elevation: 0,
+              iconTheme: const IconThemeData(
+                color: Colors.black,
+              ),
+              title: Text(
+                widget.keyword,
+                style: const TextStyle(
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            body: SafeArea(
+              child: Container(
+                alignment: Alignment.center,
+                  child: const CircularProgressIndicator()
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 }

@@ -4,17 +4,16 @@ import 'package:letter_shelf/screens/newsletter_display_page.dart';
 import '../utils/Utils.dart';
 
 class ExploreNewsletterCard extends StatelessWidget {
-  final String title;
-  final String description;
+  final Map<String, dynamic> newsletterData;
 
-  const ExploreNewsletterCard({Key? key, required this.title, required this.description}) : super(key: key);
+  const ExploreNewsletterCard({Key? key, required this.newsletterData}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => NewsletterDisplayPage() ),
+          MaterialPageRoute(builder: (context) => NewsletterDisplayPage( newsletterData: newsletterData, ) ),
         );
       },
       child: Container(
@@ -33,7 +32,7 @@ class ExploreNewsletterCard extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 32,
                   backgroundColor: Colors.greenAccent,
-                  child: Text( Utils.getInitials(title) ),
+                  child: Text( Utils.getInitials(newsletterData['id']) ),
                 ),
               ),
 
@@ -44,14 +43,15 @@ class ExploreNewsletterCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      newsletterData['id'],
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 24,
+                        fontSize: 22,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     Text(
-                      description,
+                      newsletterData['description'],
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],

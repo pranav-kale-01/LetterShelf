@@ -112,6 +112,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
           elevation: 5,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
+
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -127,8 +128,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding:
-                          const EdgeInsets.only(top: 15, bottom: 5, left: 10),
+                      padding: const EdgeInsets.only(top: 15, bottom: 5, left: 10),
                       alignment: Alignment.centerLeft,
                       child: Text(
                         widget.emailMessage.from,

@@ -50,6 +50,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
   int currentIndex = 0;
   int maxResults = 500;
   bool executeOnTap = true;
+  late String username;
 
   late List<EmailMessage> top = [];
 
@@ -67,8 +68,11 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
     // first creating a logged in user account, to indicate that the sign up process was successful
     CreateLoggedinUser(api: widget.gmailApi);
 
+    // getting username
+    username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
+
     // opening Hive Box
-    await hiveService.openHiveBox( widget.queryStringAddOn + "CachedMessages");
+    await hiveService.openHiveBox( widget.queryStringAddOn + "CachedMessages" + username );
 
     await _getEmailMessages( false );
   }
@@ -126,18 +130,17 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
 
             setState(() { });
           }
-          // setState(() {
-            // creating an object of EmailMessage
-            EmailMessage msg = EmailMessage(
-                msgId: tempMsgIds.elementAt(currentIndex),
-                from: from,
-                date: date,
-                subject: subject,
-                image: '');
 
-            cacheList.add(msg.toJson());
-            visibleMessages.addAll({tempMsgIds.elementAt(currentIndex): msg});
-          // });
+          // creating an object of EmailMessage
+          EmailMessage msg = EmailMessage(
+              msgId: tempMsgIds.elementAt(currentIndex),
+              from: from,
+              date: date,
+              subject: subject,
+              image: '');
+
+          cacheList.add(msg.toJson());
+          visibleMessages.addAll({tempMsgIds.elementAt(currentIndex): msg});
 
           currentIndex += 1;
         }
@@ -145,7 +148,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
 
 
       // adding json to hive for caching
-      await hiveService.addBoxes( cacheList, widget.queryStringAddOn + "CachedMessages");
+      await hiveService.addBoxes( cacheList, widget.queryStringAddOn + "CachedMessages" + username );
 
       setState(() {
         widget.loaded = false;
@@ -193,19 +196,18 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
 
   Future<void> _getEmailMessages( bool _breakLoop ) async {
     try {
-      // checking if emailmessages are already cached
-      bool exists = await hiveService.isExists(boxName: widget.queryStringAddOn + "CachedMessages");
+      // checking if email messages are already cached
+      bool exists = await hiveService.isExists(boxName: widget.queryStringAddOn + "CachedMessages" + username );
 
       // checking if user has internet connection
       bool hasInternet = await Utils.hasNetwork();
 
-
-      if ( (!Utils.firstHomeScreenLoad && exists) || (!hasInternet) ) {
-        List<dynamic> tempList = await hiveService.getBoxes( widget.queryStringAddOn + "CachedMessages");
+      if ( ( !(widget.queryStringAddOn == 'unread' ? Utils.firstHomeScreenLoadUnread : Utils.firstHomeScreenLoadRead) && exists ) || (!hasInternet) ) {
+        List<dynamic> tempList = await hiveService.getBoxes( widget.queryStringAddOn + "CachedMessages" + username );
 
         for( var msg in tempList ) {
          setState(() {
-           // creating string for from feild
+           // creating string for from field
            String _from = "${msg['from']} <${msg['emailId']}>";
 
            // creating an object of EmailMessage
@@ -224,11 +226,11 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
       else {
         // removing the current box from hive ( so the messages from api are loaded instead of the cached messages )
         // getting required box
-        Box _box = await Hive.openBox( widget.queryStringAddOn + "CachedMessages");
+        Box _box = await Hive.openBox( widget.queryStringAddOn + "CachedMessages" + username );
 
         _box.deleteAll(_box.keys);
 
-        Utils.firstHomeScreenLoad = false;
+        widget.queryStringAddOn == 'unread' ? Utils.firstHomeScreenLoadUnread : Utils.firstHomeScreenLoadRead = false;
 
         String result = '' ;
 
@@ -251,7 +253,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
           widget.breakLoop = false;
         }
 
-        _loadEmailMessages(10);
+        _loadEmailMessages( tempMsgIds.length < 5 ? tempMsgIds.length : 5 );
       }
     } catch (e, stacktrace) {
       debugPrint(e.toString());
@@ -289,7 +291,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
           widget.loaded = false;
         });
 
-        Utils.firstHomeScreenLoad = true;
+        widget.queryStringAddOn == 'unread' ? Utils.firstHomeScreenLoadUnread : Utils.firstHomeScreenLoadRead = true;
 
         widget.breakLoop = true;
 

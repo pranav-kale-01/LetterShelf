@@ -52,11 +52,18 @@ class FirebaseUtils {
     showDataCalled = false;
   }
 
-  Future<List<dynamic>> getData() async {
+  Future<List<dynamic>> getData( { GetOptions? options}) async {
     List<dynamic> _data = [];
 
     try {
-      QuerySnapshot data = await db.collection("newsletters_list").get();
+      QuerySnapshot data;
+
+      if( options == null ) {
+        data = await db.collection("newsletters_list").get();
+      }
+      else {
+        data = await db.collection("newsletters_list").get( options );
+      }
 
       // looping over the list of docs
       for( var i in data.docs ) {

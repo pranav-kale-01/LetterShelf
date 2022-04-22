@@ -7,9 +7,9 @@ class EmailMessage {
   late DateTime date;
   late String emailId;
   late String from;
-  bool unread = true;
+  bool unread;
 
-  EmailMessage( {required this.msgId, required String from, required this.image, required this.subject, required date }) {
+  EmailMessage( {required this.msgId, required String from, required this.image, required this.subject, required date, this.unread = true }) {
     int index = from.indexOf( '<' );
 
     this.from = from.substring( 0, index-1 );

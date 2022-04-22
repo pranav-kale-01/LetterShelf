@@ -134,7 +134,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                         widget.emailMessage.from,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: widget.listKey == "[<'UNREAD'>]" && widget.emailMessage.unread ? widget.headerColor : Colors.grey,
+                          color: widget.listKey != "[<'READ'>]" && widget.emailMessage.unread ? widget.headerColor : Colors.grey,
                           fontWeight: FontWeight.w700,
                           fontSize: 22,
                         ),

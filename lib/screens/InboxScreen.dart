@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:letter_shelf/models/emailMessage.dart';
 import 'package:letter_shelf/widgets/HomeScreenList.dart';
-
-
+import 'package:letter_shelf/widgets/home_screen_drawer.dart';
+import 'package:letter_shelf/widgets/home_screen_search_bar.dart';
+import 'package:letter_shelf/widgets/newsletter_search_list.dart';
 
 class InboxScreen extends StatefulWidget {
   final gmail.GmailApi gmailApi;
@@ -24,24 +25,23 @@ class InboxScreen extends StatefulWidget {
 
 class _InboxScreenState extends State<InboxScreen>
     with AutomaticKeepAliveClientMixin {
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+
   late String queryString;
   late List<HomeScreenList> homeScreenTabsList;
   late AppBar _appBar;
+  late Widget currentDisplayScreen;
+  late Widget previousScreen;
+  Widget? mainScreen;
+
+  bool firstTimeSearchTriggered = false;
+
 
   @override
   void initState() {
     super.initState();
-
-    // initializing appbar
-    _appBar = AppBar(
-      title: const Text('LetterShelf'),
-      backgroundColor: Colors.white,
-      elevation: 0,
-      titleTextStyle: const TextStyle(color: Colors.black, fontSize: 22),
-      iconTheme: const IconThemeData(
-        color: Colors.black,
-      ),
-    );
 
     homeScreenTabsList = [
       HomeScreenList(
@@ -59,6 +59,8 @@ class _InboxScreenState extends State<InboxScreen>
         removeFromListMethod: removeFromHomeScreenList,
       ),
     ];
+
+    currentDisplayScreen = homeScreenTabsList[0];
   }
 
   Future<void> addToHomeScreenList(
@@ -81,68 +83,81 @@ class _InboxScreenState extends State<InboxScreen>
     }
   }
 
+  void setNewScreen( int index ) {
+    setState(() {
+      currentDisplayScreen = homeScreenTabsList[index];
+      mainScreen = currentDisplayScreen;
+      firstTimeSearchTriggered = true;
+    });
+
+    _scaffoldKey.currentState!.openEndDrawer();
+  }
+
+  void showRecommendationScreen() {
+    if( mainScreen == null ) {
+      mainScreen = currentDisplayScreen;
+    }
+
+    previousScreen = mainScreen!;
+
+    setState(() {
+      currentDisplayScreen = Container();
+    });
+  }
+
+  void toggleSearchScreen( bool submitButtonClicked, String searchedText ) {
+    if( submitButtonClicked ) {
+
+      setState(() {
+        currentDisplayScreen = NewsletterSearchList(
+          gmailApi: widget.gmailApi,
+          queryStringAddOn: searchedText,
+          addToListMethod: addToHomeScreenList,
+          removeFromListMethod: removeFromHomeScreenList,
+        );
+      });
+    }
+    else {
+      if( !submitButtonClicked ) {
+        firstTimeSearchTriggered = false;
+      }
+
+      setState(() {
+        currentDisplayScreen = previousScreen;
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    _appBar = AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      titleTextStyle: const TextStyle(color: Colors.black, fontSize: 22),
+      iconTheme: const IconThemeData(
+        color: Colors.black,
+      ),
+      actions: [
+        HomeScreenSearchBar(scaffoldKey: _scaffoldKey, triggerSearchScreen: toggleSearchScreen, showSearchRecommendation: showRecommendationScreen, ),
+      ],
+    );
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        key: _scaffoldKey,
+        drawer: HomeScreenDrawer( notifyParent: setNewScreen, displayScreen: currentDisplayScreen, displayOptions: homeScreenTabsList ),
         appBar: _appBar,
-        body: SafeArea(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height -
-                _appBar.preferredSize.height -
-                widget.topPadding -
-                widget.bottomPadding,
-            child: Column(
-              children: [
-                /// TODO: implement Searchbar here
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  alignment: Alignment.centerLeft,
-                  height: (MediaQuery.of(context).size.height -
-                          _appBar.preferredSize.height -
-                          widget.topPadding -
-                          widget.bottomPadding) *
-                      0.05,
-                  child: TabBar(
-                    indicator: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.blueAccent,
-                    ),
-                    indicatorSize: TabBarIndicatorSize.label,
-                    isScrollable: true,
-                    tabs: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.black26,
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: const Tab(text: 'Unread'),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: Colors.black26,
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: const Tab(text: 'Read'),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: (MediaQuery.of(context).size.height -
-                          _appBar.preferredSize.height -
-                          widget.topPadding -
-                          widget.bottomPadding) *
-                      0.84,
-                  child: TabBarView(
-                    children: homeScreenTabsList,
-                  ),
-                ),
-              ],
-            ),
+        body: SizedBox(
+          height: MediaQuery.of(context).size.height - widget.topPadding - widget.bottomPadding,
+          child: Column(
+            children: [
+              SizedBox(
+                height: MediaQuery.of(context).size.height - _appBar.preferredSize.height - widget.topPadding - widget.bottomPadding - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom - 10,
+                child: currentDisplayScreen,
+              ),
+            ],
           ),
         ),
       ),

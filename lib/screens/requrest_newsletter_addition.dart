@@ -130,7 +130,6 @@ class RequestNewsletterAddition extends StatelessWidget {
                   onPressed: () async {
                     // checking if any of the text fields are empty
                     if( nameController.text.length == 0 || emailController.text.length ==0 || organizationWebsiteController.text.length == 0 ) {
-                      debugPrint("cannot continue");
                       return;
                     }
 
@@ -149,13 +148,11 @@ class RequestNewsletterAddition extends StatelessWidget {
                     QuerySnapshot snapshot = await db.collection("request_list").where("id", isEqualTo: nameController.text + emailController.text + organizationWebsiteController.text ).get();
 
                     if( snapshot.size != 0 ) {
+                      /// TODO: display toast message that request was successful
                       Navigator.of(context).pop();
                     }
                     else {
-                      for( var i in snapshot.docs ) {
-                        debugPrint( i.get("id") );
-                      }
-                      debugPrint( snapshot.size.toString() );
+                      /// TODO: display toast message that request wasn't successful
                     }
                   },
                   child: Container(

@@ -126,11 +126,8 @@ class _SetupScreenListState extends State<SetupScreenList> {
 
       loadingComplete = true;
 
-      debugPrint( "SetupScreenList : " + jsonEncode( subscribedEmails) );
-
       widget.onLoadingComplete(widget.subscribedNewsletters);
     } catch (e, stacktrace) {
-
       debugPrint( "SetupScreenList - " + e.toString() + "\n" + stacktrace.toString());
     }
   }

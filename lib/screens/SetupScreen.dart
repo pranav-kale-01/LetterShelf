@@ -199,7 +199,6 @@ class SetupScreenState extends State<SetupScreen> {
                                   TextButton(
                                     child: const Text('Continue'),
                                     onPressed: () {
-                                      debugPrint('Confirmed');
                                       saveNewsletters();
                                     },
                                   ),

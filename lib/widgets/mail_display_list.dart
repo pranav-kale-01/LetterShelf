@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:letter_shelf/models/emailMessage.dart';
@@ -13,7 +10,7 @@ import 'package:letter_shelf/utils/hive_services.dart';
 import '../utils/CreateLoggedinUser.dart';
 import 'HomeScreenListTile.dart';
 
-class NewsletterSearchList extends StatefulWidget {
+class MailDisplayList extends StatefulWidget {
   final gmail.GmailApi gmailApi;
   final String queryStringAddOn;
   final Function addToListMethod;
@@ -26,7 +23,7 @@ class NewsletterSearchList extends StatefulWidget {
   bool queryStringBuilt = false;
   bool breakLoop = false;
 
-  NewsletterSearchList({
+  MailDisplayList({
     Key? key,
     required this.gmailApi,
     required this.queryStringAddOn,
@@ -35,15 +32,18 @@ class NewsletterSearchList extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _NewsletterSearchListState createState() => _NewsletterSearchListState();
+  _MailDisplayListState createState() => _MailDisplayListState();
 }
 
-class _NewsletterSearchListState extends State<NewsletterSearchList> {
+class _MailDisplayListState extends State<MailDisplayList> with AutomaticKeepAliveClientMixin<MailDisplayList> {
   late Future<void> myFuture;
   late Map<String, dynamic> visibleMessages = {};
   late Set<String> tempMsgIds;
   late ScrollController controller;
   late String queryString = '';
+
+  bool refreshed = false;
+  bool loadingMore = false;
 
   final HiveServices hiveService = HiveServices( );
 
@@ -52,9 +52,6 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
   bool executeOnTap = true;
   late String username;
   ScrollPhysics _physics = ClampingScrollPhysics();
-
-  bool hasInternetConnection = true;
-  bool loadingMore = false;
 
   late List<EmailMessage> top = [];
 
@@ -65,22 +62,21 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
   void initState() {
     super.initState();
     controller = ScrollController()..addListener(handleBottomListScrolling);
+    widget.queryStringBuilt = false;
     myFuture = init();
   }
 
   Future<void> init() async {
-    // checking if user has internet connection
-    hasInternetConnection = await Utils.hasNetwork();
+    // first creating a logged in user account, to indicate that the sign up process was successful
+    CreateLoggedinUser(api: widget.gmailApi);
 
-    if( hasInternetConnection ) {
-      // getting username
-      username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
+    // getting username
+    username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
 
-      await _getEmailMessages( false );
-    }
-    else {
-      setState(() { });
-    }
+    // opening Hive Box
+    await hiveService.openHiveBox( widget.queryStringAddOn + "CachedMessages" + username );
+
+    await _getEmailMessages( false );
   }
 
   void handleBottomListScrolling() {
@@ -88,11 +84,11 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
     if (controller.position.maxScrollExtent == controller.offset) {
       if (!loadingMore) {
         setState(() {
-          loadingMore = true;
           controller.animateTo(controller.position.maxScrollExtent,
               duration: const Duration(milliseconds: 600),
               curve: Curves.easeOutExpo);
         });
+        loadingMore = true;
 
         _loadEmailMessages(
             currentIndex + 10 > tempMsgIds.length ? tempMsgIds.length -
@@ -109,18 +105,27 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
     else {
       setState(() => _physics = BouncingScrollPhysics());
     }
+
   }
 
   Future<void> _loadEmailMessages(int limit) async {
     try {
+      List<dynamic> cacheList = [];
+
+
       if (widget.loaded) {
         return;
       }
 
-      setState(() => widget.loaded = true );
+      setState(() {
+        widget.loaded = true;
+      });
+
+      int batchCount=0;
+
+
 
       while (currentIndex < limit && currentIndex < maxResults - 1 ) {
-
         if( widget.breakLoop )
         {
           widget.breakLoop = false;
@@ -131,7 +136,8 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
         gmail.Message msg = await widget.gmailApi.users.messages.get('me', msgId, format: "metadata");
         List<gmail.MessagePartHeader>? headers = msg.payload?.headers;
 
-        late String subject, date, from;
+        late String subject, date, from, to;
+        bool isUnread = false;
 
         for (gmail.MessagePartHeader header in headers!) {
           if (header.name == 'Subject') {
@@ -141,27 +147,41 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
           } else if (header.name == 'Date') {
             date = header.value!;
           }
+          else if ( header.name == 'To' ) {
+            to = header.value!;
+          }
         } // headers loop ends here
 
-        bool isUnread = false;
-        for( var i in msg.labelIds! ) {
-          if( i == "UNREAD" ) {
-            isUnread = true;
+        // checking if the message is read or unread
+        List<String>? labels = msg.labelIds;
+
+        if( labels != null ) {
+          for( String label in labels ) {
+            if( label == 'UNREAD' ) {
+              isUnread = true;
+            }
           }
+
         }
 
         if( !widget.breakLoop ) {
-          setState(() { });
+          if( batchCount > 5 ) {
+            batchCount=0;
+
+            setState(() { });
+          }
 
           // creating an object of EmailMessage
           EmailMessage msg = EmailMessage(
-              msgId: tempMsgIds.elementAt(currentIndex),
-              from: from,
-              date: date,
-              subject: subject,
-              image: '',
-              unread: isUnread
+            msgId: tempMsgIds.elementAt(currentIndex),
+            from: widget.queryStringAddOn == ' in:sent ' ? to : from ,
+            date: date,
+            subject: subject,
+            image: '',
+            unread: isUnread,
           );
+
+          cacheList.add(msg.toJson());
 
           visibleMessages.addAll({tempMsgIds.elementAt(currentIndex): msg});
 
@@ -169,84 +189,75 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
         }
       }
 
-      setState(() => widget.loaded = false );
+      // adding json to hive for caching
+      await hiveService.addBoxes( cacheList, widget.queryStringAddOn + "CachedMessages" + username );
+
+      setState(() {
+        loadingMore = false;
+        widget.loaded = false;
+      });
     }
     catch( e, stacktrace ) {
       debugPrint( e.toString() );
       debugPrint( stacktrace.toString() );
+
+      loadingMore = false;
+      widget.loaded = false;
     }
-  }
-
-  Future<String> _createQueryString() async {
-    if (widget.queryStringBuilt) {
-      return '';
-    }
-    widget.queryStringBuilt = true;
-
-    // loading the newsletters file from memory
-    final localPath = await Utils.localPath;
-    final String username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
-
-    final File newslettersFile = File(localPath.path + '/newsletterslist_' + username + '.json');
-
-    // reading the file
-    List<dynamic> jsonList = jsonDecode(await newslettersFile.readAsString());
-
-    int count=0;
-    for (var json in jsonList) {
-      if (json['email'] != null && json['enabled'] == true ) {
-        queryString += '( from: "' + json['name'] + '" AND { "${widget.queryStringAddOn}" (';
-
-        // trimming the string
-        String searchString = widget.queryStringAddOn.trim();
-        for( var i in searchString.split(" ") ) {
-          queryString += " $i";
-        }
-        queryString += ") }";
-
-        // checking if the searched string is the same as the newsletter's name
-        if( json['name'].toString().toUpperCase().contains( searchString.toUpperCase() ) ) {
-          queryString += ') OR ( from:"${json['name']}" ';
-        }
-
-        if( count < jsonList.length - 1 ) {
-          queryString += ") OR ";
-        }
-        else{
-          queryString += ") ";
-        }
-        count+=1;
-      }
-    }
-
-    // checking queryString is empty
-    if( queryString.length == 2 ) {
-      queryString = "{from: _}";
-    }
-
-    debugPrint( queryString );
-
-    return queryString;
   }
 
   Future<void> _getEmailMessages( bool _breakLoop ) async {
     try {
-      // checking if user has internet connection
-      hasInternetConnection = await Utils.hasNetwork();
+      // checking if email messages are already cached
+      bool exists = await hiveService.isExists(boxName: widget.queryStringAddOn + "CachedMessages" + username );
 
-      if ( hasInternetConnection ) {
-        String result = '' ;
+      if ( ( !(Utils.firstScreenLoad(widget.key.toString().split("'")[1] ) ) && exists ) ) {
+        List<dynamic> tempList = await hiveService.getBoxes( widget.queryStringAddOn + "CachedMessages" + username );
 
-        if ( queryString.isEmpty ) {
-          queryString = await _createQueryString();
+        for( var msg in tempList ) {
+          setState(() {
+            // creating string for from field
+            String _from = "${msg['from']} <${msg['emailId']}>";
+
+            // creating an object of EmailMessage
+            EmailMessage _msg = EmailMessage(
+                msgId: msg['msgId'],
+                from: _from,
+                date: msg['date'],
+                subject: msg['subject'],
+                image: msg['image'],
+                unread: msg['unread']
+            );
+
+            currentIndex += tempList.length;
+            visibleMessages.addAll( {msg['msgId'] : _msg} );
+          });
         }
 
-        result = queryString;
-
-        gmail.ListMessagesResponse clientMessages = await widget.gmailApi.users.messages.list('me', maxResults: maxResults, q: result );
+        Utils.firstScreenLoad( widget.key.toString().split("'")[1] , false);
+        gmail.ListMessagesResponse clientMessages = await widget.gmailApi.users.messages.list('me', maxResults: maxResults, q: widget.queryStringAddOn );
 
         if( clientMessages.messages == null ) {
-          setState( () => widget.loaded = true );
+          return;
+        }
+
+        tempMsgIds = clientMessages.messages!.map((message) {
+          return message.id.toString();
+        }).toSet();
+
+        _loadEmailMessages( currentIndex + 7 < maxResults ? currentIndex + 7 : maxResults - 1 );
+      }
+      else {
+        // removing the current box from hive ( so the messages from api are loaded instead of the cached messages )
+        // getting required box
+        Box _box = await Hive.openBox( widget.queryStringAddOn + "CachedMessages" + username );
+
+        _box.deleteAll(_box.keys);
+
+        Utils.firstScreenLoad( widget.key.toString().split("'")[1] , false);
+        gmail.ListMessagesResponse clientMessages = await widget.gmailApi.users.messages.list('me', maxResults: maxResults, q: widget.queryStringAddOn );
+
+        if( clientMessages.messages == null ) {
           return;
         }
 
@@ -258,9 +269,10 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
           widget.breakLoop = false;
         }
 
-        _loadEmailMessages( tempMsgIds.length < 6 ? tempMsgIds.length : 6 );
+        _loadEmailMessages( tempMsgIds.length < 7 ? tempMsgIds.length : 7 );
       }
-    } catch (e, stacktrace) {
+    }
+    catch (e, stacktrace) {
       debugPrint(e.toString());
       debugPrint(stacktrace.toString());
     }
@@ -273,6 +285,8 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
   }
 
   void removeElement(String msgId) {
+    // EmailMessage msg = visibleMessages[msgId];
+
     setState(() {
       visibleMessages.removeWhere((key, value) => key == msgId);
     });
@@ -289,23 +303,32 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
     int messagesLength = visibleMessages.length;
 
     return RefreshIndicator(
-      onRefresh: () async {
-        setState(() {
-          loadingMore = false;
-          widget.loaded = false;
+      onRefresh: ( ) async {
+        if( !refreshed ) {
+          refreshed = true;
+          return;
+        }
+
+        Future.delayed(const Duration(milliseconds: 100), () async {
+          setState(() {
+            loadingMore = false;
+            widget.loaded = false;
+          });
+
+          Utils.firstScreenLoad(widget.key.toString().split("'")[1] , true);
+          widget.breakLoop = true;
+
+          setState(() {
+            widget.queryStringBuilt = false;
+            visibleMessages = {};
+          });
+
+          currentIndex=0;
+          await _getEmailMessages( true );
         });
-
-        widget.breakLoop = true;
-
-        setState(() {
-          visibleMessages = {};
-        });
-
-        currentIndex=0;
-        await _getEmailMessages( true );
       },
       child: CustomScrollView(
-        physics: messagesLength < 7 ? AlwaysScrollableScrollPhysics( ) : _physics,
+        physics: messagesLength < 7 ?  AlwaysScrollableScrollPhysics( ) : _physics ,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         controller: controller,
         center: centerKey,
@@ -331,22 +354,22 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
             delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
                 return HomeScreenListTile(
-                  listKey: widget.key.toString() ,
-                  gmailApi: widget.gmailApi,
-                  emailMessage: visibleMessages.values.toList()[index],
-                  addToListMethod: widget.addToListMethod,
-                  removeFromListMethod: removeElement,
-                  username: username,
+                    listKey: widget.key.toString() ,
+                    gmailApi: widget.gmailApi,
+                    emailMessage: visibleMessages.values.toList()[index],
+                    addToListMethod: widget.addToListMethod,
+                    removeFromListMethod: removeElement,
+                    username: username
                 );
               },
               childCount: messagesLength,
             ),
-          ) : hasInternetConnection ?  widget.loaded ? SliverToBoxAdapter(
+          ) : widget.loaded == false ? SliverToBoxAdapter(
             key: centerKey,
             child: Container(
               margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
               alignment: Alignment.center,
-              child: const Text("No matching results found"),
+              child: const Text("no current messages"),
             ),
           ) : SliverToBoxAdapter(
             key: centerKey,
@@ -354,12 +377,6 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
               margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
               alignment: Alignment.center,
               child: const CircularProgressIndicator(),
-            ),
-          ) : SliverToBoxAdapter(
-            child: Container(
-              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
-              alignment: Alignment.center,
-              child: const Text("no internet connection"),
             ),
           ),
           loadingMore ? SliverToBoxAdapter(
@@ -369,7 +386,7 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
               height: 50,
               child: CircularProgressIndicator.adaptive(),
             ),
-          ): const SliverToBoxAdapter( ),
+          ) : const SliverToBoxAdapter(),
         ],
       ),
     );

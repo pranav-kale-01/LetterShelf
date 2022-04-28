@@ -24,8 +24,6 @@ class TopNewsletterTile extends StatelessWidget {
 
           _querySnapshot.addAll( { "id" : newsletterData['id'] } );
 
-          debugPrint( _querySnapshot.toString() );
-
           Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => NewsletterDisplayPage(newsletterData: _querySnapshot))
           );

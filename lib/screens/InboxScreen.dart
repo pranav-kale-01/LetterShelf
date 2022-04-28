@@ -6,6 +6,9 @@ import 'package:letter_shelf/widgets/home_screen_drawer.dart';
 import 'package:letter_shelf/widgets/home_screen_search_bar.dart';
 import 'package:letter_shelf/widgets/newsletter_search_list.dart';
 
+import '../widgets/mail_display_list.dart';
+import '../widgets/saved_screen_list.dart';
+
 class InboxScreen extends StatefulWidget {
   final gmail.GmailApi gmailApi;
   bool queryStringBuilt = false;
@@ -30,10 +33,11 @@ class _InboxScreenState extends State<InboxScreen>
 
 
   late String queryString;
-  late List<HomeScreenList> homeScreenTabsList;
+  late List<Widget> homeScreenTabsList;
   late AppBar _appBar;
   late Widget currentDisplayScreen;
   late Widget previousScreen;
+  int selectedDrawer=0;
   Widget? mainScreen;
 
   bool firstTimeSearchTriggered = false;
@@ -58,6 +62,94 @@ class _InboxScreenState extends State<InboxScreen>
         addToListMethod: addToHomeScreenList,
         removeFromListMethod: removeFromHomeScreenList,
       ),
+      SavedScreenList( ),
+      MailDisplayList(
+        key: const Key('INBOX'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' is:inbox ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+      MailDisplayList(
+        key: const Key('IMPORTANT'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' is:important ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+      MailDisplayList(
+        key: const Key('UNREAD MAILS'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' is:unread ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+      MailDisplayList(
+        key: const Key('STARRED'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' is:starred ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+      MailDisplayList(
+        key: const Key('SNOOZED'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' is:snoozed ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+      MailDisplayList(
+        key: const Key('SENT'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' in:sent ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+      MailDisplayList(
+        key: const Key('SCHEDULED'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' in:scheduled ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+      MailDisplayList(
+        key: const Key('OUTBOX'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' is:outbox ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+      MailDisplayList(
+        key: const Key('DRAFTS'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' is:draft ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+
+      MailDisplayList(
+        key: const Key('ALL MAILS'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+
+      MailDisplayList(
+        key: const Key('SPAM'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' in:spam ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
+
+      MailDisplayList(
+        key: const Key('BIN'),
+        gmailApi: widget.gmailApi,
+        queryStringAddOn: ' in:bin ',
+        addToListMethod: addToHomeScreenList,
+        removeFromListMethod: removeFromHomeScreenList,
+      ),
     ];
 
     currentDisplayScreen = homeScreenTabsList[0];
@@ -65,7 +157,7 @@ class _InboxScreenState extends State<InboxScreen>
 
   Future<void> addToHomeScreenList(
       {required String listName, required EmailMessage msg}) async {
-    for (HomeScreenList homeScreenTab in homeScreenTabsList) {
+    for (HomeScreenList homeScreenTab in homeScreenTabsList as List<HomeScreenList>) {
       if (homeScreenTab.key.toString() == listName) {
         // the correct list is found, adding the element to the top of the list
         homeScreenTab.addElementToTop(msg);
@@ -75,7 +167,7 @@ class _InboxScreenState extends State<InboxScreen>
 
   Future<void> removeFromHomeScreenList(
       {required String listName, required String msgId}) async {
-    for (HomeScreenList homeScreenTab in homeScreenTabsList) {
+    for (HomeScreenList homeScreenTab in homeScreenTabsList as List<HomeScreenList> ) {
       if (homeScreenTab.key.toString() == listName) {
         // the correct list is found, removing the element from the list
         homeScreenTab.removeElement(msgId);
@@ -85,6 +177,7 @@ class _InboxScreenState extends State<InboxScreen>
 
   void setNewScreen( int index ) {
     setState(() {
+      selectedDrawer = index;
       currentDisplayScreen = homeScreenTabsList[index];
       mainScreen = currentDisplayScreen;
       firstTimeSearchTriggered = true;
@@ -128,6 +221,13 @@ class _InboxScreenState extends State<InboxScreen>
     }
   }
 
+  Color getBackgroundColor(int index) {
+    if( selectedDrawer == index ) {
+      return Color.fromRGBO(255, 70, 120, 0.4);
+    }
+
+    return Colors.white;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +247,7 @@ class _InboxScreenState extends State<InboxScreen>
       length: 2,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: HomeScreenDrawer( notifyParent: setNewScreen, displayScreen: currentDisplayScreen, displayOptions: homeScreenTabsList ),
+        drawer: HomeScreenDrawer( notifyParent: setNewScreen, displayScreen: currentDisplayScreen, displayOptions: homeScreenTabsList, getBackgroundColor: getBackgroundColor, ),
         appBar: _appBar,
         body: SizedBox(
           height: MediaQuery.of(context).size.height - widget.topPadding - widget.bottomPadding,

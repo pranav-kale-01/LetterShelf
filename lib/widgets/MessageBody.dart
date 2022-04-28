@@ -36,13 +36,10 @@ class _MessageBodyState extends State<MessageBody> {
   }
 
   Future<String> _getMessageBody() async {
-    gmail.Message msg = await widget.api.users.messages
-        .get('me', widget.messageId, format: 'full');
+    gmail.Message msg = await widget.api.users.messages.get('me', widget.messageId, format: 'full');
 
     // checking if file is a multipart or is a simple text/html file..
-
-    if (msg.payload?.mimeType == 'text/html' ||
-        msg.payload?.mimeType == 'text/plain') {
+    if (msg.payload?.mimeType == 'text/html' || msg.payload?.mimeType == 'text/plain') {
       String decodedString =
           stringToBase64Url.decode("${msg.payload?.body?.data}");
 

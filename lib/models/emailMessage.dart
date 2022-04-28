@@ -12,15 +12,35 @@ class EmailMessage {
   EmailMessage( {required this.msgId, required String from, required this.image, required this.subject, required date, this.unread = true }) {
     int index = from.indexOf( '<' );
 
-    this.from = from.substring( 0, index-1 );
+    // in some cases the from field only has the address of the send and not the name
+    // "Amazon.in" <shipment-tracking@amazon.in>
+    // <cbssbi.cas@sbi.co.in>
+    if( index == 0 ) {
+      this.from = from.substring(index+1, from.indexOf('@') );
+    }
+    else if( index == -1 ) {
+      this.from = from;
+    }
+    else {
+      this.from = from.substring(0, index-1);
+    }
+
     emailId = from.substring( index+1, from.length - 1 );
 
     if( date.runtimeType == DateTime ) {
       this.date = date;
     }
     else {
-      final dateFormat =  DateFormat( 'EEE, d MMM y H:m:s' );
-      this.date = dateFormat.parse( date );
+      try {
+        final dateFormat =  DateFormat( 'EEE, d MMM y H:m:s' );
+        this.date = dateFormat.parse( date );
+      }
+      catch( e, stacktrace ) {
+        final dateFormat =  DateFormat( 'd MMM y H:m:s' );
+        this.date = dateFormat.parse( date );
+      }
+
+
     }
   }
 

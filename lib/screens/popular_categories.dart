@@ -33,48 +33,48 @@ class _PopularCategoriesState extends State<PopularCategories> {
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: CategoryCard(
-                          text: 'Business',
-                          backgroundColor: Colors.red,
-                        ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(
-                            text: 'Lifestyle',
-                            backgroundColor: Colors.blue,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.height * 0.16,
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: CategoryCard(
-                          text: 'Politics',
-                          backgroundColor: Colors.green,
-                        ),
-                      ),
-                      Expanded(
-                        child: CategoryCard(
-                          text: 'Tech',
-                          backgroundColor: Colors.amber,
-                          textColor: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Container(
+                //   height: MediaQuery.of(context).size.height * 0.16,
+                //   padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                //   child: Row(
+                //     children: [
+                //       Expanded(
+                //         child: CategoryCard(
+                //           text: 'Business',
+                //           backgroundColor: Colors.red,
+                //         ),
+                //       ),
+                //       Expanded(
+                //         child: CategoryCard(
+                //             text: 'Lifestyle',
+                //             backgroundColor: Colors.blue,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                // Container(
+                //   height: MediaQuery.of(context).size.height * 0.16,
+                //   padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                //   child: Row(
+                //     crossAxisAlignment: CrossAxisAlignment.stretch,
+                //     children: [
+                //       Expanded(
+                //         child: CategoryCard(
+                //           text: 'Politics',
+                //           backgroundColor: Colors.green,
+                //         ),
+                //       ),
+                //       Expanded(
+                //         child: CategoryCard(
+                //           text: 'Tech',
+                //           backgroundColor: Colors.amber,
+                //           textColor: Colors.black,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
               ],
             ),
           ),

@@ -95,7 +95,6 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
   Future<void> getBackgroundImage() async {
 
     bool exists = await hiveService.isExists( boxName: widget.emailMessage.from + "CachedImage" );
-
     if(exists) {
       List<dynamic> tempList = await hiveService.getBoxes( widget.emailMessage.from + "CachedImage" );
       Uint8List rawImage = Uint8List.fromList( List<int>.from( tempList ) );

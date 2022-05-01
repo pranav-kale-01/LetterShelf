@@ -6,6 +6,8 @@ import 'package:letter_shelf/widgets/home_screen_drawer.dart';
 import 'package:letter_shelf/widgets/home_screen_search_bar.dart';
 import 'package:letter_shelf/widgets/newsletter_search_list.dart';
 
+import '../utils/OAuthClient.dart';
+import '../utils/Utils.dart';
 import '../widgets/mail_display_list.dart';
 import '../widgets/saved_screen_list.dart';
 
@@ -152,7 +154,12 @@ class _InboxScreenState extends State<InboxScreen>
       ),
     ];
 
+    init();
     currentDisplayScreen = homeScreenTabsList[0];
+  }
+
+  Future<void> init() async {
+    Utils.username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
   }
 
   Future<void> addToHomeScreenList(

@@ -8,6 +8,8 @@ class Utils {
   static bool firstHomeScreenLoadRead = true;
   static bool firstProfileScreenLoad = true;
   static bool firstInboxScreenLoad = true;
+  static bool firstExploreScreenLoad = true;
+  static String username = '';
 
   static final List<Color> backgroundColorsList = [
     Color( Colors.pinkAccent.value ),

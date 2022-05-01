@@ -40,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     if( _pages.isEmpty ) {
       _pages = <Widget> [
         InboxScreen(gmailApi: widget.gmailApi, topPadding: MediaQuery.of(context).padding.top, bottomPadding: MediaQuery.of(context).padding.bottom,),
-        const ExploreScreen(),
+        ExploreScreen(),
         ProfileScreen( gmailApi: widget.gmailApi, peopleApi: widget.peopleApi, bottomPadding: Platform.isAndroid ? kBottomNavigationBarHeight : 90, ),
       ];
     }

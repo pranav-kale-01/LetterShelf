@@ -3,10 +3,11 @@ import 'package:letter_shelf/screens/categorized_list.dart';
 
 class CategoryCard extends StatelessWidget {
   final String text;
-  final Color backgroundColor;
+  Color? backgroundColor;
+  final Image image;
   final Color textColor;
 
-  const CategoryCard({Key? key, required this.text, required this.backgroundColor, this.textColor = Colors.white}) : super(key: key);
+  CategoryCard({Key? key, required this.text, required this.image, this.textColor = Colors.white}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,20 +19,39 @@ class CategoryCard extends StatelessWidget {
           )
         );
       },
-      child: Container(
-        margin: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          style:  TextStyle(
-              fontSize: 20,
-              color: textColor,
-              fontWeight: FontWeight.w400),
-        ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Container(
+            margin: const EdgeInsets.all(4.0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: image,
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: Colors.black54,
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              text,
+              style:  TextStyle(
+                  fontSize: 20,
+                  color: textColor,
+                  fontWeight: FontWeight.w400),
+            ),
+          ),
+        ],
+
       ),
     );
   }

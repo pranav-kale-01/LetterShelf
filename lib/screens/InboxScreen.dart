@@ -276,6 +276,7 @@ class _InboxScreenState extends State<InboxScreen>
 
   @override
   void dispose() {
+    Utils.firstHomeScreenLoad = false;
     super.dispose();
   }
 }

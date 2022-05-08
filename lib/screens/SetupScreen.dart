@@ -26,9 +26,22 @@ class SetupScreenState extends State<SetupScreen> {
   bool setupListLoadingComplete = false;
   List<SubscribedNewsletter> subscribedNewsletters = [];
   List<SubscribedNewsletter> allNewsletters = [];
+  bool load= true;
+  double _progress=0;
+  late Text displayText;
+  late double textPadding;
+
+  @override
+  void initState() {
+    displayText = Text('0%');
+    textPadding = 0;
+
+    super.initState();
+  }
 
   void onLoadingComplete(List<SubscribedNewsletter> subscribedNewsletters) {
     setState(() {
+      load = false;
       this.subscribedNewsletters = subscribedNewsletters;
       setupListLoadingComplete = true;
       nextButtonText = 'continue';
@@ -79,32 +92,49 @@ class SetupScreenState extends State<SetupScreen> {
     );
   }
 
+  void updateProgress( double currentProgress ) {
+    setState(() {
+      displayText = new Text('${_progress.toInt()}%');
+      textPadding = _progress;
+      _progress = currentProgress;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         actions: [
           ElevatedButton(
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                elevation: MaterialStateProperty.all<double>(0),
+              ) ,
               onPressed: () {},
-              child: IconButton(
-                icon: const Icon(Icons.logout),
-                onPressed: () async {
-                  final path = (await Utils.localPath).path;
-                  final file = File(path + '/currentUser.json');
+              child: Container(
+                child: IconButton(
+                  color: Colors.black,
+                  icon: const Icon(Icons.logout),
+                  onPressed: () async {
+                    final path = (await Utils.localPath).path;
+                    final file = File(path + '/currentUser.json');
 
-                  // resetting all the flags for the new user
-                  Utils.firstProfileScreenLoad = true;
-                  Utils.firstHomeScreenLoadRead = true;
-                  Utils.firstHomeScreenLoadUnread = true;
+                    // resetting all the flags for the new user
+                    Utils.firstProfileScreenLoad = true;
+                    Utils.firstHomeScreenLoadRead = true;
+                    Utils.firstHomeScreenLoadUnread = true;
 
-                  file.delete();
+                    file.delete();
 
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const SelectAccount(),
-                    ),
-                  );
-                },
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => const SelectAccount(),
+                      ),
+                    );
+                  },
+                ),
               ))
         ],
       ),
@@ -124,7 +154,7 @@ class SetupScreenState extends State<SetupScreen> {
                 : MainAxisAlignment.end,
             children: [
               Container(
-                padding: const EdgeInsets.only(left: 10, right: 10, top: 30),
+                padding: const EdgeInsets.only(left: 10, right: 10, top: 30, bottom: 25),
                 child: Text(
                   setupListLoadingComplete
                       ? 'Select which newsletters you want to read'
@@ -137,6 +167,23 @@ class SetupScreenState extends State<SetupScreen> {
                       : TextAlign.center,
                 ),
               ),
+              if( !setupListLoadingComplete ) Container(
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                height: 20,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: LinearProgressIndicator(
+                    value: _progress,
+
+                  ),
+                ),
+              ),
+              // if( !setupListLoadingComplete) Container(
+              //   margin: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+              //   width: MediaQuery.of(context).size.width,
+              //   padding: EdgeInsets.only(left: textPadding),
+              //   child: displayText,
+              // ),
               const SizedBox(
                 height: 10,
               ),
@@ -155,6 +202,8 @@ class SetupScreenState extends State<SetupScreen> {
                     onLoadingComplete: onLoadingComplete,
                     subscribedNewsletters: subscribedNewsletters,
                     allNewsletters: allNewsletters,
+                    onProgressed: updateProgress,
+                    firstLoad: load,
                   ),
                 ),
               ),
@@ -186,26 +235,37 @@ class SetupScreenState extends State<SetupScreen> {
                             barrierDismissible: false, // user must tap button!
                             builder: (BuildContext context) {
                               return AlertDialog(
-                                title: Text('AlertDialog Title'),
+                                title: Text('Are You Sure?'),
                                 content: SingleChildScrollView(
                                   child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: const <Widget>[
-                                      Text('Are You Sure?'),
-                                      Text('You Have to manually add later, the newsletters you want?'),
+
+                                      Text('You Have to manually add later, the newsletters you want'),
                                     ],
                                   ),
                                 ),
                                 actions: <Widget>[
                                   TextButton(
-                                    child: const Text('Continue'),
+                                    child: const Text(
+                                        'Cancel',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                        ),
+                                    ),
                                     onPressed: () {
-                                      saveNewsletters();
+                                      Navigator.of(context).pop();
                                     },
                                   ),
                                   TextButton(
-                                    child: const Text('Cancel'),
+                                    child: const Text(
+                                      'Continue',
+                                      style: TextStyle(
+                                        fontSize: 28,
+                                      ),
+                                    ),
                                     onPressed: () {
-                                      Navigator.of(context).pop();
+                                      saveNewsletters();
                                     },
                                   ),
                                 ],

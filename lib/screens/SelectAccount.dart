@@ -63,11 +63,57 @@ class _SelectAccountState extends State<SelectAccount> {
       builder: (BuildContext context) {
         return Dialog(
           child: GestureDetector(
-            onTap: () async {
-              launch(url);
-              Navigator.of(context).pop();
-            },
-            child: const Text('Please go the following URL and grant access'),
+            child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 22),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only( top: 16.0, bottom: 24),
+                      child: Text(
+                          "Google Sign In",
+                          style: TextStyle(
+                            fontSize: 26,
+                          ),
+                      ),
+                    ),
+                    Text(
+                        'Please go the following URL to Sign in with your Google Account',
+                        style: TextStyle(
+                          fontSize: 18,
+                        ),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Container(
+                      height: 2,
+                      color: Colors.black12,
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        launch(url);
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        padding: EdgeInsets.only(right: 8.0,top: 12),
+                        alignment: Alignment.center,
+                        child: Text(
+                            'Open Link',
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w500
+                            ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                  ],
+                ),
+            ),
           ),
         );
       },
@@ -83,13 +129,26 @@ class _SelectAccountState extends State<SelectAccount> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.7,
-                  child: Center(
+              padding: const EdgeInsets.only(left: 8.0,  right: 8.0, top: 40,),
+              child: Text(
+                "Select a account to Sign in",
+                style: TextStyle(
+                  fontSize: 36,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 80,
+            ),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: SizedBox(
+                    // height: MediaQuery.of(context).size.height - 400,
                     child: SingleChildScrollView(
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                        // mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: allAccounts.map((value) {
                           return GestureDetector(
                             onTap: () {
@@ -105,20 +164,19 @@ class _SelectAccountState extends State<SelectAccount> {
                           );
                         }).toList(),
                       ),
-                    ),
-                  )),
+                    )),
+              ),
             ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.12,
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.8,
-              height: MediaQuery.of(context).size.height * 0.06,
+            Container(
+              margin: EdgeInsets.only(bottom: 10),
+              width: MediaQuery.of(context).size.width * 0.95,
+              height: 60,
               child: Material(
                 elevation: 10,
                 borderRadius: BorderRadius.circular(15),
                 child: ElevatedButton(
                   style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Colors.pinkAccent),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -145,7 +203,7 @@ class _SelectAccountState extends State<SelectAccount> {
                   child: const Text(
                     'Sign in With Other Account',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 21,
                     ),
                   ),
                 ),

@@ -8,8 +8,10 @@ class EmailMessage {
   late String emailId;
   late String from;
   bool unread;
+  bool starred;
+  bool important;
 
-  EmailMessage( {required this.msgId, required String from, required this.image, required this.subject, required date, this.unread = true }) {
+  EmailMessage( {required this.msgId, required String from, required this.image, required this.subject, required date, this.unread = true, this.starred = false, this.important = false }) {
     int index = from.indexOf( '<' );
 
     // in some cases the from field only has the address of the send and not the name
@@ -31,16 +33,20 @@ class EmailMessage {
       this.date = date;
     }
     else {
-      try {
-        final dateFormat =  DateFormat( 'EEE, d MMM y H:m:s' );
-        this.date = dateFormat.parse( date );
-      }
-      catch( e, stacktrace ) {
-        final dateFormat =  DateFormat( 'd MMM y H:m:s' );
-        this.date = dateFormat.parse( date );
-      }
+      List<String> formatString = ['EEE, d MMM y H:m:s', 'd MMM y H:m:s', 'EEE,  d MMM y H:m:s'];
+      int count =0;
 
-
+      while( true ) {
+        try {
+          final dateFormat =  DateFormat( formatString[count] );
+          this.date = dateFormat.parse( date );
+          break;
+        }
+        catch( e, stacktrace ) {
+          count+=1;
+          continue;
+        }
+      }
     }
   }
 

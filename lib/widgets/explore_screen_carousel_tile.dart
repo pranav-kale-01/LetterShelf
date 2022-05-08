@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:letter_shelf/widgets/editors_choice_list.dart';
 
 class ExploreScreenCarouselTile extends StatelessWidget {
   final String title;
   final Image image;
+  final String imageUrl;
+  final List<dynamic> featuredNewslettersList;
 
-  const ExploreScreenCarouselTile({Key? key, required this.title, required this.image}) : super(key: key);
+  const ExploreScreenCarouselTile({Key? key, required this.title, required this.image, required this.featuredNewslettersList, this.imageUrl = ''}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        debugPrint('tapped');
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => EditorsChoiceList( titleString: title, imageUrl: imageUrl, featuredNewsletters: featuredNewslettersList,),
+          ),
+        );
       },
       child: Container(
         decoration: BoxDecoration(

@@ -97,7 +97,10 @@ class _MessageBodyState extends State<MessageBody> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text(widget.messageSubject),
+        elevation: 1,
+        foregroundColor: Colors.black,
         leading: IconButton(
           onPressed: () {
             Navigator.of(context).pop();

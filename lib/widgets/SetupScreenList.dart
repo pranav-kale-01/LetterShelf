@@ -15,17 +15,22 @@ class SetupScreenList extends StatefulWidget {
   bool loaded = false;
   bool breakLoop = false;
   int uniqueItems = 0;
-  int count = 0;
+  double count=0;
+  final int _maxResults = 50;
+  bool firstLoad;
   List<SubscribedNewsletter> allNewsletters;
   List<SubscribedNewsletter> subscribedNewsletters;
   final Function onLoadingComplete;
+  final Function(double) onProgressed;
 
   SetupScreenList(
       {Key? key,
       required this.api,
       required this.onLoadingComplete,
       required this.subscribedNewsletters,
-      required this.allNewsletters})
+      required this.allNewsletters,
+      required this.onProgressed,
+      required this.firstLoad})
       : super(key: key);
 
   @override
@@ -38,16 +43,20 @@ class _SetupScreenListState extends State<SetupScreenList> {
   List<String> msgIds = [];
   bool loadingComplete = false;
 
-  void callOnLoad(Function methodToCall) {
+  @override
+  void initState() {
+    super.initState();
+
     Future.delayed(const Duration(milliseconds: 1000), () async {
-      if (!widget.loaded) {
+      if (!widget.loaded && widget.firstLoad ) {
         widget.loaded = true;
-        await methodToCall();
+        await loadSubscribedEmailAccounts();
       }
     });
   }
 
   Future<void> loadSubscribedEmailAccounts() async {
+    debugPrint("functionCalled");
     Map<String, String> unSubscribedEmails = {};
 
     if (loadingComplete) {
@@ -56,7 +65,7 @@ class _SetupScreenListState extends State<SetupScreenList> {
 
     try {
       gmail.ListMessagesResponse clientMessages =
-          await widget.api.users.messages.list('me', maxResults: 50);
+          await widget.api.users.messages.list('me', maxResults: widget._maxResults);
 
       // creating a reference of firebase db
       FirebaseFirestore db = FirebaseFirestore.instance;
@@ -77,9 +86,12 @@ class _SetupScreenListState extends State<SetupScreenList> {
         return message.id.toString();
       }).toList();
 
+      double _count =0;
       for (String msgId in tempMsgIds) {
         gmail.Message msg = await widget.api.users.messages.get('me', msgId, format: "metadata");
         List<gmail.MessagePartHeader>? headers = msg.payload?.headers;
+
+        widget.onProgressed( ( _count / widget._maxResults) );
 
         for (gmail.MessagePartHeader header in headers!) {
           // debugPrint( header.name.toString() + ' - ' + header.value.toString() );
@@ -121,7 +133,8 @@ class _SetupScreenListState extends State<SetupScreenList> {
             return;
           }
         } // headers loop ends here
-        widget.count++;
+        _count +=1;
+        widget.count+=1;
       } // messages loop ends here
 
       loadingComplete = true;
@@ -132,10 +145,8 @@ class _SetupScreenListState extends State<SetupScreenList> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    callOnLoad(loadSubscribedEmailAccounts);
     return Padding(
       padding: const EdgeInsets.all(4),
       child: ListView.builder(

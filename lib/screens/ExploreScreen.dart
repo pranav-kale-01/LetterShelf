@@ -1,16 +1,58 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:letter_shelf/screens/popular_categories.dart';
 import 'package:letter_shelf/screens/top_25.dart';
-import 'package:letter_shelf/utils/explore_screen_carousel_tile.dart';
+import 'package:letter_shelf/widgets/explore_screen_carousel_tile.dart';
 import 'package:letter_shelf/widgets/browse_categories_tile.dart';
 import 'package:letter_shelf/widgets/category_card.dart';
 import 'package:letter_shelf/widgets/top_newsletter_card.dart';
 
-class ExploreScreen extends StatelessWidget {
+import '../utils/Utils.dart';
+
+class ExploreScreen extends StatefulWidget {
   List<Widget> carouselItems = [];
 
   ExploreScreen({Key? key}) : super(key: key) {
+    // carouselItems = [
+    //   ExploreScreenCarouselTile(
+    //     title: "Catch up with the World",
+    //     image: Image( image: AssetImage( 'assets/images/letter_shelf_logo.jpg' ) ),
+    //     imageUrl: "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8d29ybGQlMjBuZXdzfGVufDB8fDB8fA%3D%3D&w=1000&q=80",
+    //     featuredNewslettersList: [
+    //       {'id' : 'Emerging Tech Brew', 'organization' : 'Morning Brew'},
+    //       {'id' : 'Medium Daily Digest', 'organization' : 'Medium'},
+    //       {'id' : 'Bits', 'organization' : 'The New York Times'}
+    //     ],
+    //   ),
+    //   ExploreScreenCarouselTile(
+    //     title: "For Tech Geeks",
+    //     image: Image( image: AssetImage( 'assets/images/letter_shelf_logo.jpg' ), ),
+    //     imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dGVjaG5vbG9neXxlbnwwfHwwfHw%3D&w=1000&q=80",
+    //     featuredNewslettersList: [
+    //       {'id' : 'Emerging Tech Brew', 'organization' : 'Morning Brew'},
+    //       {'id' : 'Bits', 'organization' : 'The New York Times'}
+    //     ],
+    //   ),
+    //   ExploreScreenCarouselTile(
+    //     title: "Best Picks for Food Lovers",
+    //     image: Image( image: AssetImage( 'assets/images/letter_shelf_logo.jpg' ) ),
+    //     imageUrl: "https://cdn.tasteatlas.com//images/toplistarticles/d0e6a0a79d5f4197a51f4ca065393ffe.jpg?w=375&h=280",
+    //     featuredNewslettersList: [
+    //       {'id' : 'Cooking', 'organization' : 'The New York Times'},
+    //       {'id' : 'Eater Austin', 'organization' : 'Eater'}
+    //     ],
+    //   ),
+    //   ExploreScreenCarouselTile(
+    //     title: "Straight from the Wall St.",
+    //     image: Image( image: AssetImage( 'assets/images/letter_shelf_logo.jpg' ) ),
+    //     imageUrl: "https://images.indianexpress.com/2021/04/wall-street-1200.jpg",
+    //     featuredNewslettersList: [
+    //       {'id' : 'CNN News Alert', 'organization' : 'CNN'}
+    //     ],
+    //   ),
+    // ];
+
+
+
     carouselItems = [
       ExploreScreenCarouselTile(
         title: "Catch up with the World",
@@ -18,6 +60,12 @@ class ExploreScreen extends StatelessWidget {
           "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8d29ybGQlMjBuZXdzfGVufDB8fDB8fA%3D%3D&w=1000&q=80",
           fit: BoxFit.fitWidth,
         ),
+        imageUrl: "https://images.unsplash.com/photo-1521295121783-8a321d551ad2?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8d29ybGQlMjBuZXdzfGVufDB8fDB8fA%3D%3D&w=1000&q=80",
+        featuredNewslettersList: [
+          {'id' : 'Emerging Tech Brew', 'organization' : 'Morning Brew'},
+          {'id' : 'Medium Daily Digest', 'organization' : 'Medium'},
+          {'id' : 'Bits', 'organization' : 'The New York Times'}
+        ],
       ),
       ExploreScreenCarouselTile(
         title: "For Tech Geeks",
@@ -25,6 +73,11 @@ class ExploreScreen extends StatelessWidget {
           "https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dGVjaG5vbG9neXxlbnwwfHwwfHw%3D&w=1000&q=80",
           fit: BoxFit.fitWidth,
         ),
+        imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8M3x8dGVjaG5vbG9neXxlbnwwfHwwfHw%3D&w=1000&q=80",
+        featuredNewslettersList: [
+          {'id' : 'Emerging Tech Brew', 'organization' : 'Morning Brew'},
+          {'id' : 'Bits', 'organization' : 'The New York Times'}
+        ],
       ),
       ExploreScreenCarouselTile(
         title: "Best Picks for Food Lovers",
@@ -32,6 +85,11 @@ class ExploreScreen extends StatelessWidget {
           "https://cdn.tasteatlas.com//images/toplistarticles/d0e6a0a79d5f4197a51f4ca065393ffe.jpg?w=375&h=280",
           fit: BoxFit.fitWidth,
         ),
+        imageUrl: "https://cdn.tasteatlas.com//images/toplistarticles/d0e6a0a79d5f4197a51f4ca065393ffe.jpg?w=375&h=280",
+        featuredNewslettersList: [
+          {'id' : 'Cooking', 'organization' : 'The New York Times'},
+          {'id' : 'Eater Austin', 'organization' : 'Eater'}
+        ],
       ),
       ExploreScreenCarouselTile(
         title: "Straight from the Wall St.",
@@ -39,10 +97,19 @@ class ExploreScreen extends StatelessWidget {
           "https://images.indianexpress.com/2021/04/wall-street-1200.jpg",
           fit: BoxFit.fitWidth,
         ),
+        imageUrl: "https://images.indianexpress.com/2021/04/wall-street-1200.jpg",
+        featuredNewslettersList: [
+          {'id' : 'CNN News Alert', 'organization' : 'CNN'}
+        ],
       ),
     ];
   }
 
+  @override
+  _ExploreScreenState createState() => _ExploreScreenState();
+}
+
+class _ExploreScreenState extends State<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,36 +124,36 @@ class ExploreScreen extends StatelessWidget {
               ),
 
               // Search Bar
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: SizedBox(
-                  height: 60,
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
-                    elevation: 4,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.search,
-                            size: 30,
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            'Search Newsletter',
-                            style:
-                                TextStyle(fontSize: 18, color: Colors.black45),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              //   child: SizedBox(
+              //     height: 60,
+              //     child: Card(
+              //       shape: RoundedRectangleBorder(
+              //           borderRadius: BorderRadius.circular(20)),
+              //       elevation: 4,
+              //       child: Padding(
+              //         padding: EdgeInsets.symmetric(horizontal: 10),
+              //         child: Row(
+              //           children: [
+              //             Icon(
+              //               Icons.search,
+              //               size: 30,
+              //             ),
+              //             SizedBox(
+              //               width: 10,
+              //             ),
+              //             Text(
+              //               'Search Newsletter',
+              //               style:
+              //                   TextStyle(fontSize: 18, color: Colors.black45),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
 
               // Editor's Choice Carousel
               Padding(
@@ -108,14 +175,14 @@ class ExploreScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(top: 8.0),
                 child: CarouselSlider(
                   options: CarouselOptions(
-                      height: 170.0,
-                      autoPlay: true,
-                      enlargeCenterPage: true,
-                      viewportFraction: 0.98,
-                      autoPlayAnimationDuration: const Duration( seconds: 2),
-                      autoPlayCurve: Curves.easeOutExpo,
+                    height: 170.0,
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    viewportFraction: 0.98,
+                    autoPlayAnimationDuration: const Duration( seconds: 2),
+                    autoPlayCurve: Curves.easeOutExpo,
                   ),
-                  items: carouselItems,
+                  items: widget.carouselItems,
                 ),
               ),
 
@@ -147,20 +214,14 @@ class ExploreScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: CategoryCard(
-                        text: 'Business', 
-                        image: Image.network(
-                            "https://assets.entrepreneur.com/content/3x2/2000/20191127190639-shutterstock-431848417-crop.jpeg",
-                            fit: BoxFit.fitWidth,
-                        ),
+                        text: 'Business',
+                        image: Image( image: AssetImage( 'assets/images/business.jpg' ), fit: BoxFit.fitWidth, ),
                       ),
                     ),
                     Expanded(
                       child: CategoryCard(
-                        text: 'Lifestyle', 
-                        image: Image.network(
-                            "https://headerpop.com/wp-content/uploads/2019/08/lifestyle-scaled.jpg",
-                            fit: BoxFit.fitWidth,
-                        ),
+                        text: 'Lifestyle',
+                        image: Image( image: AssetImage( 'assets/images/lifestyle.jpg' ), fit: BoxFit.fitWidth, ),
                       ),
                     ),
                   ],
@@ -175,19 +236,13 @@ class ExploreScreen extends StatelessWidget {
                     Expanded(
                       child: CategoryCard(
                         text: 'Politics',
-                        image: Image.network(
-                            "https://media.istockphoto.com/photos/political-fund-raising-for-congress-running-for-reelection-washington-picture-id1296606378?b=1&k=20&m=1296606378&s=170667a&w=0&h=SXs2feEbDzpW4_Mx0lIMwo6AvAlVga2ApTPu9koiano=",
-                            fit: BoxFit.fitWidth,
-                        ),
+                        image: Image( image: AssetImage( 'assets/images/politics.jpg' ), fit: BoxFit.fitWidth, ),
                       ),
                     ),
                     Expanded(
                       child: CategoryCard(
                         text: 'Tech',
-                        image: Image.network(
-                            "https://bahriatech.com/wp-content/uploads/2021/10/businessman-using-tech-devices-icons-thin-line-interface_117023-904-1.jpg",
-                            fit: BoxFit.fitWidth,
-                        ),
+                        image: Image( image: AssetImage( 'assets/images/tech.jpg' ), fit: BoxFit.fitWidth, ),
                       ),
                     ),
                   ],
@@ -204,7 +259,7 @@ class ExploreScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Top 25",
+                      "Top 10",
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
@@ -231,9 +286,11 @@ class ExploreScreen extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      TopNewsletterCard(newsletterData: {'id': 'Morning Brew', 'organization': 'Morning Brew'}, cardHeight: 190, cardWidth: 150,),
-                      TopNewsletterCard(newsletterData: {'id': 'Medium Daily Digest', 'organization': 'Medium'}, cardHeight: 190, cardWidth: 150,),
-                      TopNewsletterCard(newsletterData: {'id': 'Emerging Tech Brew', 'organization': 'Morning Brew'}, cardHeight: 190, cardWidth: 150,),
+                      TopNewsletterCard(newsletterData: {'id': 'Morning Briefing', 'organization': 'Morning Brew'}, cardHeight: 190, cardWidth: 150, enabledCaching: true,),
+                      TopNewsletterCard(newsletterData: {'id': 'Morning Brew', 'organization': 'Morning Brew'}, cardHeight: 190, cardWidth: 150, enabledCaching: true,),
+                      TopNewsletterCard(newsletterData: {'id': 'CNN News Alert', 'organization': 'Morning Brew'}, cardHeight: 190, cardWidth: 150, enabledCaching: true,),
+                      TopNewsletterCard(newsletterData: {'id': 'Dharma Markets Report', 'organization': 'Morning Brew'}, cardHeight: 190, cardWidth: 150, enabledCaching: true,),
+                      TopNewsletterCard(newsletterData: {'id': 'Medium Daily Digest', 'organization': 'Medium'}, cardHeight: 190, cardWidth: 150, enabledCaching: true,),
                     ],
                   ),
                 ),
@@ -274,5 +331,14 @@ class ExploreScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+
+    // setting firstload of Explore Screen to false
+    Utils.firstExploreScreenLoad = false;
+
+    super.dispose();
   }
 }

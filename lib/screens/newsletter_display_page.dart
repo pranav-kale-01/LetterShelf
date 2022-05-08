@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:letter_shelf/utils/hive_services.dart';
@@ -100,8 +101,8 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
         Map<String, dynamic> decodedData = jsonDecode( jsonEncode( snapshot.data() ) );
 
         // getting logo
-        if(decodedData['image'] != null ) {
-          List<String> fileNames = await storage.listLogosFile( widget.newsletterData['id']);
+        List<String> fileNames = await storage.listLogosFile( widget.newsletterData['id']);
+        if( fileNames.isNotEmpty ) {
           String url = await storage.getDownloadUrl( fileNames[0] );
           http.Response response = await http.get( Uri.parse( url) );
 
@@ -109,7 +110,11 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
           _box.deleteAll(_box.keys);
 
           await hiveService.addBoxes(  response.bodyBytes, widget.newsletterData['id'] + "CachedImage");
-          setState(() => image = Image.memory(response.bodyBytes) );
+          setState(() => image = Image.memory(
+              response.bodyBytes,
+              fit: BoxFit.scaleDown,
+            ),
+          );
         }
       }
     }
@@ -128,9 +133,9 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
       relatedImages.add(
         Image.network( url ),
       );
-    }
 
-    setState(() { });
+      setState(() { });
+    }
   }
 
   @override
@@ -190,7 +195,7 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
                         borderRadius: BorderRadius.circular(50),
                       ),
                       child: CircleAvatar(
-                        radius: 48,
+                        radius: 50,
                         backgroundColor: Colors.white,
                         child: image == null ? Text(
                           Utils.getInitials(widget.newsletterData['id']),
@@ -261,7 +266,21 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
                     autoPlayAnimationDuration: const Duration( seconds: 2),
                     autoPlayCurve: Curves.easeOutExpo,
                   ),
-                  items: relatedImages,
+                  items: relatedImages.isEmpty ?  [
+                    Card(
+                      elevation: 1,
+                      child: Container(
+                        width: 300,
+                        height: 100,
+                        alignment: Alignment.center,
+                        color: Color.fromRGBO(168, 168, 168, 1),
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                  ] : relatedImages,
                 ),
               ),
 

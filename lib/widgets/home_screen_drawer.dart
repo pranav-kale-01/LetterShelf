@@ -115,6 +115,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
               child: HomeScreenDrawerTile(
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 backgroundColor: widget.getBackgroundColor( 3 ),
+                iconLabel: Icons.inbox,
                 title: "Inbox",
               ),
             ),
@@ -130,6 +131,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Important",
                 backgroundColor: widget.getBackgroundColor( 4 ),
+                iconLabel: Icons.label_important_outline_rounded,
               ),
             ),
 
@@ -144,6 +146,8 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Unread Mails",
                 backgroundColor: widget.getBackgroundColor( 5 ),
+                iconLabel: Icons.mark_email_unread_outlined,
+                iconColor: Colors.grey,
               ),
             ),
 
@@ -171,6 +175,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Starred",
                 backgroundColor: widget.getBackgroundColor( 6 ),
+                iconLabel: Icons.star_border_purple500_outlined,
               ),
             ),
 
@@ -185,6 +190,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Snoozed",
                 backgroundColor: widget.getBackgroundColor( 7 ),
+                iconLabel: Icons.snooze_rounded,
               ),
             ),
 
@@ -199,6 +205,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Important",
                 backgroundColor: widget.getBackgroundColor( 7 ),
+                iconLabel: Icons.label_important_outline_sharp,
               ),
             ),
 
@@ -213,6 +220,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Sent",
                 backgroundColor: widget.getBackgroundColor( 8 ),
+                iconLabel: Icons.send_outlined,
               ),
             ),
 
@@ -227,6 +235,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Scheduled",
                 backgroundColor: widget.getBackgroundColor( 9 ),
+                iconLabel: Icons.cancel_schedule_send_outlined,
               ),
             ),
 
@@ -241,6 +250,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Outbox",
                 backgroundColor: widget.getBackgroundColor( 10 ),
+                iconLabel: Icons.outbox,
               ),
             ),
 
@@ -255,6 +265,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Drafts",
                 backgroundColor: widget.getBackgroundColor( 11 ),
+                iconLabel: Icons.drafts_outlined,
               ),
             ),
 
@@ -282,6 +293,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "all Mails",
                 backgroundColor: widget.getBackgroundColor( 12 ),
+                iconLabel: Icons.all_inbox_rounded,
               ),
             ),
 
@@ -296,6 +308,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Spam",
                 backgroundColor: widget.getBackgroundColor( 13 ),
+                iconLabel: Icons.warning_amber_outlined,
               ),
             ),
 
@@ -310,6 +323,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Bin",
                 backgroundColor: widget.getBackgroundColor( 14 ),
+                iconLabel: Icons.delete_outline,
               ),
             ),
           ],

@@ -9,6 +9,7 @@ class Utils {
   static bool firstProfileScreenLoad = true;
   static bool firstInboxScreenLoad = true;
   static bool firstExploreScreenLoad = true;
+  static bool firstHomeScreenLoad = true;
   static String username = '';
 
   static final List<Color> backgroundColorsList = [
@@ -90,7 +91,6 @@ class Utils {
         return Utils.backgroundColorsList[ colorIndex ];
       }
       catch( e ) {
-        print( displayText );
         print( ((displayText.codeUnitAt(0) - 64) / colorPerIndex ) );
         print( 'pleease not from here - ' +  colorIndex.toString() );
         return Colors.pink;

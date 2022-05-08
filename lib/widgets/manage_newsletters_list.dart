@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:letter_shelf/models/subscribed_newsletter_hive.dart';
 import 'package:letter_shelf/models/subscribed_newsletters.dart';
 
 

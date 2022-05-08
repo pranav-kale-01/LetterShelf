@@ -138,6 +138,8 @@ class _MailDisplayListState extends State<MailDisplayList> with AutomaticKeepAli
 
         late String subject, date, from, to;
         bool isUnread = false;
+        bool isStarred = false;
+        bool isImportant = false;
 
         for (gmail.MessagePartHeader header in headers!) {
           if (header.name == 'Subject') {
@@ -160,6 +162,12 @@ class _MailDisplayListState extends State<MailDisplayList> with AutomaticKeepAli
             if( label == 'UNREAD' ) {
               isUnread = true;
             }
+            else if( label == 'STARRED' ) {
+              isStarred = true;
+            }
+            else if( label == 'IMPORTANT' ) {
+              isImportant = true;
+            }
           }
 
         }
@@ -179,6 +187,8 @@ class _MailDisplayListState extends State<MailDisplayList> with AutomaticKeepAli
             subject: subject,
             image: '',
             unread: isUnread,
+            starred: isStarred,
+            important: isImportant
           );
 
           cacheList.add(msg.toJson());

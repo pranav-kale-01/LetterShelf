@@ -19,14 +19,31 @@ class AddNewNewslettersListTile extends StatefulWidget {
 }
 
 class _AddNewNewslettersListTileState extends State<AddNewNewslettersListTile> {
+  late String initials;
+  late Color backgroundColor;
+
+  @override
+  void initState() {
+    super.initState();
+
+    initials = Utils.getInitials(widget.newsletter.name);
+    backgroundColor = Utils.getBackgroundColor(initials);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
       elevation: 5,
       child: ListTile(
-        leading: const CircleAvatar(
+        leading: CircleAvatar(
+          backgroundColor: backgroundColor,
           radius: 25,
-          child: Text('A'),
+          child: Text(
+              initials,
+              style: TextStyle(
+                color: Colors.white,
+              ),
+          ),
         ),
         title: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),

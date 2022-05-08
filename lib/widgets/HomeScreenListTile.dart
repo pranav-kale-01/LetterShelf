@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:ffi';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,7 +10,7 @@ import 'package:hive/hive.dart';
 import 'package:letter_shelf/models/emailMessage.dart';
 import 'package:http/http.dart' as http;
 
-
+import '../firebase_operations/storage_service.dart';
 import '../utils/Utils.dart';
 import '../utils/hive_services.dart';
 import 'MessageBody.dart';
@@ -44,6 +44,8 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
   bool executeOnTap = true;
   late BuildContext ctx;
   Image? image;
+  late bool stopImageLoading = false;
+  Storage storage = Storage();
   Color backgroundColor = Colors.pinkAccent;
 
   final monthData = {
@@ -93,40 +95,72 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
   }
 
   Future<void> getBackgroundImage() async {
+    // checking if showing images option is disabled in preferences
+    // opening user's newsletters list file
+    String path = ( await Utils.localPath ).path;
+    String username = Utils.username;
 
-    bool exists = await hiveService.isExists( boxName: widget.emailMessage.from + "CachedImage" );
-    if(exists) {
-      List<dynamic> tempList = await hiveService.getBoxes( widget.emailMessage.from + "CachedImage" );
-      Uint8List rawImage = Uint8List.fromList( List<int>.from( tempList ) );
-      image = Image.memory( rawImage);
-      setState(() {
+    File file = File( '$path/preferences_' + username + '.json');
+    file.createSync();
+    String data = file.readAsStringSync();
+    Map<String, dynamic> jsonData = {};
 
-      });
+    if( data.isEmpty ) {
+      jsonData['show_images_on_tile'] = true;
+      file.writeAsString( jsonEncode(jsonData)) ;
+      return;
+    }
+
+    jsonData = jsonDecode( data );
+    if( jsonData['show_images_on_tile'] == false ) {
+      return;
+    }
+
+    bool exists = await hiveService.isExists( boxName: widget.emailMessage.from + "CachedImage");
+    bool firstLoad = widget.listKey == "[<'UNREAD'>]" ? Utils.firstHomeScreenLoadUnread : Utils.firstHomeScreenLoadRead;
+
+    debugPrint("first Load- " + firstLoad.toString() );
+    debugPrint("----");
+
+    if (exists && !firstLoad) {
+      debugPrint("Loading image from cache");
+
+      debugPrint("Load Image");
+      if( !stopImageLoading ) {
+          List<dynamic> tempList = await hiveService.getBoxes( widget.emailMessage.from + "CachedImage");
+          Uint8List rawImage = Uint8List.fromList(List<int>.from(tempList));
+          image = Image.memory(rawImage);
+
+          setState(() { });
+      }
+
     }
     else {
-      Future.delayed(const Duration( seconds: 1), () async {
-        // creating a reference of firebase db
-        FirebaseFirestore db = FirebaseFirestore.instance;
+      widget.listKey == "[<'UNREAD'>]" ? Utils.firstHomeScreenLoadUnread = false : Utils.firstHomeScreenLoadRead = false;
 
-        // showing the list of available newsletter emails
-        DocumentSnapshot snapshot = await db.collection("newsletters_list").doc( widget.emailMessage.from ).get();
+      Future.delayed(const Duration( seconds: 2), () async {
+        List<String> fileNames = await storage.listLogosFile( widget.emailMessage.from);
 
-        if( snapshot.data() != null ) {
-          Map<String, dynamic> decodedData = jsonDecode( jsonEncode( snapshot.data() ) );
-
-          if(decodedData['image'] != null ) {
-            Uint8List rawImage = Uint8List.fromList( List<int>.from( decodedData['image'] ) );
+        if( fileNames.isNotEmpty) {
+          try {
+            String url = await storage.getDownloadUrl( fileNames[0] );
+            http.Response response = await http.get( Uri.parse( url) );
 
             Box _box = await Hive.openBox( widget.emailMessage.from + "CachedImage" );
             _box.deleteAll(_box.keys);
 
-            await hiveService.addBoxes( rawImage, widget.emailMessage.from + "CachedImage");
-            image = Image.memory( rawImage);
+            await hiveService.addBoxes(  response.bodyBytes, widget.emailMessage.from + "CachedImage");
 
-            setState(() {
-
-            });
+            setState(() => image = Image.network(
+              url,
+              fit: BoxFit.cover,
+            ));
           }
+          catch( e, stackTrace ) {
+            debugPrint( e.toString() );
+            debugPrint( stackTrace.toString() );
+          }
+
         }
       });
     }
@@ -263,7 +297,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
             ),
             Container(
               height: 1,
-              margin: EdgeInsets.only(top: 8),
+              margin: EdgeInsets.only(top: 8, left: 6, right: 6),
               color: Colors.black12,
             ),
             Container(
@@ -277,14 +311,64 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                         primary: Colors.white,
                         elevation: 0
                       ) ,
-                      onPressed: () {},
+                      onPressed: () async {
+                        List<dynamic> tempList = await hiveService.getBoxes( " is:starred CachedMessages" + widget.username );
+
+                        if (  widget.emailMessage.starred ) {
+                          setState(() {
+                            widget.emailMessage.starred = false;
+
+                            // now inserting new data to previous cached data
+                            for( var msg in tempList ) {
+                              if( msg['msgId'] == widget.emailMessage.msgId ) {
+                                msg['starred'] = false;
+                                break;
+                              }
+                            }
+
+                            hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+
+                            // modifying the messages label to remove UNREAD Label from the message
+                            gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                                removeLabelIds: [
+                                  "STARRED"
+                                ]
+                            );
+
+                            widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId );
+                          });
+                        }
+                        else {
+                          setState(() {
+                            widget.emailMessage.starred = true;
+                            // now inserting new data to previous cached data
+                            for( var msg in tempList ) {
+                              if( msg['msgId'] == widget.emailMessage.msgId ) {
+                                msg['starred'] = true;
+                                break;
+                              }
+                            }
+
+                            hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+                            // modifying the messages label to remove UNREAD Label from the message
+                            gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                                addLabelIds: [
+                                  "STARRED"
+                                ]
+                            );
+
+                            widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+                          });
+                        }
+                      },
                       child: Container(
                           color: Colors.white,
                           alignment: Alignment.center,
                           // padding: EdgeInsets.symmetric(vertical: 8),
                           child: Icon(
-                            Icons.star_border,
-                            color: Colors.black87,
+                            widget.emailMessage.starred ? Icons.star : Icons.star_border,
+                            color: widget.emailMessage.starred ? Colors.amber : Colors.grey,
+                            size: 28,
                           ),
                       ),
                     ),
@@ -295,14 +379,74 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                         primary: Colors.white,
                         elevation: 0
                       ) ,
-                      onPressed: () {},
+                      onPressed: () async {
+                        List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+
+                        if (  widget.emailMessage.important ) {
+                          setState(() {
+                            widget.emailMessage.important = false;
+                          });
+
+                          // now inserting new data to previous cached data
+                          for( var msg in tempList ) {
+                            if( msg['msgId'] == widget.emailMessage.msgId ) {
+                              msg['important'] = false;
+                              break;
+                            }
+                          }
+
+                          hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+
+
+                          // modifying the messages label to remove UNREAD Label from the message
+                          gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                              removeLabelIds: [
+                                "IMPORTANT"
+                              ]
+                          );
+
+                          widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+
+                          setState(() { });
+                        }
+                        else {
+                          setState(() {
+                            widget.emailMessage.important = true;
+                          });
+
+                          // now inserting new data to previous cached data
+                          for( var msg in tempList ) {
+                            if( msg['msgId'] == widget.emailMessage.msgId ) {
+                              msg['important'] = true;
+                              break;
+                            }
+                          }
+
+                          hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+
+
+                          // modifying the messages label to remove UNREAD Label from the message
+                          gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                              addLabelIds: [
+                                "IMPORTANT"
+                              ]
+                          );
+
+                          widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+
+                          setState(() {
+
+                          });
+                        }
+                      },
                       child: Container(
                           color: Colors.white,
                           alignment: Alignment.center,
                           // padding: EdgeInsets.symmetric(vertical: 8),
                           child: Icon(
-                            Icons.label_important_outline,
-                            color: Colors.black87,
+                            widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+                            color: Colors.redAccent,
+                            size: 28,
                           ),
                       ),
                     ),
@@ -320,29 +464,26 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                           // padding: EdgeInsets.symmetric(vertical: 8),
                           child: Icon(
                             Icons.download_outlined,
-                            color: Colors.black87,
+                            color: Colors.blueAccent,
+                            size: 28,
                           ),
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.white,
-                        elevation: 0
-                      ) ,
-                      onPressed: () {},
-                      child: Container(
-                          color: Colors.white,
-                          alignment: Alignment.center,
-                          // padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Icon(
-                            Icons.forward_outlined,
-                            color: Colors.black87,
-                          ),
-                      ),
-                    ),
-                  ),
+                  // Expanded(
+                  //   child: ElevatedButton(
+                  //     style: ElevatedButton.styleFrom(
+                  //       primary: Colors.white,
+                  //       elevation: 0
+                  //     ) ,
+                  //     onPressed: () {},
+                  //     child: Container(
+                  //         color: Colors.white,
+                  //         alignment: Alignment.center,
+                  //         // padding: EdgeInsets.symmetric(vertical: 8),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             )
@@ -350,5 +491,12 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    stopImageLoading = true;
+
+    super.dispose();
   }
 }

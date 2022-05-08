@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:letter_shelf/widgets/top_newsletter_tile.dart';
 
 import '../widgets/top_newsletter_card.dart';
 
@@ -18,7 +17,7 @@ class Top25 extends StatelessWidget {
           color: Colors.black
         ),
         title: Text(
-            "Top 25",
+            "Top 10",
             style: TextStyle(
               color: Colors.black
             ),
@@ -35,46 +34,38 @@ class Top25 extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TopNewsletterCard(newsletterData: {'id' : 'Eater Austin', 'organization' : 'Eater'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
-                    TopNewsletterCard(newsletterData: {'id' : 'Emerging Tech Brew', 'organization' : 'Morning Brew'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
+                    TopNewsletterCard(newsletterData: {'id' : 'Eater Austin', 'organization' : 'Eater'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
+                    TopNewsletterCard(newsletterData: {'id' : 'Emerging Tech Brew', 'organization' : 'Morning Brew'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TopNewsletterCard(newsletterData: {'id' : 'Medium Daily Digest', 'organization' : 'Medium'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
-                    TopNewsletterCard(newsletterData: {'id' : 'Morning Brew', 'organization' : 'Morning Brew'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
+                    TopNewsletterCard(newsletterData: {'id' : 'Medium Daily Digest', 'organization' : 'Medium'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
+                    TopNewsletterCard(newsletterData: {'id' : 'Morning Brew', 'organization' : 'Morning Brew'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TopNewsletterCard(newsletterData: {'id' : 'Bits', 'organization' : 'The New York Times'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
-                    TopNewsletterCard(newsletterData: {'id' : 'CNN News Alert', 'organization' : 'CNN'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
+                    TopNewsletterCard(newsletterData: {'id' : 'Bits', 'organization' : 'The New York Times'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
+                    TopNewsletterCard(newsletterData: {'id' : 'CNN News Alert', 'organization' : 'CNN'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TopNewsletterCard(newsletterData: {'id' : 'Cooking', 'organization' : 'The New York Times'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
-                    TopNewsletterCard(newsletterData: {'id' : 'Dharma Markets Report', 'organization' : 'Dharma Labs'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
+                    TopNewsletterCard(newsletterData: {'id' : 'Cooking', 'organization' : 'The New York Times'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
+                    TopNewsletterCard(newsletterData: {'id' : 'Dharma Markets Report', 'organization' : 'Dharma Labs'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
                   ],
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    TopNewsletterCard(newsletterData: {'id' : 'Morning Briefing', 'organization' : 'The New York Times'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
-                    TopNewsletterCard(newsletterData: {'id' : 'Running', 'organization' : 'The New York Times'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
+                    TopNewsletterCard(newsletterData: {'id' : 'Morning Briefing', 'organization' : 'The New York Times'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
+                    TopNewsletterCard(newsletterData: {'id' : 'Running', 'organization' : 'The New York Times'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2, enabledCaching: false,),
                   ],
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TopNewsletterCard(newsletterData: {'id' : 'Theater Update', 'organization' : 'The New York Times'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
-                    TopNewsletterCard(newsletterData: {'id' : 'Medium Daily Digest', 'organization' : 'Medium'}, cardHeight: (screenWidth / 2 ) + 50, cardWidth: screenWidth / 2,),
-                  ],
-                ),
-
               ],
             ),
           ),

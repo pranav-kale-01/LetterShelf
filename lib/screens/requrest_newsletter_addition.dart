@@ -121,6 +121,7 @@ class RequestNewsletterAddition extends StatelessWidget {
                 alignment: Alignment.bottomCenter,
                 child: ElevatedButton(
                   style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Colors.pinkAccent),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0),

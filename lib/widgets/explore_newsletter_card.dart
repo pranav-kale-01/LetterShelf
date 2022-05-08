@@ -4,14 +4,18 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 import 'package:letter_shelf/screens/newsletter_display_page.dart';
 import 'package:letter_shelf/utils/hive_services.dart';
 
+import '../firebase_operations/storage_service.dart';
 import '../utils/Utils.dart';
 
 class ExploreNewsletterCard extends StatefulWidget {
   final Map<String, dynamic> newsletterData;
-  const ExploreNewsletterCard({Key? key, required this.newsletterData}) : super(key: key);
+
+  const ExploreNewsletterCard({Key? key, required this.newsletterData})
+      : super(key: key);
 
   @override
   _ExploreNewsletterCardState createState() => _ExploreNewsletterCardState();
@@ -19,6 +23,7 @@ class ExploreNewsletterCard extends StatefulWidget {
 
 class _ExploreNewsletterCardState extends State<ExploreNewsletterCard> {
   HiveServices hiveService = HiveServices();
+  Storage storage = Storage();
   Image? image;
 
   @override
@@ -28,51 +33,40 @@ class _ExploreNewsletterCardState extends State<ExploreNewsletterCard> {
   }
 
   Future<void> init() async {
-    bool exists = await hiveService.isExists( boxName: widget.newsletterData['id'] + "CachedImage" );
-    if(exists && Utils.firstExploreScreenLoad ) {
+    bool exists = await hiveService.isExists( boxName: widget.newsletterData['id'] + "CachedImage");
+    if (exists) {
       debugPrint('if');
 
       Utils.firstInboxScreenLoad = false;
-      List<dynamic> tempList = await hiveService.getBoxes( widget.newsletterData['id'] + "CachedImage" );
-      Uint8List rawImage = Uint8List.fromList( List<int>.from( tempList ) );
+      List<dynamic> tempList = await hiveService
+          .getBoxes(widget.newsletterData['id'] + "CachedImage");
+      Uint8List rawImage = Uint8List.fromList(List<int>.from(tempList));
       image = Image.memory(
-          rawImage,
-          fit: BoxFit.fitWidth,
+        rawImage,
+        fit: BoxFit.fitWidth,
       );
-      setState(() {
+      setState(() {});
 
-      });
-    }
-    else {
-      debugPrint('else');
-      Future.delayed(const Duration( seconds: 1), () async {
-        // creating a reference of firebase db
-        FirebaseFirestore db = FirebaseFirestore.instance;
+    } else {
+      Future.delayed(const Duration(seconds: 1), () async {
+          List<String> fileNames = await storage.listLogosFile(widget.newsletterData['id']);
+          if ( fileNames.isNotEmpty ) {
+            String url = await storage.getDownloadUrl(fileNames[0]);
+            http.Response response = await http.get(Uri.parse(url));
 
-        // showing the list of available newsletter emails
-        DocumentSnapshot snapshot = await db.collection("newsletters_list").doc( widget.newsletterData['id'] ).get();
-
-        if( snapshot.data() != null ) {
-          Map<String, dynamic> decodedData = jsonDecode( jsonEncode( snapshot.data() ) );
-
-          if(decodedData['image'] != null ) {
-            debugPrint("okay");
-            Uint8List rawImage = Uint8List.fromList( List<int>.from( decodedData['image'] ) );
-
-            Box _box = await Hive.openBox( widget.newsletterData['id'] + "CachedImage" );
+            Box _box = await Hive.openBox(widget.newsletterData['id'] + "CachedImage");
             _box.deleteAll(_box.keys);
 
-            await hiveService.addBoxes( rawImage, widget.newsletterData['id'] + "CachedImage");
-            image = Image.memory(
-                rawImage,
+            await hiveService.addBoxes(response.bodyBytes, widget.newsletterData['id'] + "CachedImage");
+            setState(
+              () => image = Image.network(
+                url,
                 fit: BoxFit.fitWidth,
+              ),
             );
-
-            setState(() {
-
-            });
           }
-        }
+
+          setState(() {});
       });
     }
   }
@@ -82,7 +76,10 @@ class _ExploreNewsletterCardState extends State<ExploreNewsletterCard> {
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => NewsletterDisplayPage( newsletterData: widget.newsletterData, ) ),
+          MaterialPageRoute(
+              builder: (context) => NewsletterDisplayPage(
+                    newsletterData: widget.newsletterData,
+                  )),
         );
       },
       child: Container(
@@ -100,26 +97,29 @@ class _ExploreNewsletterCardState extends State<ExploreNewsletterCard> {
               children: [
                 // Organization Image
                 Padding(
-                  padding: const EdgeInsets.only( top: 10.0, right: 10, left: 10),
+                  padding:
+                      const EdgeInsets.only(top: 10.0, right: 10, left: 10),
                   child: Card(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50)
-                    ),
+                        borderRadius: BorderRadius.circular(50)),
                     elevation: 1,
                     child: CircleAvatar(
                       radius: 36,
                       backgroundColor: Color.fromRGBO(238, 26, 81, 0.7),
-                      child: image == null ? Text(
-                          Utils.getInitials( widget.newsletterData['id'], ),
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600
-                          ),
-                      ) : ClipRRect(
-                          borderRadius: BorderRadius.circular(50),
-                          child: image,
-                      ),
+                      child: image == null
+                          ? Text(
+                              Utils.getInitials(
+                                widget.newsletterData['id'],
+                              ),
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600),
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(50),
+                              child: image,
+                            ),
                     ),
                   ),
                 ),
@@ -161,7 +161,9 @@ class _ExploreNewsletterCardState extends State<ExploreNewsletterCard> {
                 Container(
                   alignment: Alignment.center,
                   padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                  child: const Icon( Icons.arrow_forward_ios_sharp, ),
+                  child: const Icon(
+                    Icons.arrow_forward_ios_sharp,
+                  ),
                 ),
               ],
             ),

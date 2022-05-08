@@ -39,16 +39,13 @@ class ManageNewslettersSettings extends StatelessWidget {
                 );
               },
               child: Container(
-                height: 60,
+                height: 70,
                 child: Card(
                   elevation: 1,
                   child: Row(
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: FlutterLogo(
-                          size: 32,
-                        ),
+                      SizedBox(
+                        width: 5,
                       ),
                       Container(
                         alignment: Alignment.centerLeft,
@@ -56,7 +53,7 @@ class ManageNewslettersSettings extends StatelessWidget {
                         child: const Text(
                           "Manage newsletter List",
                           style: TextStyle(
-                              fontSize: 19,
+                              fontSize: 21,
                               fontWeight: FontWeight.w400
                           ),
                         ),
@@ -79,16 +76,13 @@ class ManageNewslettersSettings extends StatelessWidget {
                 );
               },
               child: Container(
-                height: 60,
+                height: 70,
                 child: Card(
                   elevation: 1,
                   child: Row(
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: FlutterLogo(
-                          size: 32,
-                        ),
+                      SizedBox(
+                        width: 5,
                       ),
                       Container(
                         alignment: Alignment.centerLeft,
@@ -96,7 +90,7 @@ class ManageNewslettersSettings extends StatelessWidget {
                         child: const Text(
                           "Request Newsletter Addition",
                           style: TextStyle(
-                              fontSize: 19,
+                              fontSize: 21,
                               fontWeight: FontWeight.w400
                           ),
                         ),
@@ -119,16 +113,13 @@ class ManageNewslettersSettings extends StatelessWidget {
                 );
               },
               child: Container(
-                height: 60,
+                height: 70,
                 child: Card(
                   elevation: 1,
                   child: Row(
                     children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
-                        child: FlutterLogo(
-                          size: 32,
-                        ),
+                      SizedBox(
+                        width: 5,
                       ),
                       Container(
                         alignment: Alignment.centerLeft,
@@ -136,7 +127,7 @@ class ManageNewslettersSettings extends StatelessWidget {
                         child: const Text(
                           "Add Custom newsletter",
                           style: TextStyle(
-                              fontSize: 19,
+                              fontSize: 21,
                               fontWeight: FontWeight.w400
                           ),
                         ),

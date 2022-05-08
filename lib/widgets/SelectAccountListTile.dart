@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../utils/Utils.dart';
+
 
 class SelectAcccountListTile extends StatelessWidget {
   final String username;
@@ -11,17 +13,29 @@ class SelectAcccountListTile extends StatelessWidget {
     return Card(
       elevation: 5,
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: ListTile(
-          leading: const CircleAvatar(
-            radius: 25,
-            child: Text('A'),
+          leading: CircleAvatar(
+            radius: 26,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 4.0),
+              child: Text(
+                  Utils.getInitials(username),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20
+                  ),
+              ),
+            ),
           ),
           title: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),
+            padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0.0),
             child: Text(
               username,
               overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 20
+              ),
             ),
           ),
         ),

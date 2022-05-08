@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:letter_shelf/screens/preferences_screen.dart';
 import 'package:letter_shelf/widgets/profile_card.dart';
 
 import 'package:googleapis/gmail/v1.dart' as gmail;
@@ -36,11 +37,14 @@ class ProfileScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // User Profile
-              ProfileCard( gmailApi: gmailApi, peopleApi: peopleApi, bottomPadding: bottomPadding),
+              Padding(
+                padding: const EdgeInsets.only(top: 15.0),
+                child: ProfileCard( gmailApi: gmailApi, peopleApi: peopleApi, bottomPadding: bottomPadding),
+              ),
 
               // Manage newsletters
               Container(
-                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 3),
+                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 1),
                 child: GestureDetector(
                   onTap: () {
                     // redirecting to manage_newsletters_settings screen
@@ -52,16 +56,17 @@ class ProfileScreen extends StatelessWidget {
 
                   },
                   child: Container(
-                    height: 60,
+                    height: 70,
                     child: Card(
                       elevation: 1,
                       child: Row(
                         children: [
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: FlutterLogo(
-                              size: 32,
-                            ),
+                            padding: EdgeInsets.only(left: 15, top: 2),
+                            child: Icon(
+                              Icons.mail_outline_rounded,
+                              size: 28,
+                            )
                           ),
                           Container(
                             alignment: Alignment.centerLeft,
@@ -69,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
                             child: const Text(
                               "Manage newsletters",
                               style: TextStyle(
-                                fontSize: 19,
+                                fontSize: 21,
                                 fontWeight: FontWeight.w400
                               ),
                             ),
@@ -83,23 +88,26 @@ class ProfileScreen extends StatelessWidget {
 
               // Preferences
               Container(
-                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 3),
+                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 1),
                 child: GestureDetector(
                   onTap: () {
                     // redirecting to manage newsletters list screen
-
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => PreferredScreen() )
+                    );
                   },
                   child: SizedBox(
-                    height: 60,
+                    height: 70,
                     child: Card(
                       elevation: 1,
                       child: Row(
                         children: [
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: FlutterLogo(
-                              size: 32,
-                            ),
+                            padding: EdgeInsets.only(left: 15, top: 2),
+                            child: Icon(
+                              Icons.settings_outlined,
+                              size: 28,
+                            )
                           ),
                           Container(
                             alignment: Alignment.centerLeft,
@@ -107,7 +115,7 @@ class ProfileScreen extends StatelessWidget {
                             child: const Text(
                               "Preferences",
                               style: TextStyle(
-                                  fontSize: 19,
+                                  fontSize: 21,
                                   fontWeight: FontWeight.w400
                               ),
                             ),
@@ -120,48 +128,48 @@ class ProfileScreen extends StatelessWidget {
               ),
 
               // Support us
-              Container(
-                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 3),
-                child: GestureDetector(
-                  onTap: () {
-                    // debugPrint("ProfileScreen - tapped");
-
-                    // redirecting to manage newsletters list screen
-
-                  },
-                  child: SizedBox(
-                    height: 60,
-                    child: Card(
-                      elevation: 1,
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8),
-                            child: FlutterLogo(
-                              size: 32,
-                            ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.03),
-                            child: const Text(
-                              "Support Us",
-                              style: TextStyle(
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w400
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              // Container(
+              //   margin: EdgeInsets.symmetric( horizontal: 7, vertical: 3),
+              //   child: GestureDetector(
+              //     onTap: () {
+              //       // debugPrint("ProfileScreen - tapped");
+              //
+              //       // redirecting to manage newsletters list screen
+              //
+              //     },
+              //     child: SizedBox(
+              //       height: 60,
+              //       child: Card(
+              //         elevation: 1,
+              //         child: Row(
+              //           children: [
+              //             Padding(
+              //               padding: EdgeInsets.symmetric(horizontal: 8),
+              //               child: FlutterLogo(
+              //                 size: 32,
+              //               ),
+              //             ),
+              //             Container(
+              //               alignment: Alignment.centerLeft,
+              //               padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.03),
+              //               child: const Text(
+              //                 "Support Us",
+              //                 style: TextStyle(
+              //                     fontSize: 19,
+              //                     fontWeight: FontWeight.w400
+              //                 ),
+              //               ),
+              //             ),
+              //           ],
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
 
               // Log Out
               Container(
-                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 3),
+                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 1),
                 child: GestureDetector(
                   onTap: () async {
                     // logging out the user
@@ -176,16 +184,18 @@ class ProfileScreen extends StatelessWidget {
                     );
                   },
                   child: SizedBox(
-                    height: 60,
+                    height: 70,
                     child: Card(
                       elevation: 1,
                       child: Row(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric( horizontal: 8.0),
-                            child: FlutterLogo(
-                              size: 32,
-                            ),
+                            padding: EdgeInsets.only(left: 15, top: 2, right: 2),
+                            child: Icon(
+                              Icons.login_outlined,
+                              color: Colors.red,
+                              size: 28,
+                            )
                           ),
                           Container(
                             alignment: Alignment.centerLeft,
@@ -193,7 +203,7 @@ class ProfileScreen extends StatelessWidget {
                             child: const Text(
                               "Log Out",
                               style: TextStyle(
-                                  fontSize: 19,
+                                  fontSize: 21,
                                   fontWeight: FontWeight.w400,
                                   color: Colors.red,
                               ),

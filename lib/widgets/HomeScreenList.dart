@@ -151,6 +151,21 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
           }
         } // headers loop ends here
 
+        List<String>? labels = msg.labelIds;
+        bool isStarred = false;
+        bool isImportant = false;
+
+        if( labels != null ) {
+          for( String label in labels ) {
+            if( label == 'STARRED' ) {
+              isStarred = true;
+            }
+            else if( label == "IMPORTANT") {
+              isImportant = true;
+            }
+          }
+        }
+
         if( !widget.breakLoop ) {
           if( batchCount > 5 ) {
             batchCount=0;
@@ -166,6 +181,8 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
               subject: subject,
               image: '',
               unread: widget.queryStringAddOn == " is:unread " ? true : false,
+              starred: isStarred,
+              important: isImportant
           );
 
           cacheList.add(msg.toJson());

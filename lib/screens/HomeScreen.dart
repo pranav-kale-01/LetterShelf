@@ -48,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with AutomaticKeepAliveClientMi
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
+        fixedColor: Colors.pinkAccent,
         items: const [
           BottomNavigationBarItem(
             label: "Inbox",

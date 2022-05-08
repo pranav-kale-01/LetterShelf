@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:letter_shelf/firebase_operations/firebase_utils.dart';
 import 'package:letter_shelf/screen_loaders/credentialCheckLoader.dart';
 
 Future main() async {

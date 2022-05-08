@@ -67,29 +67,58 @@ class _CategorizedListState extends State<CategorizedList> {
       future: _future,
       builder: (context, snapshot) {
         if( snapshot.connectionState == ConnectionState.done ) {
-          return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Color.fromRGBO(251, 251, 251, 1),
-              elevation: 0,
-              iconTheme: IconThemeData(
-                color: Colors.black,
-              ),
-              title: Text(
-                widget.keyword,
-                style: TextStyle(
+          if( newsletters.isNotEmpty ) {
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: Color.fromRGBO(251, 251, 251, 1),
+                elevation: 0,
+                iconTheme: IconThemeData(
                   color: Colors.black,
                 ),
+                title: Text(
+                  widget.keyword,
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
               ),
-            ),
-            body: SafeArea(
-              child: ListView.builder(
+              body: SafeArea(
+                child: ListView.builder(
                   itemBuilder: (ctx, index) {
                     return ExploreNewsletterCard( newsletterData: newsletters[index], );
                   },
                   itemCount: newsletters.length,
+                ),
               ),
-            ),
-          );
+            );
+          }
+          else {
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: Color.fromRGBO(251, 251, 251, 1),
+                elevation: 0,
+                iconTheme: IconThemeData(
+                  color: Colors.black,
+                ),
+                title: Text(
+                  widget.keyword,
+                  style: TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              body: Container(
+                alignment: Alignment.center,
+                child: Text(
+                    "Sorry! No Newsletter are available for this category :)",
+                    style: TextStyle(
+                      fontSize: 18
+                    ),
+                    textAlign: TextAlign.center,
+                ),
+              ),
+            );
+          }
         }
         else if( snapshot.hasError ) {
           return Scaffold(

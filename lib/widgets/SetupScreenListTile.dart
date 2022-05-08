@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../models/subscribed_newsletters.dart';
+import '../utils/Utils.dart';
 
 class SetupScreenListTile extends StatefulWidget {
   final SubscribedNewsletter newsletter;
@@ -14,6 +15,16 @@ class SetupScreenListTile extends StatefulWidget {
 
 class _SetupScreenListTileState extends State<SetupScreenListTile> {
   bool val = true;
+  late String initials;
+  late Color backgroundColor;
+
+  @override
+  void initState() {
+    super.initState();
+
+    initials = Utils.getInitials(widget.newsletter.name);
+    backgroundColor = Utils.getBackgroundColor(initials);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +32,15 @@ class _SetupScreenListTileState extends State<SetupScreenListTile> {
       child: Card(
         elevation: 5,
         child: ListTile(
-          leading: const CircleAvatar(
+          leading: CircleAvatar(
+            backgroundColor: backgroundColor,
             radius: 25,
-            child: Text('A'),
+            child: Text(
+                initials,
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+            ),
           ),
           title: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),

@@ -1,6 +1,15 @@
-# Letter Shelf
+# Letter Shelf - A Newsletter Reader Application
+
+![GitHub commit activity](https://img.shields.io/github/commit-activity/y/pranav-kale-01/LetterShelf) ![GitHub contributors](https://img.shields.io/github/contributors/pranav-kale-01/LetterShelf) ![GitHub](https://img.shields.io/github/license/pranav-kale-01/LetterShelf) ![GitHub last commit](https://img.shields.io/github/last-commit/pranav-kale-01/LetterShelf)
+
 
 A Clean, Fast, and Easy to Use Email Client that sorts newsletters from regular emails. LetterShelf is built using Flutter along with Google's Gmail API and Firebase.
+
+
+## Note: 
+
+### The current version works only with android, iOS and web implementation in progress..
+
 
 ## Screenshots
 
@@ -25,6 +34,10 @@ Profile Page:
 <img src="https://user-images.githubusercontent.com/70502672/178279252-5dd0ef42-abbe-4fde-acf3-b575f325e1bd.png" width="200"> <img src="https://user-images.githubusercontent.com/70502672/178279267-36f4cc6b-0e62-40d8-95b3-40caf6030f5e.png" width="200"> 
 
 
-## Note: 
+## Contributing
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-### The current version works only with android, iOS and web implementation in progress
+Please make sure to update tests as appropriate.
+
+## License
+[MIT](https://choosealicense.com/licenses/mit/)

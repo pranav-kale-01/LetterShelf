@@ -45,6 +45,7 @@ class _CategorizedListState extends State<CategorizedList> {
         json.addAll( { "id" : i.id } );
         json.addAll( { "category" : i.get("category")} );
         json.addAll( { "email" : i.get("email")} );
+        json.addAll( { "duration" : i.get("duration")} );
         json.addAll( { "description" : i.get("description")} );
         json.addAll( { "organization" : i.get("organization")} );
 

@@ -1,10 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:googleapis/gmail/v1.dart' as gmail;
-import 'package:googleapis/people/v1.dart' as people;
-import 'package:googleapis_auth/auth_io.dart';
-import 'package:http/http.dart' as http;
 import 'package:letter_shelf/widgets/SelectAccountListTile.dart';
 
 import 'package:url_launcher/url_launcher.dart';
@@ -23,10 +19,6 @@ class SelectAccount extends StatefulWidget {
 class _SelectAccountState extends State<SelectAccount> {
   List<String> allAccounts = [];
   bool loaded = false;
-
-  late gmail.GmailApi gmailApi;
-  late people.PeopleServiceApi peopleApi;
-  late http.Client client;
 
   void callOnLoad(Function methodToCall) {
     Future.delayed(const Duration(milliseconds: 1000), () async {
@@ -64,12 +56,12 @@ class _SelectAccountState extends State<SelectAccount> {
         return Dialog(
           child: GestureDetector(
             child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 22),
+                padding: const EdgeInsets.symmetric(horizontal: 22),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only( top: 16.0, bottom: 24),
+                    const Padding(
+                      padding: EdgeInsets.only( top: 16.0, bottom: 24),
                       child: Text(
                           "Google Sign In",
                           style: TextStyle(
@@ -77,13 +69,13 @@ class _SelectAccountState extends State<SelectAccount> {
                           ),
                       ),
                     ),
-                    Text(
+                    const Text(
                         'Please go the following URL to Sign in with your Google Account',
                         style: TextStyle(
                           fontSize: 18,
                         ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 30,
                     ),
                     Container(
@@ -96,9 +88,9 @@ class _SelectAccountState extends State<SelectAccount> {
                         Navigator.of(context).pop();
                       },
                       child: Container(
-                        padding: EdgeInsets.only(right: 8.0,top: 12),
+                        padding: const EdgeInsets.only(right: 8.0,top: 12),
                         alignment: Alignment.center,
-                        child: Text(
+                        child: const Text(
                             'Open Link',
                             style: TextStyle(
                               color: Colors.blue,
@@ -108,7 +100,7 @@ class _SelectAccountState extends State<SelectAccount> {
                         ),
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                   ],
@@ -128,26 +120,32 @@ class _SelectAccountState extends State<SelectAccount> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0,  right: 8.0, top: 40,),
-              child: Text(
-                "Select a account to Sign in",
-                style: TextStyle(
-                  fontSize: 36,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  padding: const EdgeInsets.only(left: 8.0,  right: 8.0, top: 80,),
+                  child: const Text(
+                    "Choose an Account",
+                    style: TextStyle(
+                      fontSize: 36,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            SizedBox(
-              height: 80,
+                Image.asset(
+                    'assets/images/image-5.png',
+                     width: MediaQuery.of(context).size.width * 0.50,
+                ),
+              ],
             ),
             Expanded(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: SizedBox(
-                    // height: MediaQuery.of(context).size.height - 400,
                     child: SingleChildScrollView(
                       child: Column(
-                        // mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: allAccounts.map((value) {
                           return GestureDetector(
@@ -160,7 +158,7 @@ class _SelectAccountState extends State<SelectAccount> {
                                 ),
                               );
                             },
-                            child: SelectAcccountListTile(username: value),
+                            child: SelectAccountListTile(username: value),
                           );
                         }).toList(),
                       ),
@@ -168,18 +166,18 @@ class _SelectAccountState extends State<SelectAccount> {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(bottom: 10),
+              margin: const EdgeInsets.only(bottom: 10),
               width: MediaQuery.of(context).size.width * 0.95,
               height: 60,
               child: Material(
                 elevation: 10,
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(25),
                 child: ElevatedButton(
                   style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(Colors.pinkAccent),
+                    backgroundColor: MaterialStateProperty.all<Color>(Colors.white),
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(25),
                       ),
                     ),
                   ),
@@ -191,7 +189,7 @@ class _SelectAccountState extends State<SelectAccount> {
                       // getting the autoRefreshingClient
                       String userName = await _client.getCurrentUserName();
 
-                      Navigator.of(context).pushReplacement(
+                      Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => NewsletterslistCheckLoader(
                             username: userName,
@@ -200,11 +198,22 @@ class _SelectAccountState extends State<SelectAccount> {
                       );
                     }
                   },
-                  child: const Text(
-                    'Sign in With Other Account',
-                    style: TextStyle(
-                      fontSize: 21,
-                    ),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all( 12.0 ),
+                        child: Image.asset(
+                          'assets/images/google-logo.png'
+                        ),
+                      ),
+                      const Text(
+                        'Sign in With Other Account',
+                        style: TextStyle(
+                          fontSize: 21,
+                          color: Colors.pinkAccent,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

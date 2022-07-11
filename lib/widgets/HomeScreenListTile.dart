@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:hive/hive.dart';
@@ -116,16 +114,14 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
       return;
     }
 
-    bool exists = await hiveService.isExists( boxName: widget.emailMessage.from + "CachedImage");
-    bool firstLoad = widget.listKey == "[<'UNREAD'>]" ? Utils.firstHomeScreenLoadUnread : Utils.firstHomeScreenLoadRead;
+    bool loadFromCache = true;
 
-    debugPrint("first Load- " + firstLoad.toString() );
-    debugPrint("----");
+    if( !Utils.firstScreenLoad(widget.emailMessage.from + "CachedImage" ) ) {
+      // if it's that the image is being loaded since the start of the app, we will load the image from api
+      loadFromCache = false;
+    }
 
-    if (exists && !firstLoad) {
-      debugPrint("Loading image from cache");
-
-      debugPrint("Load Image");
+    if (loadFromCache) {
       if( !stopImageLoading ) {
           List<dynamic> tempList = await hiveService.getBoxes( widget.emailMessage.from + "CachedImage");
           Uint8List rawImage = Uint8List.fromList(List<int>.from(tempList));
@@ -136,9 +132,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
 
     }
     else {
-      widget.listKey == "[<'UNREAD'>]" ? Utils.firstHomeScreenLoadUnread = false : Utils.firstHomeScreenLoadRead = false;
-
-      Future.delayed(const Duration( seconds: 2), () async {
+      Future.delayed(const Duration( seconds: 1), () async {
         List<String> fileNames = await storage.listLogosFile( widget.emailMessage.from);
 
         if( fileNames.isNotEmpty) {
@@ -150,6 +144,9 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
             _box.deleteAll(_box.keys);
 
             await hiveService.addBoxes(  response.bodyBytes, widget.emailMessage.from + "CachedImage");
+            Utils.firstScreenLoad(widget.emailMessage.from + "CachedImage", true);
+
+
 
             setState(() => image = Image.network(
               url,
@@ -228,7 +225,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                         radius: 32,
                         child: Text(
                             circleAvatarText,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 20,
                               fontWeight: FontWeight.w600
@@ -277,7 +274,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                               strutStyle: const StrutStyle(
                                 height: 1,
                               ),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.black87,
                               ),
                             ),
@@ -297,7 +294,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
             ),
             Container(
               height: 1,
-              margin: EdgeInsets.only(top: 8, left: 6, right: 6),
+              margin: const EdgeInsets.only(top: 8, left: 6, right: 6),
               color: Colors.black12,
             ),
             Container(
@@ -451,25 +448,25 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.white,
-                        elevation: 0
-                      ) ,
-                      onPressed: () {},
-                      child: Container(
-                          color: Colors.white,
-                          alignment: Alignment.center,
-                          // padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Icon(
-                            Icons.download_outlined,
-                            color: Colors.blueAccent,
-                            size: 28,
-                          ),
-                      ),
-                    ),
-                  ),
+                  // Expanded(
+                  //   child: ElevatedButton(
+                  //     style: ElevatedButton.styleFrom(
+                  //       primary: Colors.white,
+                  //       elevation: 0
+                  //     ) ,
+                  //     onPressed: () {},
+                  //     child: Container(
+                  //         color: Colors.white,
+                  //         alignment: Alignment.center,
+                  //         // padding: EdgeInsets.symmetric(vertical: 8),
+                  //         child: const Icon(
+                  //           Icons.download_outlined,
+                  //           color: Colors.blueAccent,
+                  //           size: 28,
+                  //         ),
+                  //     ),
+                  //   ),
+                  // ),
                   // Expanded(
                   //   child: ElevatedButton(
                   //     style: ElevatedButton.styleFrom(

@@ -35,7 +35,7 @@ class _LoggedinUserCheckLoaderState extends State<LoggedinUserCheckLoader> imple
 
   @override
   Future<void> checkForFile( gmail.GmailApi? gmailApi, people.PeopleServiceApi? peopleApi  ) async {
-    redirectedScreen = await fileExists() ? NewsletterslistCheckLoader(username: userName) : const SelectAccount() ;
+    redirectedScreen = await fileExists() ? NewsletterslistCheckLoader(username: userName) : const SelectAccount( ) ;
   }
 
   // if present, creates a reference to the credentials file stored in the documents directory

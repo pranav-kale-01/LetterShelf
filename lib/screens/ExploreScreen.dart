@@ -248,6 +248,27 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   ],
                 ),
               ),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.12,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: CategoryCard(
+                        text: 'Environment',
+                        image: Image( image: AssetImage( 'assets/images/Environment.png' ), fit: BoxFit.fitWidth, ),
+                      ),
+                    ),
+                    Expanded(
+                      child: CategoryCard(
+                        text: 'Crypto',
+                        image: Image( image: AssetImage( 'assets/images/crypto.jpg' ), fit: BoxFit.fitWidth, ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
               // Top 25
               SizedBox(
@@ -335,8 +356,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   @override
   void dispose() {
-
-    // setting firstload of Explore Screen to false
+    // setting first load of Explore Screen to false
     Utils.firstExploreScreenLoad = false;
 
     super.dispose();

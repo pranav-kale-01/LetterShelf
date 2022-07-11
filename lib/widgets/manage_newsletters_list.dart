@@ -6,7 +6,7 @@ import 'package:letter_shelf/models/subscribed_newsletters.dart';
 
 
 import 'package:letter_shelf/utils/Utils.dart';
-import 'package:letter_shelf/widgets/SetupScreenListTile.dart';
+import 'package:letter_shelf/widgets/manage_newsletter_list_tile.dart';
 
 class ManageNewslettersList extends StatefulWidget {
   final dynamic newslettersList;
@@ -74,7 +74,7 @@ class _ManageNewslettersListState extends State<ManageNewslettersList> {
 
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-            child: SetupScreenListTile( newsletter: letter, ),
+            child: ManageNewsletterListTile( newsletter: letter, ),
           );
         }
         else {

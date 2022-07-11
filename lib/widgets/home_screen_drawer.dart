@@ -204,7 +204,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
               child: HomeScreenDrawerTile(
                 foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Important",
-                backgroundColor: widget.getBackgroundColor( 7 ),
+                backgroundColor: widget.getBackgroundColor( 8 ),
                 iconLabel: Icons.label_important_outline_sharp,
               ),
             ),

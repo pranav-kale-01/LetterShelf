@@ -66,41 +66,41 @@ class ManageNewslettersSettings extends StatelessWidget {
           ),
 
           // Request Newsletter Addition
-          Container(
-            margin: EdgeInsets.symmetric( horizontal: 7, vertical: 1),
-            child: GestureDetector(
-              onTap: () {
-                // redirecting to request_newsletter_addition
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => RequestNewsletterAddition( gmailApi: gmailApi,) ),
-                );
-              },
-              child: Container(
-                height: 70,
-                child: Card(
-                  elevation: 1,
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.03),
-                        child: const Text(
-                          "Request Newsletter Addition",
-                          style: TextStyle(
-                              fontSize: 21,
-                              fontWeight: FontWeight.w400
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Container(
+          //   margin: EdgeInsets.symmetric( horizontal: 7, vertical: 1),
+          //   child: GestureDetector(
+          //     onTap: () {
+          //       // redirecting to request_newsletter_addition
+          //       Navigator.of(context).push(
+          //         MaterialPageRoute(builder: (context) => RequestNewsletterAddition( gmailApi: gmailApi,) ),
+          //       );
+          //     },
+          //     child: Container(
+          //       height: 70,
+          //       child: Card(
+          //         elevation: 1,
+          //         child: Row(
+          //           children: [
+          //             SizedBox(
+          //               width: 5,
+          //             ),
+          //             Container(
+          //               alignment: Alignment.centerLeft,
+          //               padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 0.03),
+          //               child: const Text(
+          //                 "Request Newsletter Addition",
+          //                 style: TextStyle(
+          //                     fontSize: 21,
+          //                     fontWeight: FontWeight.w400
+          //                 ),
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
 
           // Add Custom Newsletter
           Container(

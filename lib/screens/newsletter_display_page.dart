@@ -50,7 +50,7 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
           category,
           style: const TextStyle(
             color: Colors.grey,
-            fontSize: 16
+            fontSize: 14
           ),
         ),
       ));
@@ -170,7 +170,7 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
                               widget.newsletterData['id'],
                               style: const TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 28,
+                                fontSize: 30,
                               ),
                             ),
                           ),
@@ -178,8 +178,17 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
                             widget.newsletterData['organization'],
                             style: const TextStyle(
                               fontWeight: FontWeight.w400,
-                              fontSize: 18,
+                              fontSize: 22,
                               color: Colors.black87,
+                            ),
+                          ),
+
+
+                          // categories
+                          Padding(
+                            padding: const EdgeInsets.only(top: 14),
+                            child: Row(
+                              children: categories,
                             ),
                           ),
                         ],
@@ -214,17 +223,9 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
                 ],
               ),
 
-              // categories
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 2),
-                child: Row(
-                  children: categories,
-                ),
-              ),
-
               // About Newsletter
               Padding(
-                padding: EdgeInsets.only(left: 12, right: 20, top: 20),
+                padding: EdgeInsets.only(left: 12, right: 20, top: 12),
                 child: Text(
                   "About",
                   style: TextStyle(
@@ -235,9 +236,32 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
               ),
 
               Padding(
-                padding: const EdgeInsets.only( top: 8.0, bottom: 18.0, left: 16.0, right: 16.0),
+                padding: const EdgeInsets.only( top: 8.0, bottom: 18.0, left: 12.0, right: 16.0),
                 child: Text(
                   widget.newsletterData['description'],
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400
+                  ),
+                ),
+              ),
+
+              // Duration
+              Padding(
+                padding: EdgeInsets.only(left: 12, right: 20, top: 2),
+                child: Text(
+                  "Duration",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
+                child: Text(
+                  widget.newsletterData['duration'],
                   style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w400

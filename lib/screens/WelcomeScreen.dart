@@ -18,7 +18,7 @@ class WelcomeScreen extends StatelessWidget {
           child: ElevatedButton(
             child: const Text("Welcome"),
             onPressed: () async {
-              Navigator.of(context).pushReplacement(
+              Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (context) => SetupScreen( gmailApi: gmailApi, peopleApi: peopleApi ),
                 ),

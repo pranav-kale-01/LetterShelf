@@ -44,10 +44,15 @@ class _TopNewsletterCardState extends State<TopNewsletterCard> {
     DocumentSnapshot _docSnapshot = await newslettersReference.doc( widget.newsletterData['id'] ).get();
     _querySnapshot = _docSnapshot.data() as Map<String,dynamic>;
     _querySnapshot.addAll( { "id" : widget.newsletterData['id'] } );
-    bool exists = await hiveService.isExists( boxName: widget.newsletterData['id'] + "CachedImage" );
 
-    if( exists && !Utils.firstExploreScreenLoad && widget.enabledCaching ) {
-      debugPrint("if");
+    bool loadFromCache = true;
+
+    if( !Utils.firstScreenLoad( widget.newsletterData['id'] + "CachedImage" ) ) {
+      // if it's that the image is being loaded since the start of the app, we will load the image from api
+      loadFromCache = false;
+    }
+
+    if( loadFromCache && widget.enabledCaching ) {
       try {
         Utils.firstInboxScreenLoad = false;
         List<dynamic> tempList = await hiveService.getBoxes( widget.newsletterData['id'] + "CachedImage" );
@@ -58,6 +63,8 @@ class _TopNewsletterCardState extends State<TopNewsletterCard> {
         });
       }
       catch( e, stackTrace ) {
+        debugPrint( e.toString() );
+        debugPrint( stackTrace.toString());
         image = null;
         setState(() {
 
@@ -65,50 +72,42 @@ class _TopNewsletterCardState extends State<TopNewsletterCard> {
       }
     }
     else {
-      debugPrint("else");
-      Future.delayed(const Duration( seconds: 1), () async {
-        // creating a reference of firebase db
-        FirebaseFirestore db = FirebaseFirestore.instance;
+        try {
+          // getting logo
+          List<String> fileNames = await storage.listLogosFile( widget.newsletterData['id'] );
 
-        // showing the list of available newsletter emails
-        DocumentSnapshot snapshot = await db.collection("newsletters_list").doc( widget.newsletterData['id'] ).get();
+          if( fileNames.isNotEmpty ) {
+            String url = await storage.getDownloadUrl(fileNames[0]);
 
-        if( snapshot.data() != null ) {
-          try {
-            // getting logo
-            List<String> fileNames = await storage.listLogosFile( widget.newsletterData['id'] );
+            if( widget.enabledCaching ) {
+              http.Response response = await http.get(Uri.parse(url));
+              Box _box = await Hive.openBox( widget.newsletterData['id'] + "CachedImage");
+              _box.deleteAll(_box.keys);
 
-            if( fileNames.isNotEmpty ) {
-              String url = await storage.getDownloadUrl(fileNames[0]);
-
-              if( widget.enabledCaching ) {
-                http.Response response = await http.get(Uri.parse(url));
-                Box _box = await Hive.openBox( widget.newsletterData['id'] + "CachedImage");
-                _box.deleteAll(_box.keys);
-                await hiveService.addBoxes(response.bodyBytes, widget.newsletterData['id'] + "CachedImage");
-              }
-
-              setState(() => image = Image.network(
-                url,
-                fit: BoxFit.fitWidth,
-              ));
+              await hiveService.addBoxes(response.bodyBytes, widget.newsletterData['id'] + "CachedImage");
+              Utils.firstScreenLoad(widget.newsletterData['id'] + "CachedImage", true);
             }
-          } catch( e, stackTrace ) {
-            debugPrint( e.toString() );
-            debugPrint( stackTrace.toString() );
-            image = null;
-            setState(() {
 
-            });
+            setState(() => image = Image.network(
+              url,
+              fit: BoxFit.fitWidth,
+            ));
           }
         }
-      });
+        catch( e, stackTrace ) {
+          debugPrint( e.toString() );
+          debugPrint( stackTrace.toString() );
+          image = null;
+          setState(() {
+
+          });
+        }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: widget.cardHeight,
       width: widget.cardWidth,
       child: GestureDetector(
@@ -146,7 +145,7 @@ class _TopNewsletterCardState extends State<TopNewsletterCard> {
               child: Text(
                 widget.newsletterData['id'],
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -157,7 +156,7 @@ class _TopNewsletterCardState extends State<TopNewsletterCard> {
               child: Text(
                 widget.newsletterData['organization'],
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
                   color: Colors.grey,

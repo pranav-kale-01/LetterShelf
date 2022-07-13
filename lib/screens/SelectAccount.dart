@@ -116,6 +116,7 @@ class _SelectAccountState extends State<SelectAccount> {
   Widget build(BuildContext context) {
     callOnLoad(getAllUserAccounts);
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

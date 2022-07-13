@@ -10,6 +10,7 @@ class Top25 extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width - 15;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(251, 251, 251, 1),
         elevation: 0,

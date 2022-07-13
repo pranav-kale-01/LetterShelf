@@ -97,6 +97,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),

@@ -64,6 +64,7 @@ class _CredentialCheckLoaderState extends State<CredentialCheckLoader> implement
           }
           else if( snapshot.hasError ){
             return Scaffold(
+              backgroundColor: Colors.white,
               body: Container(
                 alignment: Alignment.center,
                 child: Text( snapshot.error.toString() ),

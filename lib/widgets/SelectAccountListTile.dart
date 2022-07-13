@@ -129,7 +129,7 @@ class _SelectAccountListTileState extends State<SelectAccountListTile> {
               userName,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                  fontSize: 28,
+                  fontSize: 22,
                   fontWeight: FontWeight.w600,
               ),
             ),
@@ -151,6 +151,7 @@ class _SelectAccountListTileState extends State<SelectAccountListTile> {
               child: Icon(
                   Icons.delete_outline_rounded,
                   color: Colors.red,
+                  size: 30,
                 ),
             ),
           ),

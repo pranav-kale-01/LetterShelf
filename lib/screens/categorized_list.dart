@@ -70,6 +70,7 @@ class _CategorizedListState extends State<CategorizedList> {
         if( snapshot.connectionState == ConnectionState.done ) {
           if( newsletters.isNotEmpty ) {
             return Scaffold(
+              backgroundColor: Colors.white,
               appBar: AppBar(
                 backgroundColor: Color.fromRGBO(251, 251, 251, 1),
                 elevation: 0,

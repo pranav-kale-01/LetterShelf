@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:hive/hive.dart';
@@ -190,182 +191,181 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                   backgroundColor: Colors.transparent,
                   child: Container(
                     width: MediaQuery.of(context).size.width,
-                    height: MediaQuery.of(context).size.width * 0.2,
+                    height: MediaQuery.of(context).size.height * 0.7,
                     decoration: const BoxDecoration(
                       borderRadius: BorderRadius.vertical(
                           top: Radius.circular(15),
                       ),
-                      color: Colors.white
+                      color: Colors.white,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.white,
-                                elevation: 0
-                            ) ,
-                            onPressed: () async {
-                              List<dynamic> tempList = await hiveService.getBoxes( " is:starred CachedMessages" + widget.username );
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 10.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width,
+                            padding: EdgeInsets.symmetric( vertical: 2.0 ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      primary: Colors.white,
+                                      elevation: 0
+                                  ) ,
+                                  onPressed: () async {
+                                    List<dynamic> tempList = await hiveService.getBoxes( " is:starred CachedMessages" + widget.username );
 
-                              if (  widget.emailMessage.starred ) {
-                                setState(() {
-                                  widget.emailMessage.starred = false;
+                                    if (  widget.emailMessage.starred ) {
+                                      setState(() {
+                                        widget.emailMessage.starred = false;
 
-                                  // now inserting new data to previous cached data
-                                  for( var msg in tempList ) {
-                                    if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                      msg['starred'] = false;
-                                      break;
+                                        // now inserting new data to previous cached data
+                                        for( var msg in tempList ) {
+                                          if( msg['msgId'] == widget.emailMessage.msgId ) {
+                                            msg['starred'] = false;
+                                            break;
+                                          }
+                                        }
+
+                                        hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+
+                                        // modifying the messages label to remove UNREAD Label from the message
+                                        gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                                            removeLabelIds: [
+                                              "STARRED"
+                                            ]
+                                        );
+
+                                        widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId );
+                                      });
                                     }
-                                  }
+                                    else {
+                                      setState(() {
+                                        widget.emailMessage.starred = true;
+                                        // now inserting new data to previous cached data
+                                        for( var msg in tempList ) {
+                                          if( msg['msgId'] == widget.emailMessage.msgId ) {
+                                            msg['starred'] = true;
+                                            break;
+                                          }
+                                        }
 
-                                  hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+                                        hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+                                        // modifying the messages label to remove UNREAD Label from the message
+                                        gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                                            addLabelIds: [
+                                              "STARRED"
+                                            ]
+                                        );
 
-                                  // modifying the messages label to remove UNREAD Label from the message
-                                  gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                      removeLabelIds: [
-                                        "STARRED"
-                                      ]
-                                  );
-
-                                  widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId );
-                                });
-                              }
-                              else {
-                                setState(() {
-                                  widget.emailMessage.starred = true;
-                                  // now inserting new data to previous cached data
-                                  for( var msg in tempList ) {
-                                    if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                      msg['starred'] = true;
-                                      break;
+                                        widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+                                      });
                                     }
-                                  }
-
-                                  hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
-                                  // modifying the messages label to remove UNREAD Label from the message
-                                  gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                      addLabelIds: [
-                                        "STARRED"
-                                      ]
-                                  );
-
-                                  widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-                                });
-                              }
-                            },
-                            child: Container(
-                              color: Colors.white,
-                              alignment: Alignment.center,
-                              // padding: EdgeInsets.symmetric(vertical: 8),
-                              child: Icon(
-                                widget.emailMessage.starred ? Icons.star : Icons.star_border,
-                                color: widget.emailMessage.starred ? Colors.amber : Colors.grey,
-                                size: 28,
-                              ),
+                                  },
+                                  child: Container(
+                                    color: Colors.white,
+                                    alignment: Alignment.center,
+                                    // padding: EdgeInsets.symmetric(vertical: 8),
+                                    child: Icon(
+                                      widget.emailMessage.starred ? Icons.star : Icons.star_border,
+                                      color: widget.emailMessage.starred ? Colors.amber : Colors.grey,
+                                      size: 28,
+                                    ),
+                                  ),
+                                ),
+                                Text("Mark as Starred")
+                              ],
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.white,
-                                elevation: 0
-                            ) ,
-                            onPressed: () async {
-                              List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+                          Container(
+                            width: MediaQuery.of(context).size.width,
+                            padding: EdgeInsets.symmetric( vertical: 2.0 ),
+                            child: Row(
+                              children: [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      primary: Colors.white,
+                                      elevation: 0
+                                  ) ,
+                                  onPressed: () async {
+                                    List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
 
-                              if (  widget.emailMessage.important ) {
-                                setState(() {
-                                  widget.emailMessage.important = false;
-                                });
+                                    if (  widget.emailMessage.important ) {
+                                      setState(() {
+                                        widget.emailMessage.important = false;
+                                      });
 
-                                // now inserting new data to previous cached data
-                                for( var msg in tempList ) {
-                                  if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                    msg['important'] = false;
-                                    break;
-                                  }
-                                }
+                                      // now inserting new data to previous cached data
+                                      for( var msg in tempList ) {
+                                        if( msg['msgId'] == widget.emailMessage.msgId ) {
+                                          msg['important'] = false;
+                                          break;
+                                        }
+                                      }
 
-                                hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                // modifying the messages label to remove UNREAD Label from the message
-                                gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                    removeLabelIds: [
-                                      "IMPORTANT"
-                                    ]
-                                );
-
-                                widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                setState(() { });
-                              }
-                              else {
-                                setState(() {
-                                  widget.emailMessage.important = true;
-                                });
-
-                                // now inserting new data to previous cached data
-                                for( var msg in tempList ) {
-                                  if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                    msg['important'] = true;
-                                    break;
-                                  }
-                                }
-
-                                hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+                                      hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
 
 
-                                // modifying the messages label to remove UNREAD Label from the message
-                                gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                    addLabelIds: [
-                                      "IMPORTANT"
-                                    ]
-                                );
+                                      // modifying the messages label to remove UNREAD Label from the message
+                                      gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                                          removeLabelIds: [
+                                            "IMPORTANT"
+                                          ]
+                                      );
 
-                                widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+                                      widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
 
-                                setState(() {
+                                      setState(() { });
+                                    }
+                                    else {
+                                      setState(() {
+                                        widget.emailMessage.important = true;
+                                      });
 
-                                });
-                              }
-                            },
-                            child: Container(
-                              color: Colors.white,
-                              alignment: Alignment.center,
-                              // padding: EdgeInsets.symmetric(vertical: 8),
-                              child: Icon(
-                                widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
-                                color: Colors.redAccent,
-                                size: 28,
-                              ),
+                                      // now inserting new data to previous cached data
+                                      for( var msg in tempList ) {
+                                        if( msg['msgId'] == widget.emailMessage.msgId ) {
+                                          msg['important'] = true;
+                                          break;
+                                        }
+                                      }
+
+                                      hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+
+
+                                      // modifying the messages label to remove UNREAD Label from the message
+                                      gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                                          addLabelIds: [
+                                            "IMPORTANT"
+                                          ]
+                                      );
+
+                                      widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+
+                                      setState(() {
+
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    color: Colors.white,
+                                    alignment: Alignment.center,
+                                    // padding: EdgeInsets.symmetric(vertical: 8),
+                                    child: Icon(
+                                      widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+                                      color: Colors.redAccent,
+                                      size: 28,
+                                    ),
+                                  ),
+                                ),
+                                Text("Mark as Important")
+                              ],
                             ),
                           ),
-                        ),
-                        Expanded(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.white,
-                                elevation: 0
-                            ) ,
-                            onPressed: () async {},
-                            child: Container(
-                              color: Colors.white,
-                              alignment: Alignment.center,
-                              // padding: EdgeInsets.symmetric(vertical: 8),
-                              child: Icon(
-                                Icons.more_horiz,
-                                color: Colors.black,
-                                size: 28,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 )

@@ -45,6 +45,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
   late bool stopImageLoading = false;
   Storage storage = Storage();
   Color backgroundColor = Colors.pinkAccent;
+  bool tileIsSelected = false;
 
   final monthData = {
     "1": "Jan",
@@ -170,326 +171,338 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
 
     return SizedBox(
       height: 150,
-      child: GestureDetector(
-        onLongPress: () {
-          showDialog(
-              context: context,
-              builder: (context) => Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: MediaQuery.of(context).size.width * 0.2,
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(15),
-                    ),
-                    color: Colors.white
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                              elevation: 0
-                          ) ,
-                          onPressed: () async {
-                            List<dynamic> tempList = await hiveService.getBoxes( " is:starred CachedMessages" + widget.username );
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        color: Colors.white,
+        child: InkWell(
+          onLongPress: () {
+            setState(() {
+              tileIsSelected = true;
+            });
 
-                            if (  widget.emailMessage.starred ) {
-                              setState(() {
-                                widget.emailMessage.starred = false;
+            showDialog(
+                context: context,
+                builder: (context) => Dialog(
+                  insetPadding: EdgeInsets.zero,
+                  alignment: Alignment.bottomCenter,
+                  backgroundColor: Colors.transparent,
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.width * 0.2,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(15),
+                      ),
+                      color: Colors.white
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                primary: Colors.white,
+                                elevation: 0
+                            ) ,
+                            onPressed: () async {
+                              List<dynamic> tempList = await hiveService.getBoxes( " is:starred CachedMessages" + widget.username );
+
+                              if (  widget.emailMessage.starred ) {
+                                setState(() {
+                                  widget.emailMessage.starred = false;
+
+                                  // now inserting new data to previous cached data
+                                  for( var msg in tempList ) {
+                                    if( msg['msgId'] == widget.emailMessage.msgId ) {
+                                      msg['starred'] = false;
+                                      break;
+                                    }
+                                  }
+
+                                  hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+
+                                  // modifying the messages label to remove UNREAD Label from the message
+                                  gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                                      removeLabelIds: [
+                                        "STARRED"
+                                      ]
+                                  );
+
+                                  widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId );
+                                });
+                              }
+                              else {
+                                setState(() {
+                                  widget.emailMessage.starred = true;
+                                  // now inserting new data to previous cached data
+                                  for( var msg in tempList ) {
+                                    if( msg['msgId'] == widget.emailMessage.msgId ) {
+                                      msg['starred'] = true;
+                                      break;
+                                    }
+                                  }
+
+                                  hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+                                  // modifying the messages label to remove UNREAD Label from the message
+                                  gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                                      addLabelIds: [
+                                        "STARRED"
+                                      ]
+                                  );
+
+                                  widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+                                });
+                              }
+                            },
+                            child: Container(
+                              color: Colors.white,
+                              alignment: Alignment.center,
+                              // padding: EdgeInsets.symmetric(vertical: 8),
+                              child: Icon(
+                                widget.emailMessage.starred ? Icons.star : Icons.star_border,
+                                color: widget.emailMessage.starred ? Colors.amber : Colors.grey,
+                                size: 28,
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                primary: Colors.white,
+                                elevation: 0
+                            ) ,
+                            onPressed: () async {
+                              List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+
+                              if (  widget.emailMessage.important ) {
+                                setState(() {
+                                  widget.emailMessage.important = false;
+                                });
 
                                 // now inserting new data to previous cached data
                                 for( var msg in tempList ) {
                                   if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                    msg['starred'] = false;
+                                    msg['important'] = false;
                                     break;
                                   }
                                 }
 
-                                hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+                                hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+
 
                                 // modifying the messages label to remove UNREAD Label from the message
                                 gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
                                     removeLabelIds: [
-                                      "STARRED"
-                                    ]
-                                );
-
-                                widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId );
-                              });
-                            }
-                            else {
-                              setState(() {
-                                widget.emailMessage.starred = true;
-                                // now inserting new data to previous cached data
-                                for( var msg in tempList ) {
-                                  if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                    msg['starred'] = true;
-                                    break;
-                                  }
-                                }
-
-                                hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
-                                // modifying the messages label to remove UNREAD Label from the message
-                                gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                    addLabelIds: [
-                                      "STARRED"
+                                      "IMPORTANT"
                                     ]
                                 );
 
                                 widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-                              });
-                            }
-                          },
-                          child: Container(
-                            color: Colors.white,
-                            alignment: Alignment.center,
-                            // padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Icon(
-                              widget.emailMessage.starred ? Icons.star : Icons.star_border,
-                              color: widget.emailMessage.starred ? Colors.amber : Colors.grey,
-                              size: 28,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                              elevation: 0
-                          ) ,
-                          onPressed: () async {
-                            List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
 
-                            if (  widget.emailMessage.important ) {
-                              setState(() {
-                                widget.emailMessage.important = false;
-                              });
-
-                              // now inserting new data to previous cached data
-                              for( var msg in tempList ) {
-                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                  msg['important'] = false;
-                                  break;
-                                }
+                                setState(() { });
                               }
+                              else {
+                                setState(() {
+                                  widget.emailMessage.important = true;
+                                });
 
-                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                              // modifying the messages label to remove UNREAD Label from the message
-                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                  removeLabelIds: [
-                                    "IMPORTANT"
-                                  ]
-                              );
-
-                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                              setState(() { });
-                            }
-                            else {
-                              setState(() {
-                                widget.emailMessage.important = true;
-                              });
-
-                              // now inserting new data to previous cached data
-                              for( var msg in tempList ) {
-                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                  msg['important'] = true;
-                                  break;
+                                // now inserting new data to previous cached data
+                                for( var msg in tempList ) {
+                                  if( msg['msgId'] == widget.emailMessage.msgId ) {
+                                    msg['important'] = true;
+                                    break;
+                                  }
                                 }
+
+                                hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+
+
+                                // modifying the messages label to remove UNREAD Label from the message
+                                gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                                    addLabelIds: [
+                                      "IMPORTANT"
+                                    ]
+                                );
+
+                                widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+
+                                setState(() {
+
+                                });
                               }
-
-                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                              // modifying the messages label to remove UNREAD Label from the message
-                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                  addLabelIds: [
-                                    "IMPORTANT"
-                                  ]
-                              );
-
-                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                              setState(() {
-
-                              });
-                            }
-                          },
-                          child: Container(
-                            color: Colors.white,
-                            alignment: Alignment.center,
-                            // padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Icon(
-                              widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
-                              color: Colors.redAccent,
-                              size: 28,
+                            },
+                            child: Container(
+                              color: Colors.white,
+                              alignment: Alignment.center,
+                              // padding: EdgeInsets.symmetric(vertical: 8),
+                              child: Icon(
+                                widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+                                color: Colors.redAccent,
+                                size: 28,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              primary: Colors.white,
-                              elevation: 0
-                          ) ,
-                          onPressed: () async {},
-                          child: Container(
-                            color: Colors.white,
-                            alignment: Alignment.center,
-                            // padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Icon(
-                              Icons.more_horiz,
-                              color: Colors.black,
-                              size: 28,
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                primary: Colors.white,
+                                elevation: 0
+                            ) ,
+                            onPressed: () async {},
+                            child: Container(
+                              color: Colors.white,
+                              alignment: Alignment.center,
+                              // padding: EdgeInsets.symmetric(vertical: 8),
+                              child: Icon(
+                                Icons.more_horiz,
+                                color: Colors.black,
+                                size: 28,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              )
-          );
-        },
-        child: Card(
-          elevation: 1,
-          child: Column(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    // checking if the newsletter is unread
-                    List<dynamic> tempList = await hiveService.getBoxes( " is:unread CachedMessages" + widget.username );
+                )
+            ).then((val) => setState( () => tileIsSelected = false ) );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: tileIsSelected ? const Color(0xffa2d7ff) : Colors.transparent,
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      // checking if the newsletter is unread
+                      List<dynamic> tempList = await hiveService.getBoxes( " is:unread CachedMessages" + widget.username );
 
-                    if (  widget.emailMessage.unread ) {
-                      setState(() {
-                        // now inserting new data to previous cached data
-                        for( var msg in tempList ) {
-                          if( msg['msgId'] == widget.emailMessage.msgId ) {
-                            msg['unread'] = false;
-                            break;
+                      if (  widget.emailMessage.unread ) {
+                        setState(() {
+                          // now inserting new data to previous cached data
+                          for( var msg in tempList ) {
+                            if( msg['msgId'] == widget.emailMessage.msgId ) {
+                              msg['unread'] = false;
+                              break;
+                            }
                           }
-                        }
 
-                        hiveService.addBoxes( tempList, " is:unread CachedMessages" + widget.username );
+                          hiveService.addBoxes( tempList, " is:unread CachedMessages" + widget.username );
 
-                        // setting the font color to light gray
-                        widget.headerColor = Colors.grey;
+                          // setting the font color to light gray
+                          widget.headerColor = Colors.grey;
 
-                        // also changing the unread property of the current email message to false
-                        // (if we don't change the property, the next time ListTile is reloaded, there would be no way to tell if the message was read)
-                        widget.emailMessage.unread = false;
+                          // also changing the unread property of the current email message to false
+                          // (if we don't change the property, the next time ListTile is reloaded, there would be no way to tell if the message was read)
+                          widget.emailMessage.unread = false;
 
-                        // removing the message from unread and adding it to the top of read messages list
-                        // widget.removeFromListMethod( widget.emailMessage.msgId );
-                        // widget.addToListMethod( listName: 'UNREAD', msg: widget.emailMessage );
+                          // removing the message from unread and adding it to the top of read messages list
+                          // widget.removeFromListMethod( widget.emailMessage.msgId );
+                          // widget.addToListMethod( listName: 'UNREAD', msg: widget.emailMessage );
 
-                        // modifying the messages label to remove UNREAD Label from the message
-                        gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                            removeLabelIds: [
-                              "UNREAD"
-                            ]
-                        );
+                          // modifying the messages label to remove UNREAD Label from the message
+                          gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                              removeLabelIds: [
+                                "UNREAD"
+                              ]
+                          );
 
-                        widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-                      });
-                    }
-                    loadMessage();
-                  },
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: image == null ? 4 : 0, right: 4, top: 15),
-                        child: image == null ? CircleAvatar(
-                          backgroundColor: backgroundColor,
-                          radius: 32,
-                          child: Text(
-                              circleAvatarText,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w600
-                              ),
-                          ),
-                        ) : SizedBox(
-                          width: 74,
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(50)
-                            ),
-                            elevation: 2,
-                            child: ClipRRect(
-                                borderRadius: BorderRadius.circular(50),
-                                child: image
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.74,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.only(top: 15, bottom: 3, left: 10),
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                widget.emailMessage.from,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: widget.listKey != "[<'READ'>]" && widget.emailMessage.unread ? widget.headerColor : Colors.grey,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 24,
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 6, top: 5, left: 10),
-                              child: Text(
-                                widget.emailMessage.subject,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 3,
-                                strutStyle: const StrutStyle(
-                                  height: 1,
-                                ),
+                          widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+                        });
+                      }
+                      loadMessage();
+                    },
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 4, right: 4, top: 15),
+                          child: image == null ? CircleAvatar(
+                            backgroundColor: backgroundColor,
+                            radius: 32,
+                            child: Text(
+                                circleAvatarText,
                                 style: const TextStyle(
-                                  color: Colors.black87,
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w600
                                 ),
+                            ),
+                          ) : SizedBox(
+                            width: 74,
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50)
+                              ),
+                              elevation: 2,
+                              child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(50),
+                                  child: image
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.74,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.only(top: 15, bottom: 3, left: 10),
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  widget.emailMessage.from,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: widget.listKey != "[<'READ'>]" && widget.emailMessage.unread ? widget.headerColor : Colors.grey,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 24,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(bottom: 6, top: 5, left: 10),
+                                child: Text(
+                                  widget.emailMessage.subject,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 3,
+                                  strutStyle: const StrutStyle(
+                                    height: 1,
+                                  ),
+                                  style: const TextStyle(
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                alignment: Alignment.bottomRight,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                    '${monthData[widget.emailMessage.date.month.toString()]} ${widget.emailMessage.date.day}'),
-              ),
-              Container(
-                height: 1,
-                margin: const EdgeInsets.only(top: 8, left: 6, right: 6),
-                color: Colors.black12,
-              ),
-            ],
+                Container(
+                  alignment: Alignment.bottomRight,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(
+                      '${monthData[widget.emailMessage.date.month.toString()]} ${widget.emailMessage.date.day}'),
+                ),
+                Container(
+                  height: 1,
+                  margin: const EdgeInsets.only(top: 8, left: 6, right: 6),
+                  color: Colors.black12,
+                ),
+              ],
+            ),
           ),
         ),
       ),

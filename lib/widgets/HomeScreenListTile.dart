@@ -3,12 +3,12 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:hive/hive.dart';
 import 'package:letter_shelf/models/emailMessage.dart';
 import 'package:http/http.dart' as http;
+import 'package:letter_shelf/widgets/HomeScreenBottomDialog.dart';
 
 import '../firebase_operations/storage_service.dart';
 import '../utils/Utils.dart';
@@ -40,14 +40,12 @@ class HomeScreenListTile extends StatefulWidget {
 
 class _HomeScreenListTileState extends State<HomeScreenListTile> {
   final HiveServices hiveService = HiveServices( );
-  String circleAvatarText = "";
-  bool executeOnTap = true;
-  late BuildContext ctx;
-  Image? image;
-  late bool stopImageLoading = false;
   Storage storage = Storage();
   Color backgroundColor = Colors.pinkAccent;
+  String circleAvatarText = "";
+  bool executeOnTap = true;
   bool tileIsSelected = false;
+  Image? image;
 
   final monthData = {
     "1": "Jan",
@@ -63,6 +61,9 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
     "11": "Nov",
     "12": "Dec"
   };
+
+  late bool stopImageLoading = false;
+  late BuildContext ctx;
 
   void loadMessage() {
     if (executeOnTap) {
@@ -92,6 +93,8 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
 
     circleAvatarText = Utils.getInitials(widget.emailMessage.from);
     backgroundColor = Utils.getBackgroundColor( circleAvatarText );
+
+    // getting background image for the tile
     getBackgroundImage();
   }
 
@@ -149,8 +152,6 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
             await hiveService.addBoxes(  response.bodyBytes, widget.emailMessage.from + "CachedImage");
             Utils.firstScreenLoad(widget.emailMessage.from + "CachedImage", true);
 
-
-
             setState(() => image = Image.network(
               url,
               fit: BoxFit.cover,
@@ -160,12 +161,11 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
             debugPrint( e.toString() );
             debugPrint( stackTrace.toString() );
           }
-
         }
       });
     }
   }
-
+  
 
   @override
   Widget build(BuildContext context) {
@@ -184,741 +184,728 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
               tileIsSelected = true;
             });
 
-            Rect? cutoutBounds;
-
-            List<DisplayFeature> features = MediaQuery.of(context).displayFeatures;
-
-            for(DisplayFeature feature in features ) {
-              if( feature.type == DisplayFeatureType.cutout ) {
-                cutoutBounds = feature.bounds;
-              }
-
-              debugPrint( feature.toString() );
-            }
-
-            debugPrint( MediaQuery.of(context).viewPadding.top.toString() );
-            debugPrint( MediaQuery.of(context).viewInsets.top.toString() );
             var topPadding =MediaQueryData.fromWindow(window).padding.top;
 
             showDialog(
                 context: context,
-                builder: (context) => Dialog(
-                  insetPadding: EdgeInsets.zero,
-                  alignment: Alignment.bottomCenter,
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          GestureDetector(
-                            onTap: ( ) => Navigator.of(context).pop(),
-                            child: Container(
-                              height: MediaQuery.of(context).size.height * 0.6,
-                              color: Colors.transparent,
-                            ),
-                          ),
-                          Container(
-                            height: MediaQuery.of(context).size.height - topPadding,
-                            decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(15),
-                              ),
-                              color: Colors.white,
-                            ),
-                            child: Container(
-                              margin: const EdgeInsets.only(top: 10.0),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    padding: EdgeInsets.symmetric( vertical: 2.0 ),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              primary: Colors.white,
-                                              elevation: 0
-                                          ) ,
-                                          onPressed: () async {
-                                            List<dynamic> tempList = await hiveService.getBoxes( " is:starred CachedMessages" + widget.username );
-
-                                            if (  widget.emailMessage.starred ) {
-                                              setState(() {
-                                                widget.emailMessage.starred = false;
-
-                                                // now inserting new data to previous cached data
-                                                for( var msg in tempList ) {
-                                                  if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                    msg['starred'] = false;
-                                                    break;
-                                                  }
-                                                }
-
-                                                hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
-
-                                                // modifying the messages label to remove UNREAD Label from the message
-                                                gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                    removeLabelIds: [
-                                                      "STARRED"
-                                                    ]
-                                                );
-
-                                                widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId );
-                                              });
-                                            }
-                                            else {
-                                              setState(() {
-                                                widget.emailMessage.starred = true;
-                                                // now inserting new data to previous cached data
-                                                for( var msg in tempList ) {
-                                                  if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                    msg['starred'] = true;
-                                                    break;
-                                                  }
-                                                }
-
-                                                hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
-                                                // modifying the messages label to remove UNREAD Label from the message
-                                                gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                    addLabelIds: [
-                                                      "STARRED"
-                                                    ]
-                                                );
-
-                                                widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-                                              });
-                                            }
-                                          },
-                                          child: Container(
-                                            color: Colors.white,
-                                            alignment: Alignment.center,
-                                            // padding: EdgeInsets.symmetric(vertical: 8),
-                                            child: Icon(
-                                              widget.emailMessage.starred ? Icons.star : Icons.star_border,
-                                              color: widget.emailMessage.starred ? Colors.amber : Colors.grey,
-                                              size: 28,
-                                            ),
-                                          ),
-                                        ),
-                                        Text("Mark as Starred")
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    padding: EdgeInsets.symmetric( vertical: 2.0 ),
-                                    child: Row(
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              primary: Colors.white,
-                                              elevation: 0
-                                          ) ,
-                                          onPressed: () async {
-                                            List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
-
-                                            if (  widget.emailMessage.important ) {
-                                              setState(() {
-                                                widget.emailMessage.important = false;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = false;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  removeLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() { });
-                                            }
-                                            else {
-                                              setState(() {
-                                                widget.emailMessage.important = true;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = true;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  addLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() {
-
-                                              });
-                                            }
-                                          },
-                                          child: Container(
-                                            color: Colors.white,
-                                            alignment: Alignment.center,
-                                            // padding: EdgeInsets.symmetric(vertical: 8),
-                                            child: Icon(
-                                              widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
-                                              color: Colors.redAccent,
-                                              size: 28,
-                                            ),
-                                          ),
-                                        ),
-                                        Text("Mark as Important")
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    padding: EdgeInsets.symmetric( vertical: 2.0 ),
-                                    child: Row(
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              primary: Colors.white,
-                                              elevation: 0
-                                          ) ,
-                                          onPressed: () async {
-                                            List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
-
-                                            if (  widget.emailMessage.important ) {
-                                              setState(() {
-                                                widget.emailMessage.important = false;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = false;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  removeLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() { });
-                                            }
-                                            else {
-                                              setState(() {
-                                                widget.emailMessage.important = true;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = true;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  addLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() {
-
-                                              });
-                                            }
-                                          },
-                                          child: Container(
-                                            color: Colors.white,
-                                            alignment: Alignment.center,
-                                            // padding: EdgeInsets.symmetric(vertical: 8),
-                                            child: Icon(
-                                              widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
-                                              color: Colors.redAccent,
-                                              size: 28,
-                                            ),
-                                          ),
-                                        ),
-                                        Text("Mark as Important")
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    padding: EdgeInsets.symmetric( vertical: 2.0 ),
-                                    child: Row(
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              primary: Colors.white,
-                                              elevation: 0
-                                          ) ,
-                                          onPressed: () async {
-                                            List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
-
-                                            if (  widget.emailMessage.important ) {
-                                              setState(() {
-                                                widget.emailMessage.important = false;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = false;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  removeLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() { });
-                                            }
-                                            else {
-                                              setState(() {
-                                                widget.emailMessage.important = true;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = true;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  addLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() {
-
-                                              });
-                                            }
-                                          },
-                                          child: Container(
-                                            color: Colors.white,
-                                            alignment: Alignment.center,
-                                            // padding: EdgeInsets.symmetric(vertical: 8),
-                                            child: Icon(
-                                              widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
-                                              color: Colors.redAccent,
-                                              size: 28,
-                                            ),
-                                          ),
-                                        ),
-                                        Text("Mark as Important")
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    padding: EdgeInsets.symmetric( vertical: 2.0 ),
-                                    child: Row(
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              primary: Colors.white,
-                                              elevation: 0
-                                          ) ,
-                                          onPressed: () async {
-                                            List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
-
-                                            if (  widget.emailMessage.important ) {
-                                              setState(() {
-                                                widget.emailMessage.important = false;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = false;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  removeLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() { });
-                                            }
-                                            else {
-                                              setState(() {
-                                                widget.emailMessage.important = true;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = true;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  addLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() {
-
-                                              });
-                                            }
-                                          },
-                                          child: Container(
-                                            color: Colors.white,
-                                            alignment: Alignment.center,
-                                            // padding: EdgeInsets.symmetric(vertical: 8),
-                                            child: Icon(
-                                              widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
-                                              color: Colors.redAccent,
-                                              size: 28,
-                                            ),
-                                          ),
-                                        ),
-                                        Text("Mark as Important")
-                                      ],
-                                    ),
-                                  ),
-
-                                  Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    padding: EdgeInsets.symmetric( vertical: 2.0 ),
-                                    child: Row(
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              primary: Colors.white,
-                                              elevation: 0
-                                          ) ,
-                                          onPressed: () async {
-                                            List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
-
-                                            if (  widget.emailMessage.important ) {
-                                              setState(() {
-                                                widget.emailMessage.important = false;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = false;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  removeLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() { });
-                                            }
-                                            else {
-                                              setState(() {
-                                                widget.emailMessage.important = true;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = true;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  addLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() {
-
-                                              });
-                                            }
-                                          },
-                                          child: Container(
-                                            color: Colors.white,
-                                            alignment: Alignment.center,
-                                            // padding: EdgeInsets.symmetric(vertical: 8),
-                                            child: Icon(
-                                              widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
-                                              color: Colors.redAccent,
-                                              size: 28,
-                                            ),
-                                          ),
-                                        ),
-                                        Text("Mark as Important")
-                                      ],
-                                    ),
-                                  ),
-
-                                  Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    padding: EdgeInsets.symmetric( vertical: 2.0 ),
-                                    child: Row(
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              primary: Colors.white,
-                                              elevation: 0
-                                          ) ,
-                                          onPressed: () async {
-                                            List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
-
-                                            if (  widget.emailMessage.important ) {
-                                              setState(() {
-                                                widget.emailMessage.important = false;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = false;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  removeLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() { });
-                                            }
-                                            else {
-                                              setState(() {
-                                                widget.emailMessage.important = true;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = true;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  addLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() {
-
-                                              });
-                                            }
-                                          },
-                                          child: Container(
-                                            color: Colors.white,
-                                            alignment: Alignment.center,
-                                            // padding: EdgeInsets.symmetric(vertical: 8),
-                                            child: Icon(
-                                              widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
-                                              color: Colors.redAccent,
-                                              size: 28,
-                                            ),
-                                          ),
-                                        ),
-                                        Text("Mark as Important")
-                                      ],
-                                    ),
-                                  ),
-
-                                  Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    padding: EdgeInsets.symmetric( vertical: 2.0 ),
-                                    child: Row(
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              primary: Colors.white,
-                                              elevation: 0
-                                          ) ,
-                                          onPressed: () async {
-                                            List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
-
-                                            if (  widget.emailMessage.important ) {
-                                              setState(() {
-                                                widget.emailMessage.important = false;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = false;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  removeLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() { });
-                                            }
-                                            else {
-                                              setState(() {
-                                                widget.emailMessage.important = true;
-                                              });
-
-                                              // now inserting new data to previous cached data
-                                              for( var msg in tempList ) {
-                                                if( msg['msgId'] == widget.emailMessage.msgId ) {
-                                                  msg['important'] = true;
-                                                  break;
-                                                }
-                                              }
-
-                                              hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
-
-
-                                              // modifying the messages label to remove UNREAD Label from the message
-                                              gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                                                  addLabelIds: [
-                                                    "IMPORTANT"
-                                                  ]
-                                              );
-
-                                              widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-
-                                              setState(() {
-
-                                              });
-                                            }
-                                          },
-                                          child: Container(
-                                            color: Colors.white,
-                                            alignment: Alignment.center,
-                                            // padding: EdgeInsets.symmetric(vertical: 8),
-                                            child: Icon(
-                                              widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
-                                              color: Colors.redAccent,
-                                              size: 28,
-                                            ),
-                                          ),
-                                        ),
-                                        Text("Mark as Important")
-                                      ],
-                                    ),
-                                  ),
-
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  )
-                )
+                builder: (context) => HomeScreenBottomDialog(topPadding: topPadding,),
             ).then((val) => setState( () => tileIsSelected = false ) );
+
+            // Dialog(
+            //     insetPadding: EdgeInsets.zero,
+            //     alignment: Alignment.bottomCenter,
+            //     backgroundColor: Colors.transparent,
+            //     elevation: 0,
+            //
+            //     child: SizedBox(
+            //         height: MediaQuery.of(context).size.height,
+            //         width: MediaQuery.of(context).size.width,
+            //         child: SingleChildScrollView(
+            //           controller: scrollController,
+            //           child: Column(
+            //             children: [
+            //               GestureDetector(
+            //                 onTap: ( ) => Navigator.of(context).pop(),
+            //                 child: Container(
+            //                   height: MediaQuery.of(context).size.height * 0.6,
+            //                   color: Colors.transparent,
+            //                 ),
+            //               ),
+            //               Container(
+            //                 height: MediaQuery.of(context).size.height - topPadding,
+            //                 decoration: BoxDecoration(
+            //                   borderRadius: BorderRadius.vertical(
+            //                     top: bottomDialogBorderRadius,
+            //                   ),
+            //                   color: Colors.white,
+            //                 ),
+            //                 child: Container(
+            //                   margin: const EdgeInsets.only(top: 10.0),
+            //                   child: Column(
+            //                     mainAxisSize: MainAxisSize.min,
+            //                     children: [
+            //                       Container(
+            //                         width: MediaQuery.of(context).size.width,
+            //                         padding: EdgeInsets.symmetric( vertical: 2.0 ),
+            //                         child: Row(
+            //                           crossAxisAlignment: CrossAxisAlignment.center,
+            //                           children: [
+            //                             ElevatedButton(
+            //                               style: ElevatedButton.styleFrom(
+            //                                   primary: Colors.white,
+            //                                   elevation: 0
+            //                               ) ,
+            //                               onPressed: () async {
+            //                                 List<dynamic> tempList = await hiveService.getBoxes( " is:starred CachedMessages" + widget.username );
+            //
+            //                                 if (  widget.emailMessage.starred ) {
+            //                                   setState(() {
+            //                                     widget.emailMessage.starred = false;
+            //
+            //                                     // now inserting new data to previous cached data
+            //                                     for( var msg in tempList ) {
+            //                                       if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                         msg['starred'] = false;
+            //                                         break;
+            //                                       }
+            //                                     }
+            //
+            //                                     hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+            //
+            //                                     // modifying the messages label to remove UNREAD Label from the message
+            //                                     gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                         removeLabelIds: [
+            //                                           "STARRED"
+            //                                         ]
+            //                                     );
+            //
+            //                                     widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId );
+            //                                   });
+            //                                 }
+            //                                 else {
+            //                                   setState(() {
+            //                                     widget.emailMessage.starred = true;
+            //                                     // now inserting new data to previous cached data
+            //                                     for( var msg in tempList ) {
+            //                                       if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                         msg['starred'] = true;
+            //                                         break;
+            //                                       }
+            //                                     }
+            //
+            //                                     hiveService.addBoxes( tempList, " is:starred CachedMessages" + widget.username );
+            //                                     // modifying the messages label to remove UNREAD Label from the message
+            //                                     gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                         addLabelIds: [
+            //                                           "STARRED"
+            //                                         ]
+            //                                     );
+            //
+            //                                     widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //                                   });
+            //                                 }
+            //                               },
+            //                               child: Container(
+            //                                 color: Colors.white,
+            //                                 alignment: Alignment.center,
+            //                                 // padding: EdgeInsets.symmetric(vertical: 8),
+            //                                 child: Icon(
+            //                                   widget.emailMessage.starred ? Icons.star : Icons.star_border,
+            //                                   color: widget.emailMessage.starred ? Colors.amber : Colors.grey,
+            //                                   size: 28,
+            //                                 ),
+            //                               ),
+            //                             ),
+            //                             Text("Mark as Starred")
+            //                           ],
+            //                         ),
+            //                       ),
+            //                       Container(
+            //                         width: MediaQuery.of(context).size.width,
+            //                         padding: EdgeInsets.symmetric( vertical: 2.0 ),
+            //                         child: Row(
+            //                           children: [
+            //                             ElevatedButton(
+            //                               style: ElevatedButton.styleFrom(
+            //                                   primary: Colors.white,
+            //                                   elevation: 0
+            //                               ) ,
+            //                               onPressed: () async {
+            //                                 List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+            //
+            //                                 if (  widget.emailMessage.important ) {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = false;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = false;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       removeLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() { });
+            //                                 }
+            //                                 else {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = true;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = true;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       addLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() {
+            //
+            //                                   });
+            //                                 }
+            //                               },
+            //                               child: Container(
+            //                                 color: Colors.white,
+            //                                 alignment: Alignment.center,
+            //                                 // padding: EdgeInsets.symmetric(vertical: 8),
+            //                                 child: Icon(
+            //                                   widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+            //                                   color: Colors.redAccent,
+            //                                   size: 28,
+            //                                 ),
+            //                               ),
+            //                             ),
+            //                             Text("Mark as Important")
+            //                           ],
+            //                         ),
+            //                       ),
+            //
+            //                       // temp
+            //                       Container(
+            //                         width: MediaQuery.of(context).size.width,
+            //                         padding: EdgeInsets.symmetric( vertical: 2.0 ),
+            //                         child: Row(
+            //                           children: [
+            //                             ElevatedButton(
+            //                               style: ElevatedButton.styleFrom(
+            //                                   primary: Colors.white,
+            //                                   elevation: 0
+            //                               ) ,
+            //                               onPressed: () async {
+            //                                 List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+            //
+            //                                 if (  widget.emailMessage.important ) {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = false;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = false;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       removeLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() { });
+            //                                 }
+            //                                 else {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = true;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = true;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       addLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() {
+            //
+            //                                   });
+            //                                 }
+            //                               },
+            //                               child: Container(
+            //                                 color: Colors.white,
+            //                                 alignment: Alignment.center,
+            //                                 // padding: EdgeInsets.symmetric(vertical: 8),
+            //                                 child: Icon(
+            //                                   widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+            //                                   color: Colors.redAccent,
+            //                                   size: 28,
+            //                                 ),
+            //                               ),
+            //                             ),
+            //                             Text("Mark as Important")
+            //                           ],
+            //                         ),
+            //                       ),
+            //                       Container(
+            //                         width: MediaQuery.of(context).size.width,
+            //                         padding: EdgeInsets.symmetric( vertical: 2.0 ),
+            //                         child: Row(
+            //                           children: [
+            //                             ElevatedButton(
+            //                               style: ElevatedButton.styleFrom(
+            //                                   primary: Colors.white,
+            //                                   elevation: 0
+            //                               ) ,
+            //                               onPressed: () async {
+            //                                 List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+            //
+            //                                 if (  widget.emailMessage.important ) {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = false;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = false;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       removeLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() { });
+            //                                 }
+            //                                 else {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = true;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = true;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       addLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() {
+            //
+            //                                   });
+            //                                 }
+            //                               },
+            //                               child: Container(
+            //                                 color: Colors.white,
+            //                                 alignment: Alignment.center,
+            //                                 // padding: EdgeInsets.symmetric(vertical: 8),
+            //                                 child: Icon(
+            //                                   widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+            //                                   color: Colors.redAccent,
+            //                                   size: 28,
+            //                                 ),
+            //                               ),
+            //                             ),
+            //                             Text("Mark as Important")
+            //                           ],
+            //                         ),
+            //                       ),
+            //                       Container(
+            //                         width: MediaQuery.of(context).size.width,
+            //                         padding: EdgeInsets.symmetric( vertical: 2.0 ),
+            //                         child: Row(
+            //                           children: [
+            //                             ElevatedButton(
+            //                               style: ElevatedButton.styleFrom(
+            //                                   primary: Colors.white,
+            //                                   elevation: 0
+            //                               ) ,
+            //                               onPressed: () async {
+            //                                 List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+            //
+            //                                 if (  widget.emailMessage.important ) {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = false;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = false;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       removeLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() { });
+            //                                 }
+            //                                 else {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = true;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = true;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       addLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() {
+            //
+            //                                   });
+            //                                 }
+            //                               },
+            //                               child: Container(
+            //                                 color: Colors.white,
+            //                                 alignment: Alignment.center,
+            //                                 // padding: EdgeInsets.symmetric(vertical: 8),
+            //                                 child: Icon(
+            //                                   widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+            //                                   color: Colors.redAccent,
+            //                                   size: 28,
+            //                                 ),
+            //                               ),
+            //                             ),
+            //                             Text("Mark as Important")
+            //                           ],
+            //                         ),
+            //                       ),
+            //                       Container(
+            //                         width: MediaQuery.of(context).size.width,
+            //                         padding: EdgeInsets.symmetric( vertical: 2.0 ),
+            //                         child: Row(
+            //                           children: [
+            //                             ElevatedButton(
+            //                               style: ElevatedButton.styleFrom(
+            //                                   primary: Colors.white,
+            //                                   elevation: 0
+            //                               ) ,
+            //                               onPressed: () async {
+            //                                 List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+            //
+            //                                 if (  widget.emailMessage.important ) {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = false;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = false;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       removeLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() { });
+            //                                 }
+            //                                 else {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = true;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = true;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       addLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() {
+            //
+            //                                   });
+            //                                 }
+            //                               },
+            //                               child: Container(
+            //                                 color: Colors.white,
+            //                                 alignment: Alignment.center,
+            //                                 // padding: EdgeInsets.symmetric(vertical: 8),
+            //                                 child: Icon(
+            //                                   widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+            //                                   color: Colors.redAccent,
+            //                                   size: 28,
+            //                                 ),
+            //                               ),
+            //                             ),
+            //                             Text("Mark as Important")
+            //                           ],
+            //                         ),
+            //                       ),
+            //                       Container(
+            //                         width: MediaQuery.of(context).size.width,
+            //                         padding: EdgeInsets.symmetric( vertical: 2.0 ),
+            //                         child: Row(
+            //                           children: [
+            //                             ElevatedButton(
+            //                               style: ElevatedButton.styleFrom(
+            //                                   primary: Colors.white,
+            //                                   elevation: 0
+            //                               ) ,
+            //                               onPressed: () async {
+            //                                 List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+            //
+            //                                 if (  widget.emailMessage.important ) {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = false;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = false;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       removeLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() { });
+            //                                 }
+            //                                 else {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = true;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = true;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       addLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() {
+            //
+            //                                   });
+            //                                 }
+            //                               },
+            //                               child: Container(
+            //                                 color: Colors.white,
+            //                                 alignment: Alignment.center,
+            //                                 // padding: EdgeInsets.symmetric(vertical: 8),
+            //                                 child: Icon(
+            //                                   widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+            //                                   color: Colors.redAccent,
+            //                                   size: 28,
+            //                                 ),
+            //                               ),
+            //                             ),
+            //                             Text("Mark as Important")
+            //                           ],
+            //                         ),
+            //                       ),
+            //                       Container(
+            //                         width: MediaQuery.of(context).size.width,
+            //                         padding: EdgeInsets.symmetric( vertical: 2.0 ),
+            //                         child: Row(
+            //                           children: [
+            //                             ElevatedButton(
+            //                               style: ElevatedButton.styleFrom(
+            //                                   primary: Colors.white,
+            //                                   elevation: 0
+            //                               ) ,
+            //                               onPressed: () async {
+            //                                 List<dynamic> tempList = await hiveService.getBoxes( " is:important CachedMessages" + widget.username );
+            //
+            //                                 if (  widget.emailMessage.important ) {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = false;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = false;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       removeLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() { });
+            //                                 }
+            //                                 else {
+            //                                   setState(() {
+            //                                     widget.emailMessage.important = true;
+            //                                   });
+            //
+            //                                   // now inserting new data to previous cached data
+            //                                   for( var msg in tempList ) {
+            //                                     if( msg['msgId'] == widget.emailMessage.msgId ) {
+            //                                       msg['important'] = true;
+            //                                       break;
+            //                                     }
+            //                                   }
+            //
+            //                                   hiveService.addBoxes( tempList, " is:important CachedMessages" + widget.username );
+            //
+            //
+            //                                   // modifying the messages label to remove UNREAD Label from the message
+            //                                   gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+            //                                       addLabelIds: [
+            //                                         "IMPORTANT"
+            //                                       ]
+            //                                   );
+            //
+            //                                   widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+            //
+            //                                   setState(() {
+            //
+            //                                   });
+            //                                 }
+            //                               },
+            //                               child: Container(
+            //                                 color: Colors.white,
+            //                                 alignment: Alignment.center,
+            //                                 // padding: EdgeInsets.symmetric(vertical: 8),
+            //                                 child: Icon(
+            //                                   widget.emailMessage.important ? Icons.label_important : Icons.label_important_outline,
+            //                                   color: Colors.redAccent,
+            //                                   size: 28,
+            //                                 ),
+            //                               ),
+            //                             ),
+            //                             Text("Mark as Important")
+            //                           ],
+            //                         ),
+            //                       ),
+            //                     ],
+            //                   ),
+            //                 ),
+            //               ),
+            //             ],
+            //           ),
+            //         )
+            //     )
+            // )
           },
           child: Container(
             decoration: BoxDecoration(

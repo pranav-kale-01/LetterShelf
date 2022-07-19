@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 class HomeScreenBottomDialog extends StatefulWidget {
   final double topPadding;
@@ -11,7 +12,7 @@ class HomeScreenBottomDialog extends StatefulWidget {
 }
 
 class _HomeScreenBottomDialogState extends State<HomeScreenBottomDialog> {
-  ScrollController scrollController = ScrollController();
+  ScrollController scrollController = ScrollController(initialScrollOffset: 1);
   ScrollController innerScrollController = ScrollController();
   Radius bottomDialogBorderRadius = const Radius.circular(15);
   bool positionNotZero = true;
@@ -21,56 +22,96 @@ class _HomeScreenBottomDialogState extends State<HomeScreenBottomDialog> {
   ScrollPhysics? innerScrollPhysics = const NeverScrollableScrollPhysics();
   ScrollPosition? scrollPosition;
 
+  bool isAnimating = false;
+
   @override
   Widget build(BuildContext context) {
-    // adding listener to scroll Controller
-    scrollController.addListener(() {
-      scrollPosition ??= scrollController.positions.toList()[0];
-      screenHeight ??= MediaQuery.of(context).size.height;
+    // if( scrollController.hasClients ) {
+      // adding listener to scroll Controller
+      scrollController.addListener(() async {
+        // breaking the operation if the the scroll view is currently animating
+        if( isAnimating ) {
+          return;
+        }
 
-      // if the bottom sheet covers up the whole screen, then we will replace the circular border with sharp borders
-      if( scrollController.position.pixels == scrollController.position.maxScrollExtent && ( screenHeight! * 0.6 ).round() == scrollPosition!.maxScrollExtent.round() ) {
-        positionNotZero = true;
-        innerScrollController.jumpTo( 1.0 );
+        scrollPosition ??= scrollController.positions.toList()[0];
+        screenHeight ??= MediaQuery.of(context).size.height;
 
-        isNeverScrollableScrollPhysics = true;
-        innerScrollPhysics = const ClampingScrollPhysics();
+        // checking scroll direction
+        if( scrollController.position.userScrollDirection == ScrollDirection.forward) {
+          // if the bottom sheet is at the lowest position and user scrolls down, then the bottom sheet will animate down and then close
+          if( scrollController.position.pixels == (scrollPosition!.maxScrollExtent.round() - screenHeight! * 0.6).round()  ) {
+            try {
+              isAnimating = true;
 
-        setState(() {
-          bottomDialogBorderRadius = Radius.zero;
-        });
-      }
-      else if(positionNotZero){
-        positionNotZero = false;
+              SchedulerBinding.instance.addPostFrameCallback((_) {
+                Navigator.of(context).pop();
+              });
+            }
+            catch( e ) {
+              debugPrint( e.toString());
+            }
+            return;
+          }
+          // else if( scrollController.position.pixels == 0.0 ) {
+          // if the bottom sheet is in fullscreen mode, then animating it to the bottom sheet
 
-        isNeverScrollableScrollPhysics = false;
-        innerScrollPhysics = const NeverScrollableScrollPhysics();
+          // }
+        }
+        else if(  scrollController.position.userScrollDirection == ScrollDirection.reverse  ) {
+          // if the bottom sheet is at the the bottom and user scrolls upwards then, animating up till the bottom sheet covers the whole page
+          isAnimating = true;
 
-        // scrollController.jumpTo(300.0);
-        // scrollController.animateTo(300.0, duration: const Duration(milliseconds: 300), curve: Curves.easeInOutExpo);
+          await scrollController.animateTo(
+            screenHeight! * 0.6,
+            curve: Curves.linear,
+            duration: const Duration( milliseconds: 250 ),
+          ).then( (_) {
+            isAnimating = false;
+          });
+        }
 
-        setState(() {
-          bottomDialogBorderRadius = const Radius.circular(15);
-        });
-      }
-    });
+        // if the bottom sheet covers up the whole screen, then we will replace the circular border with sharp borders
+        if( scrollController.position.pixels == scrollController.position.maxScrollExtent && ( screenHeight! * 0.6 ).round() == scrollPosition!.maxScrollExtent.round() ) {
 
-    // scroll Controller for inner SingleChildScrollView
-    innerScrollController.addListener(() {
-      scrollPosition ??= scrollController.positions.toList()[0];
-      screenHeight ??= MediaQuery.of(context).size.height;
+          positionNotZero = true;
+          innerScrollController.jumpTo( 1.0 );
 
-      if( innerScrollController.offset == 0.0 ) {
-        setState(() {
+          isNeverScrollableScrollPhysics = true;
+          innerScrollPhysics = const ClampingScrollPhysics();
 
-          scrollController.animateTo(
-            scrollPosition!.maxScrollExtent.round() - screenHeight! * 0.6,
-            duration: const Duration( milliseconds: 300),
-            curve: Curves.easeIn,
+          setState(() {
+            bottomDialogBorderRadius = Radius.zero;
+          });
+        }
+        else if(positionNotZero){
+          positionNotZero = false;
+
+          isNeverScrollableScrollPhysics = false;
+          innerScrollPhysics = const NeverScrollableScrollPhysics();
+
+          setState(() {
+            bottomDialogBorderRadius = const Radius.circular(15);
+          });
+        }
+      });
+    // }
+
+    if( innerScrollController.hasClients ) {
+      // scroll Controller for inner SingleChildScrollView
+      innerScrollController.addListener(() async {
+        scrollPosition ??= scrollController.positions.toList()[0];
+        screenHeight ??= MediaQuery.of(context).size.height;
+
+        if( innerScrollController.offset == 0.0 ) {
+          await scrollController.animateTo(
+            (scrollPosition!.maxScrollExtent.round() - screenHeight! * 0.6) + 1,
+            duration: const Duration( milliseconds: 250),
+            curve: Curves.linear,
           );
-        });
-      }
-    });
+        }
+      });
+    }
 
     return Dialog(
         insetPadding: EdgeInsets.zero,
@@ -83,6 +124,7 @@ class _HomeScreenBottomDialogState extends State<HomeScreenBottomDialog> {
             width: MediaQuery.of(context).size.width,
             child: SingleChildScrollView(
               controller: scrollController,
+
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [

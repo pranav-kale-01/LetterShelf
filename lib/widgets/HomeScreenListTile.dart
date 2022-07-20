@@ -165,8 +165,8 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
             await hiveService.addBoxes(  response.bodyBytes, widget.emailMessage.from + "CachedImage");
             Utils.firstScreenLoad(widget.emailMessage.from + "CachedImage", true);
 
-            image = Image.memory(
-              response.bodyBytes,
+            image = Image.network(
+              url,
               fit: BoxFit.cover,
             );
 
@@ -203,7 +203,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
     );
 
     return SizedBox(
-      height: 150,
+      height: 130,
       child: Container(
         margin: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
         decoration: BoxDecoration(
@@ -327,7 +327,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                                   style: TextStyle(
                                     color: widget.listKey != "[<'READ'>]" && widget.emailMessage.unread ? widget.headerColor : Colors.grey,
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 24,
+                                    fontSize: 20,
                                   ),
                                 ),
                               ),

@@ -8,7 +8,7 @@ class HomeScreenDrawer extends StatefulWidget {
   final Function(int) getBackgroundColor;
   Widget displayScreen;
 
-  HomeScreenDrawer({Key? key, required this.displayScreen, required this.displayOptions, required this.notifyParent , required this.getBackgroundColor}) : super(key: key);
+  HomeScreenDrawer({Key? key, required this.displayScreen, required this.displayOptions, required this.notifyParent , required this.getBackgroundColor, }) : super(key: key);
 
   @override
   _HomeScreenDrawerState createState() => _HomeScreenDrawerState();
@@ -17,13 +17,13 @@ class HomeScreenDrawer extends StatefulWidget {
 class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width > 400 ? MediaQuery.of(context).size.width : 230 ,
+    return SizedBox(
+      width: MediaQuery.of(context).size.width < 300 ? 250 : MediaQuery.of(context).size.width * 0.7 ,
       child: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
           children: [
-            SizedBox(
+            const SizedBox(
               height: 70,
               child: DrawerHeader(
                   child: Text(
@@ -36,7 +36,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
               ),
             ),
             // Newsletters Header
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(left: 8,top: 10, bottom: 10),
               child: Text(
                 "Newsletters",
@@ -56,7 +56,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 backgroundColor: widget.getBackgroundColor(0),
                 title: "Unread",
                 iconLabel: Icons.mark_email_unread,
@@ -70,30 +70,32 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 backgroundColor: widget.getBackgroundColor(1),
                 title: "Read",
                 iconLabel: Icons.mark_email_unread,
                 iconColor: Colors.black45,
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                widget.notifyParent( 2 );
-                // widget.selectedDrawer = 2;
 
-                setState(() { });
-              },
-              child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
-                backgroundColor: widget.getBackgroundColor(2),
-                title: "Saved",
-                iconLabel: Icons.download_sharp,
-              ),
-            ),
+            // TODO: enable this option when implementing local saving of newsletters
+            // GestureDetector(
+            //   onTap: () {
+            //     widget.notifyParent( 2 );
+            //     // widget.selectedDrawer = 2;
+            //
+            //     setState(() { });
+            //   },
+            //   child: HomeScreenDrawerTile(
+            //     foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
+            //     backgroundColor: widget.getBackgroundColor(2),
+            //     title: "Saved",
+            //     iconLabel: Icons.download_sharp,
+            //   ),
+            // ),
 
             // All Mails Header
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(left: 8,top: 10),
               child: Text(
                 "All Mails",
@@ -113,7 +115,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 backgroundColor: widget.getBackgroundColor( 3 ),
                 iconLabel: Icons.inbox,
                 title: "Inbox",
@@ -128,7 +130,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Important",
                 backgroundColor: widget.getBackgroundColor( 4 ),
                 iconLabel: Icons.label_important_outline_rounded,
@@ -143,7 +145,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Unread Mails",
                 backgroundColor: widget.getBackgroundColor( 5 ),
                 iconLabel: Icons.mark_email_unread_outlined,
@@ -152,7 +154,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
             ),
 
             // All Labels Header
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(left: 8,top: 10),
               child: Text(
                 "All Labels",
@@ -172,7 +174,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Starred",
                 backgroundColor: widget.getBackgroundColor( 6 ),
                 iconLabel: Icons.star_border_purple500_outlined,
@@ -187,7 +189,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Snoozed",
                 backgroundColor: widget.getBackgroundColor( 7 ),
                 iconLabel: Icons.snooze_rounded,
@@ -202,7 +204,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Important",
                 backgroundColor: widget.getBackgroundColor( 8 ),
                 iconLabel: Icons.label_important_outline_sharp,
@@ -217,7 +219,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Sent",
                 backgroundColor: widget.getBackgroundColor( 8 ),
                 iconLabel: Icons.send_outlined,
@@ -232,7 +234,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Scheduled",
                 backgroundColor: widget.getBackgroundColor( 9 ),
                 iconLabel: Icons.cancel_schedule_send_outlined,
@@ -247,7 +249,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Outbox",
                 backgroundColor: widget.getBackgroundColor( 10 ),
                 iconLabel: Icons.outbox,
@@ -262,7 +264,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Drafts",
                 backgroundColor: widget.getBackgroundColor( 11 ),
                 iconLabel: Icons.drafts_outlined,
@@ -270,7 +272,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
             ),
 
             // Other  Header
-            Padding(
+            const Padding(
               padding: EdgeInsets.only(left: 8,top: 10),
               child: Text(
                 "Other",
@@ -290,7 +292,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "all Mails",
                 backgroundColor: widget.getBackgroundColor( 12 ),
                 iconLabel: Icons.all_inbox_rounded,
@@ -305,7 +307,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Spam",
                 backgroundColor: widget.getBackgroundColor( 13 ),
                 iconLabel: Icons.warning_amber_outlined,
@@ -320,7 +322,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
                 setState(() { });
               },
               child: HomeScreenDrawerTile(
-                foregroundColor: Color.fromRGBO(238, 26, 81, 1.0),
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
                 title: "Bin",
                 backgroundColor: widget.getBackgroundColor( 14 ),
                 iconLabel: Icons.delete_outline,

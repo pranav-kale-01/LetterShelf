@@ -18,7 +18,6 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
 
   // searchbar Properties
   late Icon menuIcon;
-  late EdgeInsets searchBarPadding;
   late double searchBarElevation;
 
   // animation properties
@@ -31,7 +30,6 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
   void initState() {
     super.initState();
 
-    searchBarPadding = const EdgeInsets.symmetric(horizontal: 0.0);
     searchBarElevation = 3.0;
     // animatedMenuButton = AnimatedMenuButton(menuIcon: menuIcon, buttonOnPressed: menuIconBehaviour );
 
@@ -43,7 +41,6 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
       // behaviour for back button
       setState(() {
         searchBarElevation = 3;
-        searchBarPadding = const EdgeInsets.symmetric(horizontal: 3.0, );
         menuIcon = const Icon( Icons.menu , color: Colors.black,);
 
         FocusScope.of(context).requestFocus(FocusNode());
@@ -76,8 +73,11 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
       child: AnimatedPadding(
         duration: const Duration( milliseconds: 600),
         curve: Curves.easeOutExpo,
-        padding: searchBarPadding,
+        padding: EdgeInsets.zero,
         child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10)
+          ),
           elevation: searchBarElevation,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -100,7 +100,6 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
 
                         // adding back elevation to the search bar
                         searchBarElevation = 3;
-                        searchBarPadding = const EdgeInsets.symmetric(horizontal: 5.0, );
 
                         // changing the menu icon
                         menuIcon = const Icon( Icons.menu, color: Colors.black, );
@@ -145,7 +144,6 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
 
                         // adding back elevation to the search bar
                         searchBarElevation = 3;
-                        searchBarPadding = const EdgeInsets.symmetric(horizontal: 5.0, );
 
                         // changing the menu icon
                         menuIcon = const Icon( Icons.menu, color: Colors.black, );
@@ -169,7 +167,6 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
                         }
 
                         searchBarElevation = 0;
-                        searchBarPadding = EdgeInsets.zero;
 
                         menuIcon = const Icon( Icons.arrow_downward, color: Colors.black, );
                         widget.showSearchRecommendation();
@@ -178,9 +175,6 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
                     focusNode: searchBarFocusNode,
                     decoration: const InputDecoration(
                       hintText: "Search in Newsletters",
-                      hintStyle: TextStyle(
-                        fontSize: 18,
-                      ),
                       border: InputBorder.none,
                     ),
                   ),

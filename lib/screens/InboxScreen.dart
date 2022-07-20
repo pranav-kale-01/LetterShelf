@@ -12,6 +12,9 @@ import '../widgets/mail_display_list.dart';
 import '../widgets/saved_screen_list.dart';
 
 class InboxScreen extends StatefulWidget {
+  static const stateOpen = 0;
+  static const stateClosed = 1;
+
   final gmail.GmailApi gmailApi;
   bool queryStringBuilt = false;
   final double topPadding;
@@ -29,9 +32,9 @@ class InboxScreen extends StatefulWidget {
 }
 
 class _InboxScreenState extends State<InboxScreen>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
 
   late String queryString;
@@ -39,15 +42,28 @@ class _InboxScreenState extends State<InboxScreen>
   late AppBar _appBar;
   late Widget currentDisplayScreen;
   late Widget previousScreen;
+
   int selectedDrawer=0;
   Widget? mainScreen;
 
   bool firstTimeSearchTriggered = false;
 
+  late AnimationController _controller;
+  late Animation _animation;
 
   @override
   void initState() {
     super.initState();
+
+    // animation for opening sidebar
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
+
+    _animation = Tween<double>(begin: 0, end: 20.0)
+        .chain(CurveTween(curve: Curves.ease))
+        .animate(_controller)
+      ..addListener(() {
+        setState(() {});
+    });
 
     homeScreenTabsList = [
       HomeScreenList(
@@ -194,9 +210,7 @@ class _InboxScreenState extends State<InboxScreen>
   }
 
   void showRecommendationScreen() {
-    if( mainScreen == null ) {
-      mainScreen = currentDisplayScreen;
-    }
+    mainScreen ??= currentDisplayScreen;
 
     previousScreen = mainScreen!;
 
@@ -230,7 +244,7 @@ class _InboxScreenState extends State<InboxScreen>
 
   Color getBackgroundColor(int index) {
     if( selectedDrawer == index ) {
-      return Color.fromRGBO(255, 70, 120, 0.4);
+      return const Color.fromRGBO(255, 70, 120, 0.4);
     }
 
     return Colors.white;
@@ -246,7 +260,7 @@ class _InboxScreenState extends State<InboxScreen>
         color: Colors.black,
       ),
       actions: [
-        HomeScreenSearchBar(scaffoldKey: _scaffoldKey, triggerSearchScreen: toggleSearchScreen, showSearchRecommendation: showRecommendationScreen, ),
+        HomeScreenSearchBar(scaffoldKey: _scaffoldKey, triggerSearchScreen: toggleSearchScreen, showSearchRecommendation: showRecommendationScreen,  ),
       ],
     );
 
@@ -254,7 +268,20 @@ class _InboxScreenState extends State<InboxScreen>
       length: 2,
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: HomeScreenDrawer( notifyParent: setNewScreen, displayScreen: currentDisplayScreen, displayOptions: homeScreenTabsList, getBackgroundColor: getBackgroundColor, ),
+        onDrawerChanged: (value) {
+          if( value ) {
+            _controller.forward();
+          }
+          else {
+            _controller.reverse();
+          }
+        },
+        drawer: HomeScreenDrawer(
+          notifyParent: setNewScreen,
+          displayScreen: currentDisplayScreen,
+          displayOptions: homeScreenTabsList,
+          getBackgroundColor: getBackgroundColor,
+        ),
         appBar: _appBar,
         body: SizedBox(
           height: MediaQuery.of(context).size.height - widget.topPadding - widget.bottomPadding,
@@ -262,7 +289,10 @@ class _InboxScreenState extends State<InboxScreen>
             children: [
               SizedBox(
                 height: MediaQuery.of(context).size.height - _appBar.preferredSize.height - widget.topPadding - widget.bottomPadding - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom - 10,
-                child: currentDisplayScreen,
+                child: Transform.translate(
+                    offset: Offset( _animation.value, 0.0),
+                    child: currentDisplayScreen
+                ),
               ),
             ],
           ),

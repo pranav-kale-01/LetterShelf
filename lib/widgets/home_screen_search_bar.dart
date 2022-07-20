@@ -31,7 +31,7 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
   void initState() {
     super.initState();
 
-    searchBarPadding = const EdgeInsets.symmetric(horizontal: 5.0);
+    searchBarPadding = const EdgeInsets.symmetric(horizontal: 0.0);
     searchBarElevation = 3.0;
     // animatedMenuButton = AnimatedMenuButton(menuIcon: menuIcon, buttonOnPressed: menuIconBehaviour );
 
@@ -43,7 +43,7 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
       // behaviour for back button
       setState(() {
         searchBarElevation = 3;
-        searchBarPadding = const EdgeInsets.symmetric(horizontal: 5.0, );
+        searchBarPadding = const EdgeInsets.symmetric(horizontal: 3.0, );
         menuIcon = const Icon( Icons.menu , color: Colors.black,);
 
         FocusScope.of(context).requestFocus(FocusNode());

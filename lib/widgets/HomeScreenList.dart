@@ -381,67 +381,73 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
           await _getEmailMessages( true );
         });
       },
-      child: CustomScrollView(
-        physics: messagesLength < 7 ?  AlwaysScrollableScrollPhysics( ) : _physics ,
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        controller: controller,
-        center: centerKey,
-        slivers: [
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                return HomeScreenListTile(
-                  listKey: widget.key.toString(),
-                  gmailApi: widget.gmailApi,
-                  emailMessage: top[index],
-                  addToListMethod: widget.addToListMethod,
-                  removeFromListMethod: removeElement,
-                  username: username,
-                );
-              },
-              childCount: top.length,
+      child: NotificationListener<OverscrollIndicatorNotification>(
+        onNotification: (OverscrollIndicatorNotification overScroll) {
+          overScroll.disallowIndicator();
+          return false;
+        },
+        child: CustomScrollView(
+          physics: messagesLength < 7 ?  AlwaysScrollableScrollPhysics( ) : _physics ,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          controller: controller,
+          center: centerKey,
+          slivers: [
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                  return HomeScreenListTile(
+                    listKey: widget.key.toString(),
+                    gmailApi: widget.gmailApi,
+                    emailMessage: top[index],
+                    addToListMethod: widget.addToListMethod,
+                    removeFromListMethod: removeElement,
+                    username: username,
+                  );
+                },
+                childCount: top.length,
+              ),
             ),
-          ),
-          visibleMessages.values.isNotEmpty ? SliverList(
-            // Key parameter makes this list grow bottom
-            key: centerKey,
-            delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                return HomeScreenListTile(
-                  listKey: widget.key.toString() ,
-                  gmailApi: widget.gmailApi,
-                  emailMessage: visibleMessages.values.toList()[index],
-                  addToListMethod: widget.addToListMethod,
-                  removeFromListMethod: removeElement,
-                  username: username
-                );
-              },
-              childCount: messagesLength,
-            ),
-          ) : widget.loaded == false ? SliverToBoxAdapter(
+            visibleMessages.values.isNotEmpty ? SliverList(
+              // Key parameter makes this list grow bottom
+              key: centerKey,
+              delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                  return HomeScreenListTile(
+                    listKey: widget.key.toString() ,
+                    gmailApi: widget.gmailApi,
+                    emailMessage: visibleMessages.values.toList()[index],
+                    addToListMethod: widget.addToListMethod,
+                    removeFromListMethod: removeElement,
+                    username: username
+                  );
+                },
+                childCount: messagesLength,
+              ),
+            ) : widget.loaded == false ? SliverToBoxAdapter(
+                key: centerKey,
+                child: Container(
+                    margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
+                    alignment: Alignment.center,
+                    child: const Text("no current messages"),
+                ),
+            ) : SliverToBoxAdapter(
               key: centerKey,
               child: Container(
-                  margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
-                  alignment: Alignment.center,
-                  child: const Text("no current messages"),
+                margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
+                alignment: Alignment.center,
+                child: const CircularProgressIndicator(),
               ),
-          ) : SliverToBoxAdapter(
-            key: centerKey,
-            child: Container(
-              margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
-              alignment: Alignment.center,
-              child: const CircularProgressIndicator(),
             ),
-          ),
-          loadingMore ? SliverToBoxAdapter(
-            child: Container(
-              alignment: Alignment.center,
-              width: MediaQuery.of(context).size.width,
-              height: 50,
-              child: CircularProgressIndicator.adaptive(),
-            ),
-          ) : const SliverToBoxAdapter(),
-        ],
+            loadingMore ? SliverToBoxAdapter(
+              child: Container(
+                alignment: Alignment.center,
+                width: MediaQuery.of(context).size.width,
+                height: 50,
+                child: CircularProgressIndicator.adaptive(),
+              ),
+            ) : const SliverToBoxAdapter(),
+          ],
+        ),
       ),
     );
   }

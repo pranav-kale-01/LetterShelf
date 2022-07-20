@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:hive/hive.dart';
 import 'package:letter_shelf/models/emailMessage.dart';
@@ -40,7 +41,16 @@ class HomeScreenListTile extends StatefulWidget {
 
 class _HomeScreenListTileState extends State<HomeScreenListTile> {
   final HiveServices hiveService = HiveServices( );
-  Storage storage = Storage();
+  final Widget selectedTile = const CircleAvatar(
+    backgroundColor: Colors.blueAccent,
+    radius: 32,
+    child: Icon(
+      Icons.check,
+      color: Colors.white,
+    ),
+  );
+
+  final Storage storage = Storage();
   Color backgroundColor = Colors.pinkAccent;
   String circleAvatarText = "";
   bool executeOnTap = true;
@@ -64,6 +74,9 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
 
   late bool stopImageLoading = false;
   late BuildContext ctx;
+
+  CircleAvatar? textAvatar;
+  Widget? imageAvatar;
 
   void loadMessage() {
     if (executeOnTap) {
@@ -152,10 +165,15 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
             await hiveService.addBoxes(  response.bodyBytes, widget.emailMessage.from + "CachedImage");
             Utils.firstScreenLoad(widget.emailMessage.from + "CachedImage", true);
 
-            setState(() => image = Image.network(
-              url,
+            image = Image.memory(
+              response.bodyBytes,
               fit: BoxFit.cover,
-            ));
+            );
+
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              setState(() { });
+            });
+
           }
           catch( e, stackTrace ) {
             debugPrint( e.toString() );
@@ -171,13 +189,34 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
   Widget build(BuildContext context) {
     ctx = context;
 
+    textAvatar ??= CircleAvatar(
+      backgroundColor: backgroundColor,
+      radius: 32,
+      child: Text(
+        circleAvatarText,
+        style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600
+        ),
+      ),
+    );
+
     return SizedBox(
       height: 150,
-      child: Card(
-        shape: RoundedRectangleBorder(
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
+        decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.grey,
+              offset: Offset(0.0, 1.0), //(x,y)
+              blurRadius: 6.0,
+            ),
+          ],
         ),
-        color: Colors.white,
         child: InkWell(
           onLongPress: () {
             setState(() {
@@ -249,25 +288,23 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.only(left: 4, right: 4, top: 15),
-                          child: image == null ? CircleAvatar(
+                          padding: const EdgeInsets.only(left: 8.0, right: 4, top: 18),
+                          child: tileIsSelected ? selectedTile : image == null ? textAvatar :
+                          CircleAvatar(
                             backgroundColor: backgroundColor,
                             radius: 32,
-                            child: Text(
-                                circleAvatarText,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600
-                                ),
-                            ),
-                          ) : SizedBox(
-                            width: 74,
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(50)
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: Colors.white,
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.grey,
+                                    offset: Offset(0.0, 1.0), //(x,y)
+                                    blurRadius: 6.0,
+                                  ),
+                                ],
                               ),
-                              elevation: 2,
                               child: ClipRRect(
                                   borderRadius: BorderRadius.circular(50),
                                   child: image

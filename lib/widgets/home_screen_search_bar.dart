@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 class HomeScreenSearchBar extends StatefulWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
   final Function(bool, String) triggerSearchScreen;
@@ -117,122 +118,145 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
       searchBarTextController.clear();
     }
 
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: AnimatedPadding(
-        duration: const Duration( milliseconds: 600),
-        curve: Curves.easeOutExpo,
-        padding: EdgeInsets.zero,
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10)
-          ),
-          elevation: _elevationAnimation.value,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // Search Bar
-              AnimatedRotation(
-                curve: Curves.easeOutExpo,
-                duration: const Duration( milliseconds: 600),
-                turns: turns,
-                child: GestureDetector(
-                  onTap: () {
-                    if( searchBarFocusNode.hasFocus || searchTriggered) {
-                        searchTriggered = false;
+    return WillPopScope(
+      onWillPop: () async {
+        rotate();
+        rotationAllowed = !rotationAllowed;
 
-                        // rotating the button and changing the flag to avoid repetition
-                        rotate();
-                        rotationAllowed = !rotationAllowed;
+        // adding back elevation to the search bar
+        // searchBarElevation = 3;
+        _elevationController.forward();
 
-                        // adding back elevation to the search bar
-                        // searchBarElevation = 3;
-                        _elevationController.forward();
+        // changing the menu icon
+        menuIcon = const Icon( Icons.menu, color: Colors.black, );
 
-                        // changing the menu icon
-                        menuIcon = const Icon( Icons.menu, color: Colors.black, );
+        // removing focus from the text field and clearing previous data
+        FocusScope.of(context).requestFocus(FocusNode());
+        searchBarTextController.clear();
 
-                        // removing focus from the text field and clearing previous data
-                        FocusScope.of(context).requestFocus(FocusNode());
-                        searchBarTextController.clear();
+        // closing the searchScreen
+        widget.triggerSearchScreen(false, '');
 
-                        // closing the searchScreen
-                        widget.triggerSearchScreen(false, '' );
-
-                        setState(() { });
-                      }
-                      else {
-                        // behaviour for menu button
-                        widget.scaffoldKey.currentState!.openDrawer();
-                      }
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 3),
-                    child: IconButton(
-                      icon: menuIcon,
-                      onPressed: null,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  margin: const EdgeInsets.only( left: 5 ),
-                  child: TextField(
-                    controller: searchBarTextController,
-                    onSubmitted: (value) {
-                      if( searchBarTextController.text.isNotEmpty ) {
-                        searchBarFocusNode.unfocus();
-                        searchTriggered = true;
-                        widget.triggerSearchScreen(true, value);
-                      }
-                      else {
-                        rotate();
-                        rotationAllowed = !rotationAllowed;
-
-                        // adding back elevation to the search bar
-                        // searchBarElevation = 3;
-                        _elevationController.forward();
-
-                        // changing the menu icon
-                        menuIcon = const Icon( Icons.menu, color: Colors.black, );
-
-                        // removing focus from the text field and clearing previous data
-                        FocusScope.of(context).requestFocus(FocusNode());
-                        searchBarTextController.clear();
-
-                        // closing the searchScreen
-                        widget.triggerSearchScreen(false, '');
-
-                        setState(() { });
-                      }
-                    },
+        setState(() { });
+        return false;
+      },
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: AnimatedPadding(
+          duration: const Duration( milliseconds: 600),
+          curve: Curves.easeOutExpo,
+          padding: EdgeInsets.zero,
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10)
+            ),
+            elevation: _elevationAnimation.value,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // Search Bar
+                AnimatedRotation(
+                  curve: Curves.easeOutExpo,
+                  duration: const Duration( milliseconds: 600),
+                  turns: turns,
+                  child: GestureDetector(
                     onTap: () {
-                      setState(() {
-                        // giving a pop effect by reducing the padding and removing the elevation of the searchBar
-                        if( rotationAllowed ) {
+                      if( searchBarFocusNode.hasFocus || searchTriggered) {
+                          searchTriggered = false;
+
+                          // rotating the button and changing the flag to avoid repetition
                           rotate();
                           rotationAllowed = !rotationAllowed;
+
+                          // adding back elevation to the search bar
+                          // searchBarElevation = 3;
+                          _elevationController.forward();
+
+                          // changing the menu icon
+                          menuIcon = const Icon( Icons.menu, color: Colors.black, );
+
+                          // removing focus from the text field and clearing previous data
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          searchBarTextController.clear();
+
+                          // closing the searchScreen
+                          widget.triggerSearchScreen(false, '' );
+
+                          setState(() { });
                         }
-
-                        _elevationController.reverse();
-                        // searchBarElevation = 0;
-
-                        menuIcon = const Icon( Icons.arrow_downward, color: Colors.black, );
-                        widget.showSearchRecommendation();
-                      });
+                        else {
+                          // behaviour for menu button
+                          widget.scaffoldKey.currentState!.openDrawer();
+                        }
                     },
-                    focusNode: searchBarFocusNode,
-                    decoration: const InputDecoration(
-                      hintText: "Search in Newsletters",
-                      border: InputBorder.none,
+                    child: Container(
+                      margin: const EdgeInsets.only(left: 3),
+                      child: IconButton(
+                        icon: menuIcon,
+                        onPressed: null,
+                      ),
                     ),
                   ),
                 ),
-              )
-            ],
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only( left: 5 ),
+                    child: TextField(
+                      controller: searchBarTextController,
+                      onSubmitted: (value) {
+                        if( searchBarTextController.text.isNotEmpty ) {
+                          searchBarFocusNode.unfocus();
+                          searchTriggered = true;
+                          widget.triggerSearchScreen(true, value);
+                        }
+                        else {
+                          rotate();
+                          rotationAllowed = !rotationAllowed;
+
+                          // adding back elevation to the search bar
+                          // searchBarElevation = 3;
+                          _elevationController.forward();
+
+                          // changing the menu icon
+                          menuIcon = const Icon( Icons.menu, color: Colors.black, );
+
+                          // removing focus from the text field and clearing previous data
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          searchBarTextController.clear();
+
+                          // closing the searchScreen
+                          widget.triggerSearchScreen(false, '');
+
+                          setState(() { });
+                        }
+                      },
+                      onTap: () {
+                        setState(() {
+                          // giving a pop effect by reducing the padding and removing the elevation of the searchBar
+                          if( rotationAllowed ) {
+                            rotate();
+                            rotationAllowed = !rotationAllowed;
+                          }
+
+                          _elevationController.reverse();
+                          // searchBarElevation = 0;
+
+                          menuIcon = const Icon( Icons.arrow_downward, color: Colors.black, );
+                          widget.showSearchRecommendation();
+                        });
+                      },
+                      focusNode: searchBarFocusNode,
+                      decoration: const InputDecoration(
+                        hintText: "Search in Newsletters",
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),

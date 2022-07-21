@@ -40,7 +40,7 @@ class _InboxScreenState extends State<InboxScreen>
   String queryString = "";
   late List<Widget> homeScreenTabsList;
   late AppBar _appBar;
-  late Widget previousScreen;
+  Widget? previousScreen;
   late Widget _searchRecommendationScreen;
 
   int selectedDrawer = 0;
@@ -52,20 +52,18 @@ class _InboxScreenState extends State<InboxScreen>
   void initState() {
     super.initState();
 
+    previousScreen = widget.currentDisplayScreen;
     _searchRecommendationScreen = SearchRecommendation(queryString: '');
-    previousScreen = _searchRecommendationScreen;
 
     init();
   }
 
   Future<void> init() async {
-    Utils.username =
-        await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
+    Utils.username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
   }
 
   Future<void> addToHomeScreenList( {required String listName, required EmailMessage msg}) async {
-    for (HomeScreenList homeScreenTab
-        in homeScreenTabsList as List<HomeScreenList>) {
+    for (HomeScreenList homeScreenTab in homeScreenTabsList as List<HomeScreenList>) {
       if (homeScreenTab.key.toString() == listName) {
         // the correct list is found, adding the element to the top of the list
         homeScreenTab.addElementToTop(msg);
@@ -84,22 +82,8 @@ class _InboxScreenState extends State<InboxScreen>
   }
 
   void showRecommendationScreen() {
-    previousScreen = widget.currentDisplayScreen;
-
     setState(() {
-      widget.currentDisplayScreen = WillPopScope(
-        onWillPop: () async {
-          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-            setState(() {
-              widget.currentDisplayScreen = previousScreen;
-              _reset = true;
-            });
-          });
-
-          return false;
-        },
-        child: _searchRecommendationScreen,
-      );
+      widget.currentDisplayScreen = _searchRecommendationScreen;
     });
   }
 
@@ -120,20 +104,19 @@ class _InboxScreenState extends State<InboxScreen>
 
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         setState(() {
-          widget.currentDisplayScreen = previousScreen;
+          widget.currentDisplayScreen = previousScreen!;
         });
       });
     }
   }
 
   void onSearchStringChanged( String value ) {
-    // if( value.isNotEmpty ) {
       setState( () {
         widget.currentDisplayScreen = WillPopScope(
           onWillPop: () async {
             WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
               setState(() {
-                widget.currentDisplayScreen = previousScreen;
+                widget.currentDisplayScreen = previousScreen!;
                 _reset = true;
               });
             });
@@ -143,7 +126,6 @@ class _InboxScreenState extends State<InboxScreen>
           child: SearchRecommendation(queryString: value),
         );
       });
-    // }
   }
 
   @override

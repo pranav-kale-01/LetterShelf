@@ -41,7 +41,7 @@ class SearchRecommendation extends StatelessWidget {
         ),
         queryString.isEmpty ? Container(
           alignment: Alignment.centerLeft,
-          margin: const EdgeInsets.only(top: 12.0, left: 8.0 ),
+          margin: const EdgeInsets.only(top: 12.0, left: 12.0 ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

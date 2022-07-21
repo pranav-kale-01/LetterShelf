@@ -56,7 +56,6 @@ class _SetupScreenListState extends State<SetupScreenList> {
   }
 
   Future<void> loadSubscribedEmailAccounts() async {
-    debugPrint("functionCalled");
     Map<String, String> unSubscribedEmails = {};
 
     if (loadingComplete) {

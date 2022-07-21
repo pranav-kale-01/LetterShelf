@@ -124,14 +124,14 @@ class _ProfileCardState extends State<ProfileCard>
 
 
             Container(
-              padding: EdgeInsets.symmetric(vertical: 10 , horizontal: 10),
+              padding: const EdgeInsets.symmetric(vertical: 10 , horizontal: 10),
              
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: EdgeInsets.only(top: 10),
+                    padding: const EdgeInsets.only(top: 10),
                     alignment: Alignment.center,
                     child: Text(
                       userName,
@@ -153,7 +153,7 @@ class _ProfileCardState extends State<ProfileCard>
                       strutStyle: const StrutStyle(
                         height: 1,
                       ),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         color: Colors.grey
                       ),

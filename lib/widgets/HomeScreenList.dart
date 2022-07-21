@@ -62,6 +62,13 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
   bool get wantKeepAlive => true;
 
   @override
+  void setState( fn ) {
+    if( mounted ) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
     controller = ScrollController()..addListener(handleBottomListScrolling);
@@ -104,10 +111,10 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
       if( controller.position.pixels < 0 ) {
         controller.jumpTo(0);
       }
-      setState(() => _physics = ClampingScrollPhysics());
+      setState(() => _physics = const ClampingScrollPhysics());
     }
     else {
-      setState(() => _physics = BouncingScrollPhysics());
+      setState(() => _physics = const BouncingScrollPhysics());
     }
 
   }
@@ -348,6 +355,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     const Key centerKey = ValueKey('second-sliver-list');
 
     // setting the super class's addToList and removeFromList methods
@@ -428,7 +436,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
                 child: Container(
                     margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
                     alignment: Alignment.center,
-                    child: const Text("no current messages"),
+                    child: Text( "no current messages" + widget.key.toString() ),
                 ),
             ) : SliverToBoxAdapter(
               key: centerKey,

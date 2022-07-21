@@ -146,7 +146,9 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
           Uint8List rawImage = Uint8List.fromList(List<int>.from(tempList));
           image = Image.memory(rawImage);
 
-          setState(() { });
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            setState(() { });
+          });
       }
 
     }
@@ -170,9 +172,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
               fit: BoxFit.cover,
             );
 
-            SchedulerBinding.instance.addPostFrameCallback((_) {
-              setState(() { });
-            });
+            setState(() { });
 
           }
           catch( e, stackTrace ) {
@@ -205,7 +205,7 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
     return SizedBox(
       height: 130,
       child: Container(
-        margin: EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
+        margin: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 4.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: Colors.white,
@@ -236,6 +236,45 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
                 ),
             ).then((val) => setState( () => tileIsSelected = false ) );
           },
+          onTap: () async {
+            // checking if the newsletter is unread
+            List<dynamic> tempList = await hiveService.getBoxes( " is:unread CachedMessages" + widget.username );
+
+            if (  widget.emailMessage.unread ) {
+              setState(() {
+                // now inserting new data to previous cached data
+                for( var msg in tempList ) {
+                  if( msg['msgId'] == widget.emailMessage.msgId ) {
+                    msg['unread'] = false;
+                    break;
+                  }
+                }
+
+                hiveService.addBoxes( tempList, " is:unread CachedMessages" + widget.username );
+
+                // setting the font color to light gray
+                widget.headerColor = Colors.grey;
+
+                // also changing the unread property of the current email message to false
+                // (if we don't change the property, the next time ListTile is reloaded, there would be no way to tell if the message was read)
+                widget.emailMessage.unread = false;
+
+                // removing the message from unread and adding it to the top of read messages list
+                // widget.removeFromListMethod( widget.emailMessage.msgId );
+                // widget.addToListMethod( listName: 'UNREAD', msg: widget.emailMessage );
+
+                // modifying the messages label to remove UNREAD Label from the message
+                gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
+                    removeLabelIds: [
+                      "UNREAD"
+                    ]
+                );
+
+                widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
+              });
+            }
+            loadMessage();
+          },
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
@@ -244,113 +283,72 @@ class _HomeScreenListTileState extends State<HomeScreenListTile> {
             child: Column(
               children: [
                 Expanded(
-                  child: GestureDetector(
-                    onTap: () async {
-                      // checking if the newsletter is unread
-                      List<dynamic> tempList = await hiveService.getBoxes( " is:unread CachedMessages" + widget.username );
-
-                      if (  widget.emailMessage.unread ) {
-                        setState(() {
-                          // now inserting new data to previous cached data
-                          for( var msg in tempList ) {
-                            if( msg['msgId'] == widget.emailMessage.msgId ) {
-                              msg['unread'] = false;
-                              break;
-                            }
-                          }
-
-                          hiveService.addBoxes( tempList, " is:unread CachedMessages" + widget.username );
-
-                          // setting the font color to light gray
-                          widget.headerColor = Colors.grey;
-
-                          // also changing the unread property of the current email message to false
-                          // (if we don't change the property, the next time ListTile is reloaded, there would be no way to tell if the message was read)
-                          widget.emailMessage.unread = false;
-
-                          // removing the message from unread and adding it to the top of read messages list
-                          // widget.removeFromListMethod( widget.emailMessage.msgId );
-                          // widget.addToListMethod( listName: 'UNREAD', msg: widget.emailMessage );
-
-                          // modifying the messages label to remove UNREAD Label from the message
-                          gmail.ModifyMessageRequest req = gmail.ModifyMessageRequest(
-                              removeLabelIds: [
-                                "UNREAD"
-                              ]
-                          );
-
-                          widget.gmailApi.users.messages.modify( req, 'me', widget.emailMessage.msgId);
-                        });
-                      }
-                      loadMessage();
-                    },
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0, right: 4, top: 18),
-                          child: tileIsSelected ? selectedTile : image == null ? textAvatar :
-                          CircleAvatar(
-                            backgroundColor: backgroundColor,
-                            radius: 32,
-                            child: Container(
-                              decoration: BoxDecoration(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0, right: 4, top: 18),
+                        child: tileIsSelected ? selectedTile : image == null ? textAvatar :
+                        CircleAvatar(
+                          backgroundColor: backgroundColor,
+                          radius: 32,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.white,
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.grey,
+                                  offset: Offset(0.0, 1.0), //(x,y)
+                                  blurRadius: 6.0,
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
                                 borderRadius: BorderRadius.circular(50),
-                                color: Colors.white,
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.grey,
-                                    offset: Offset(0.0, 1.0), //(x,y)
-                                    blurRadius: 6.0,
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(50),
-                                  child: image
-                              ),
+                                child: image
                             ),
                           ),
                         ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.74,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.only(top: 15, bottom: 3, left: 10),
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  widget.emailMessage.from,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: widget.listKey != "[<'READ'>]" && widget.emailMessage.unread ? widget.headerColor : Colors.grey,
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20,
-                                  ),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.74,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.only(top: 15, bottom: 3, left: 10),
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                widget.emailMessage.from,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: widget.listKey != "[<'READ'>]" && widget.emailMessage.unread ? widget.headerColor : Colors.grey,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 20,
                                 ),
                               ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(bottom: 6, top: 5, left: 10),
-                                child: Text(
-                                  widget.emailMessage.subject,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 3,
-                                  strutStyle: const StrutStyle(
-                                    height: 1,
-                                  ),
-                                  style: const TextStyle(
-                                    color: Colors.black87,
-                                  ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(bottom: 6, top: 5, left: 10),
+                              child: Text(
+                                widget.emailMessage.subject,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 3,
+                                strutStyle: const StrutStyle(
+                                  height: 1,
+                                ),
+                                style: const TextStyle(
+                                  color: Colors.black87,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 Container(

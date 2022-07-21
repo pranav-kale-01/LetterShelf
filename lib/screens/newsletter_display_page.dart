@@ -83,8 +83,6 @@ class _NewsletterDisplayPageState extends State<NewsletterDisplayPage> {
     DocumentSnapshot snapshot = await db.collection("newsletters_list").doc( widget.newsletterData['id'] ).get();
 
     if(exists && Utils.firstExploreScreenLoad ) {
-      debugPrint('if');
-
       Utils.firstInboxScreenLoad = false;
       List<dynamic> tempList = await hiveService.getBoxes( widget.newsletterData['id'] + "CachedImage" );
       Uint8List rawImage = Uint8List.fromList( List<int>.from( tempList ) );

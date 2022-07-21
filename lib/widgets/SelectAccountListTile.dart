@@ -56,7 +56,6 @@ class _SelectAccountListTileState extends State<SelectAccountListTile> {
       // checking if email messages are already cached
       Hive.init((await getApplicationDocumentsDirectory()).path);
       bool exists = await hiveService.isExists(boxName: "profile_data" + userEmail);
-      debugPrint( "exists" + exists.toString() );
 
       if (exists) {
         Map<dynamic, dynamic> result = (await hiveService.getBoxes("profile_data" + userEmail))[0];

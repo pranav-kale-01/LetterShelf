@@ -304,6 +304,7 @@ class _MailDisplayListState extends State<MailDisplayList> with AutomaticKeepAli
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     const Key centerKey = ValueKey('second-sliver-list');
 
     // setting the super class's addToList and removeFromList methods

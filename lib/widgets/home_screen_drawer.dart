@@ -6,9 +6,8 @@ class HomeScreenDrawer extends StatefulWidget {
   final Function(int) notifyParent;
   final List<Widget> displayOptions;
   final Function(int) getBackgroundColor;
-  Widget displayScreen;
 
-  HomeScreenDrawer({Key? key, required this.displayScreen, required this.displayOptions, required this.notifyParent , required this.getBackgroundColor, }) : super(key: key);
+  HomeScreenDrawer({Key? key, required this.displayOptions, required this.notifyParent , required this.getBackgroundColor, }) : super(key: key);
 
   @override
   _HomeScreenDrawerState createState() => _HomeScreenDrawerState();
@@ -22,6 +21,7 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
       child: Drawer(
         backgroundColor: Colors.white,
         child: ListView(
+          physics: const BouncingScrollPhysics(),
           children: [
             const SizedBox(
               height: 70,
@@ -79,20 +79,20 @@ class _HomeScreenDrawerState extends State<HomeScreenDrawer> {
             ),
 
             // TODO: enable this option when implementing local saving of newsletters
-            // GestureDetector(
-            //   onTap: () {
-            //     widget.notifyParent( 2 );
-            //     // widget.selectedDrawer = 2;
-            //
-            //     setState(() { });
-            //   },
-            //   child: HomeScreenDrawerTile(
-            //     foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
-            //     backgroundColor: widget.getBackgroundColor(2),
-            //     title: "Saved",
-            //     iconLabel: Icons.download_sharp,
-            //   ),
-            // ),
+            GestureDetector(
+              onTap: () {
+                widget.notifyParent( 2 );
+                // widget.selectedDrawer = 2;
+
+                setState(() { });
+              },
+              child: HomeScreenDrawerTile(
+                foregroundColor: const Color.fromRGBO(238, 26, 81, 1.0),
+                backgroundColor: widget.getBackgroundColor(2),
+                title: "Saved",
+                iconLabel: Icons.download_sharp,
+              ),
+            ),
 
             // All Mails Header
             const Padding(

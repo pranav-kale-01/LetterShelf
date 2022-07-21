@@ -139,7 +139,6 @@ class _SignInScreenState extends State<SignInScreen> {
                       onPageChanged: (index, _ ) {
                         setState(() {
                           _current = index;
-                          debugPrint(_current.toString());
                         });
                       },
                       autoPlay: true,

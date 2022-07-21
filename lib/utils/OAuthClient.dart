@@ -63,7 +63,7 @@ class OAuthClient {
       debugPrint( e.toString() );
       debugPrint( stacktrace.toString() );
 
-      return "exception occoured";
+      return "exception occurred";
     }
   }
 

@@ -224,8 +224,6 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
       queryString = "{from: _}";
     }
 
-    debugPrint( queryString );
-
     return queryString;
   }
 

@@ -53,7 +53,6 @@ class _HomeScreenBottomDialogState extends State<HomeScreenBottomDialog> {
 
       // checking scroll direction
       if( scrollController.position.userScrollDirection == ScrollDirection.forward) {
-        debugPrint( scrollController.position.pixels.toString() );
         // if the bottom sheet is at the lowest position and user scrolls down, then the bottom sheet will animate down and then close
         if( scrollController.position.pixels == 0.0 ) {
           try {

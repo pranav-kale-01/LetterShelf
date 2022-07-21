@@ -35,7 +35,6 @@ class _ExploreNewsletterCardState extends State<ExploreNewsletterCard> {
   Future<void> init() async {
     bool exists = await hiveService.isExists( boxName: widget.newsletterData['id'] + "CachedImage");
     if (exists) {
-      debugPrint('if');
 
       Utils.firstInboxScreenLoad = false;
       List<dynamic> tempList = await hiveService

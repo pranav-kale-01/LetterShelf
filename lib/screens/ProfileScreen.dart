@@ -133,7 +133,6 @@ class ProfileScreen extends StatelessWidget {
               //   margin: EdgeInsets.symmetric( horizontal: 7, vertical: 3),
               //   child: GestureDetector(
               //     onTap: () {
-              //       // debugPrint("ProfileScreen - tapped");
               //
               //       // redirecting to manage newsletters list screen
               //

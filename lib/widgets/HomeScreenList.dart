@@ -436,7 +436,7 @@ class _HomeScreenListState extends State<HomeScreenList> with AutomaticKeepAlive
                 child: Container(
                     margin: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.25),
                     alignment: Alignment.center,
-                    child: Text( "no current messages" + widget.key.toString() ),
+                    child: Text( "no current messages"),
                 ),
             ) : SliverToBoxAdapter(
               key: centerKey,

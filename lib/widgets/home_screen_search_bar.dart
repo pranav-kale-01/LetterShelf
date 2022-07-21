@@ -3,14 +3,22 @@ class HomeScreenSearchBar extends StatefulWidget {
   final GlobalKey<ScaffoldState> scaffoldKey;
   final Function(bool, String) triggerSearchScreen;
   final Function() showSearchRecommendation;
+  final Function(String) onQueryStringChange;
+  bool reset;
 
-  const HomeScreenSearchBar({Key? key, required this.scaffoldKey, required this.triggerSearchScreen, required this.showSearchRecommendation}) : super(key: key);
+  HomeScreenSearchBar({
+    Key? key,
+    required this.scaffoldKey,
+    required this.triggerSearchScreen,
+    required this.showSearchRecommendation,
+    required this.onQueryStringChange,
+    required this.reset }) : super(key: key);
 
   @override
   _HomeScreenSearchBarState createState() => _HomeScreenSearchBarState();
 }
 
-class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
+class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTickerProviderStateMixin {
   // behaviour properties
   final TextEditingController searchBarTextController = TextEditingController();
   final FocusNode searchBarFocusNode = FocusNode();
@@ -25,13 +33,32 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
   bool isClicked = false;
   bool rotationAllowed = true;
 
+  late AnimationController _elevationController;
+  late Animation _elevationAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    searchBarElevation = 3.0;
-    // animatedMenuButton = AnimatedMenuButton(menuIcon: menuIcon, buttonOnPressed: menuIconBehaviour );
+    // adding listener to searchBarTextController
+    searchBarTextController.addListener(() {
+      widget.onQueryStringChange(  searchBarTextController.text );
+    });
+
+    // animation for elevation
+    _elevationController = AnimationController(
+      vsync: this,
+      duration: const Duration( milliseconds: 100 ),
+    );
+
+    _elevationAnimation = Tween<double>(begin: 0.0, end: 5.0)
+        .chain(CurveTween(curve: Curves.ease))
+        .animate(_elevationController)
+      ..addListener(() {
+        setState(() {});
+      });
+
+    _elevationController.forward();
 
     menuIcon = const Icon( Icons.menu, color: Colors.black, );
   }
@@ -40,7 +67,8 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
     if( searchBarFocusNode.hasFocus ) {
       // behaviour for back button
       setState(() {
-        searchBarElevation = 3;
+        // searchBarElevation = 3;
+        _elevationController.forward();
         menuIcon = const Icon( Icons.menu , color: Colors.black,);
 
         FocusScope.of(context).requestFocus(FocusNode());
@@ -68,6 +96,27 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
 
   @override
   Widget build(BuildContext context) {
+
+    if( widget.reset ) {
+      widget.reset = false;
+
+      searchTriggered = false;
+
+      // rotating the button and changing the flag to avoid repetition
+      rotate();
+      rotationAllowed = !rotationAllowed;
+
+      // adding back elevation to the search bar
+      searchBarElevation = 3;
+
+      // changing the menu icon
+      menuIcon = const Icon( Icons.menu, color: Colors.black, );
+
+      // removing focus from the text field and clearing previous data
+      FocusScope.of(context).requestFocus(FocusNode());
+      searchBarTextController.clear();
+    }
+
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       child: AnimatedPadding(
@@ -78,7 +127,7 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10)
           ),
-          elevation: searchBarElevation,
+          elevation: _elevationAnimation.value,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -99,7 +148,8 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
                         rotationAllowed = !rotationAllowed;
 
                         // adding back elevation to the search bar
-                        searchBarElevation = 3;
+                        // searchBarElevation = 3;
+                        _elevationController.forward();
 
                         // changing the menu icon
                         menuIcon = const Icon( Icons.menu, color: Colors.black, );
@@ -143,7 +193,8 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
                         rotationAllowed = !rotationAllowed;
 
                         // adding back elevation to the search bar
-                        searchBarElevation = 3;
+                        // searchBarElevation = 3;
+                        _elevationController.forward();
 
                         // changing the menu icon
                         menuIcon = const Icon( Icons.menu, color: Colors.black, );
@@ -166,7 +217,8 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> {
                           rotationAllowed = !rotationAllowed;
                         }
 
-                        searchBarElevation = 0;
+                        _elevationController.reverse();
+                        // searchBarElevation = 0;
 
                         menuIcon = const Icon( Icons.arrow_downward, color: Colors.black, );
                         widget.showSearchRecommendation();

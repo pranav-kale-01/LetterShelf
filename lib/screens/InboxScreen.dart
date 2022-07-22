@@ -8,6 +8,7 @@ import 'package:letter_shelf/widgets/search_recommendation.dart';
 
 import '../utils/OAuthClient.dart';
 import '../utils/Utils.dart';
+import '../widgets/search_filter_button.dart';
 
 class InboxScreen extends StatefulWidget {
   static const stateOpen = 0;
@@ -51,6 +52,9 @@ class _InboxScreenState extends State<InboxScreen>
 
   String initialSearchString = "";
 
+  // for showing search filters
+  bool showSearchFilters= false;
+
   @override
   void initState() {
     super.initState();
@@ -70,8 +74,7 @@ class _InboxScreenState extends State<InboxScreen>
     Utils.username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
   }
 
-  Future<void> addToHomeScreenList(
-      {required String listName, required EmailMessage msg}) async {
+  Future<void> addToHomeScreenList( {required String listName, required EmailMessage msg}) async {
     for (HomeScreenList homeScreenTab
         in homeScreenTabsList as List<HomeScreenList>) {
       if (homeScreenTab.key.toString() == listName) {
@@ -81,8 +84,7 @@ class _InboxScreenState extends State<InboxScreen>
     }
   }
 
-  Future<void> removeFromHomeScreenList(
-      {required String listName, required String msgId}) async {
+  Future<void> removeFromHomeScreenList( {required String listName, required String msgId}) async {
     for (HomeScreenList homeScreenTab
         in homeScreenTabsList as List<HomeScreenList>) {
       if (homeScreenTab.key.toString() == listName) {
@@ -94,6 +96,10 @@ class _InboxScreenState extends State<InboxScreen>
 
   void showRecommendationScreen() {
     setState(() {
+      // showing search filters
+      showSearchFilters = true;
+
+      // changing current display to search recommendations
       widget.currentDisplayScreen = _searchRecommendationScreen;
     });
   }
@@ -144,6 +150,9 @@ class _InboxScreenState extends State<InboxScreen>
 
   void onExitingSearch() {
     setState(() {
+      // hiding search filters
+      showSearchFilters = false;
+
       initialSearchString = "";
     });
   }
@@ -191,6 +200,36 @@ class _InboxScreenState extends State<InboxScreen>
               widget.bottomPadding,
           child: Column(
             children: [
+              if( showSearchFilters )
+                Container(
+                margin: const EdgeInsets.only(top: 12.0, bottom: 4.0 ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: const [
+                      SearchFilterButton(
+                        label: "search in all mails",
+                        showDropDownIcon: false,
+                        behaviour: SearchFilterButton.toggleButton,
+                      ),
+                      SearchFilterButton(
+                        label: "Is unread",
+                        showDropDownIcon: false,
+                        behaviour: SearchFilterButton.toggleButton,
+                      ),
+                      SearchFilterButton(
+                          label: "Labels"
+                      ),
+                      SearchFilterButton(
+                          label: "From"
+                      ),
+                      SearchFilterButton(
+                          label: "Date"
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               SizedBox(
                 height: MediaQuery.of(context).size.height -
                     _appBar.preferredSize.height -

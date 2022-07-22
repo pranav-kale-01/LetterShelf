@@ -41,32 +41,6 @@ class _SearchRecommendationState extends State<SearchRecommendation> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 4.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: const [
-                SearchFilterButton(
-                    label: "Labels"
-                ),
-                SearchFilterButton(
-                    label: "From"
-                ),
-                SearchFilterButton(
-                    label: "Date"
-                ),
-                SearchFilterButton(
-                  label: "Is unread",
-                  showDropDownIcon: false,
-                ),
-                SearchFilterButton(
-                    label: "To"
-                ),
-              ],
-            ),
-          ),
-        ),
         widget.queryString.isEmpty ? Container(
           color: Colors.white,
           alignment: Alignment.centerLeft,

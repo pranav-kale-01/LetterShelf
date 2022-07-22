@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 
 class SearchFilterButton extends StatefulWidget {
+  static const int pushButton = 0;
+  static const int toggleButton = 1;
+
   final String label;
   final bool showDropDownIcon;
+  final behaviour;
 
   const SearchFilterButton({
     Key? key,
     required this.label,
     this.showDropDownIcon = true,
+    this.behaviour = SearchFilterButton.pushButton,
   }) : super(key: key);
 
   @override
@@ -15,6 +20,9 @@ class SearchFilterButton extends StatefulWidget {
 }
 
 class _SearchFilterButtonState extends State<SearchFilterButton> {
+  // used only if SearchFilterButton.behaviour is SearchFilterButton.toggleButton
+  bool _toggleState = false;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -29,29 +37,36 @@ class _SearchFilterButtonState extends State<SearchFilterButton> {
       child: InkWell(
         splashColor: const Color(0xFFC7C7C7),
         borderRadius: BorderRadius.circular(8),
-        onTap: () {},
+        onTap: () {
+          if( widget.behaviour == SearchFilterButton.toggleButton ) {
+            setState(() {
+              _toggleState = !_toggleState;
+            });
+          }
+        },
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: Colors.white,
+            color: _toggleState ? const Color(0xFFC3E7FF) : Colors.white,
           ),
-          margin: const EdgeInsets.all(1.0),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0 ),
-            child: Row(
-              children: [
-                Text(
+          margin: _toggleState ? const EdgeInsets.all(0.0) : const EdgeInsets.all(1.0),
+          padding: _toggleState ? const EdgeInsets.all(1.0) : const EdgeInsets.all(0.0),
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0 ),
+                child: Text(
                   widget.label,
                   style: const TextStyle(
                       fontWeight: FontWeight.w600
                   ),
                 ),
-                if( widget.showDropDownIcon )
-                  const Icon(
-                    Icons.arrow_drop_down_sharp
-                  ),
-              ],
-            ),
+              ),
+              if( widget.showDropDownIcon )
+                const Icon(
+                  Icons.arrow_drop_down_sharp
+                ),
+            ],
           ),
         ),
       ),

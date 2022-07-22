@@ -11,7 +11,9 @@ A Clean, Fast, and Easy to Use Email Client that sorts newsletters from regular 
 ### The current version works only with android, iOS and web implementation in progress..
 
 
-## Screenshots
+## Screenshots 
+
+(Note: The ui represented in the screenshots might be from a earlier build.)
 
 Sign-in Page:
 

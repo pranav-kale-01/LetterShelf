@@ -37,6 +37,7 @@ class InboxScreen extends StatefulWidget {
 
 class _InboxScreenState extends State<InboxScreen>
     with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+  late String username;
   String queryString = "";
   late List<Widget> homeScreenTabsList;
   late AppBar _appBar;
@@ -48,12 +49,19 @@ class _InboxScreenState extends State<InboxScreen>
   bool firstTimeSearchTriggered = false;
   bool _reset = false;
 
+  String initialSearchString = "";
+
   @override
   void initState() {
     super.initState();
 
+    // setting the current screen as previous screen
     previousScreen = widget.currentDisplayScreen;
-    _searchRecommendationScreen = SearchRecommendation(queryString: '');
+
+    _searchRecommendationScreen = SearchRecommendation(
+      queryString: '',
+      changeSearchString: changeSearchString,
+    );
 
     init();
   }
@@ -62,8 +70,10 @@ class _InboxScreenState extends State<InboxScreen>
     Utils.username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
   }
 
-  Future<void> addToHomeScreenList( {required String listName, required EmailMessage msg}) async {
-    for (HomeScreenList homeScreenTab in homeScreenTabsList as List<HomeScreenList>) {
+  Future<void> addToHomeScreenList(
+      {required String listName, required EmailMessage msg}) async {
+    for (HomeScreenList homeScreenTab
+        in homeScreenTabsList as List<HomeScreenList>) {
       if (homeScreenTab.key.toString() == listName) {
         // the correct list is found, adding the element to the top of the list
         homeScreenTab.addElementToTop(msg);
@@ -71,7 +81,8 @@ class _InboxScreenState extends State<InboxScreen>
     }
   }
 
-  Future<void> removeFromHomeScreenList( {required String listName, required String msgId}) async {
+  Future<void> removeFromHomeScreenList(
+      {required String listName, required String msgId}) async {
     for (HomeScreenList homeScreenTab
         in homeScreenTabsList as List<HomeScreenList>) {
       if (homeScreenTab.key.toString() == listName) {
@@ -110,22 +121,37 @@ class _InboxScreenState extends State<InboxScreen>
     }
   }
 
-  void onSearchStringChanged( String value ) {
-      setState( () {
-        widget.currentDisplayScreen = WillPopScope(
-          onWillPop: () async {
-            WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-              setState(() {
-                widget.currentDisplayScreen = previousScreen!;
-                _reset = true;
-              });
+  void onSearchStringChanged(String value) {
+    setState(() {
+      widget.currentDisplayScreen = WillPopScope(
+        onWillPop: () async {
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            setState(() {
+              widget.currentDisplayScreen = previousScreen!;
+              _reset = true;
             });
+          });
 
-            return false;
-          },
-          child: SearchRecommendation(queryString: value),
-        );
-      });
+          return false;
+        },
+        child: SearchRecommendation(
+          queryString: value,
+          changeSearchString: changeSearchString,
+        ),
+      );
+    });
+  }
+
+  void onExitingSearch() {
+    setState(() {
+      initialSearchString = "";
+    });
+  }
+
+  void changeSearchString( String newValue ) {
+    initialSearchString = newValue;
+    onSearchStringChanged(newValue);
+    setState(() { });
   }
 
   @override
@@ -141,11 +167,13 @@ class _InboxScreenState extends State<InboxScreen>
       ),
       actions: [
         HomeScreenSearchBar(
+          initialString: initialSearchString,
           scaffoldKey: widget.scaffoldKey,
           triggerSearchScreen: toggleSearchScreen,
           showSearchRecommendation: showRecommendationScreen,
           reset: _reset,
           onQueryStringChange: onSearchStringChanged,
+          onSearchExiting: onExitingSearch,
         ),
       ],
     );
@@ -155,6 +183,7 @@ class _InboxScreenState extends State<InboxScreen>
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         appBar: _appBar,
         body: SizedBox(
           height: MediaQuery.of(context).size.height -

@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+
+import '../utils/Utils.dart';
+import '../utils/hive_services.dart';
 
 class HomeScreenSearchBar extends StatefulWidget {
+  String initialString;
   final GlobalKey<ScaffoldState> scaffoldKey;
   final Function(bool, String) triggerSearchScreen;
   final Function() showSearchRecommendation;
   final Function(String) onQueryStringChange;
+  final VoidCallback onSearchExiting;
   bool reset;
 
   HomeScreenSearchBar({
     Key? key,
+    required this.initialString,
     required this.scaffoldKey,
     required this.triggerSearchScreen,
     required this.showSearchRecommendation,
     required this.onQueryStringChange,
+    required this.onSearchExiting,
     required this.reset }) : super(key: key);
 
   @override
@@ -21,7 +29,7 @@ class HomeScreenSearchBar extends StatefulWidget {
 
 class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTickerProviderStateMixin {
   // behaviour properties
-  final TextEditingController searchBarTextController = TextEditingController();
+  TextEditingController searchBarTextController = TextEditingController();
   final FocusNode searchBarFocusNode = FocusNode();
   bool searchTriggered = false;
 
@@ -36,6 +44,13 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
 
   late AnimationController _elevationController;
   late Animation _elevationAnimation;
+
+  // local storage
+  HiveServices hiveService = HiveServices();
+
+  // for search bar
+  String previousValue = "";
+  bool updateText = true;
 
   @override
   void initState() {
@@ -97,6 +112,17 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    if( updateText ) {
+      searchBarTextController = TextEditingController( text: widget.initialString );
+      searchBarTextController.selection = TextSelection.fromPosition(
+        TextPosition(
+          offset: searchBarTextController.text.length,
+        ),
+      );
+    }
+    else {
+      updateText = true;
+    }
 
     if( widget.reset ) {
       widget.reset = false;
@@ -120,6 +146,11 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
 
     return WillPopScope(
       onWillPop: () async {
+        // clearing previous value
+        previousValue = "";
+
+        searchBarTextController.text = "";
+
         rotate();
         rotationAllowed = !rotationAllowed;
 
@@ -164,6 +195,11 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
                   child: GestureDetector(
                     onTap: () {
                       if( searchBarFocusNode.hasFocus || searchTriggered) {
+                          widget.onSearchExiting();
+
+                          // clearing previous value
+                          previousValue = "";
+
                           searchTriggered = false;
 
                           // rotating the button and changing the flag to avoid repetition
@@ -186,10 +222,10 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
 
                           setState(() { });
                         }
-                        else {
-                          // behaviour for menu button
-                          widget.scaffoldKey.currentState!.openDrawer();
-                        }
+                      else {
+                        // behaviour for menu button
+                        widget.scaffoldKey.currentState!.openDrawer();
+                      }
                     },
                     child: Container(
                       margin: const EdgeInsets.only(left: 3),
@@ -205,11 +241,40 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
                     margin: const EdgeInsets.only( left: 5 ),
                     child: TextField(
                       controller: searchBarTextController,
-                      onSubmitted: (value) {
+                      onSubmitted: (value) async {
                         if( searchBarTextController.text.isNotEmpty ) {
+                          updateText = false;
+                          widget.onQueryStringChange( searchBarTextController.text );
+
                           searchBarFocusNode.unfocus();
+
+                          // saving the current search string for future recommendations
+                          String username = Utils.username;
+                          List<dynamic> tempList = await hiveService.getBoxes( username + "SearchRecommendations" );
+
+                          // checking if the search string is already one of the recommendations, if yes then removing that particular recommendation from the list
+                          if( tempList.contains(searchBarTextController.text) ) {
+                            tempList.remove(searchBarTextController.text);
+                          }
+
+                          // limiting the list to contain only 6 elements at max
+                          if( tempList.length > 5 ) {
+                            tempList.removeLast();
+                          }
+
+                          // inserting the current recommendation in the list of recommendations
+                          tempList.insert(0, searchBarTextController.text);
+
+                          // deleting the old values
+                          Box _box = await Hive.openBox( username + "SearchRecommendations" );
+                          _box.deleteAll(_box.keys);
+
+                          // adding the new list
+                          await hiveService.addBoxes(  tempList, username + "SearchRecommendations");
+
+                          // triggering the search screen
                           searchTriggered = true;
-                          widget.triggerSearchScreen(true, value);
+                          widget.triggerSearchScreen(true, searchBarTextController.text);
                         }
                         else {
                           rotate();
@@ -229,11 +294,14 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
                           // closing the searchScreen
                           widget.triggerSearchScreen(false, '');
 
+
                           setState(() { });
                         }
                       },
                       onTap: () {
                         setState(() {
+                          widget.initialString = "";
+
                           // giving a pop effect by reducing the padding and removing the elevation of the searchBar
                           if( rotationAllowed ) {
                             rotate();

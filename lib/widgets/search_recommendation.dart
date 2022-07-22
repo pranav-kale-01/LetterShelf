@@ -1,13 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:letter_shelf/widgets/search_filter_button.dart';
 
-class SearchRecommendation extends StatelessWidget {
-  String queryString;
+import '../utils/Utils.dart';
+import '../utils/hive_services.dart';
 
-  SearchRecommendation({
+class SearchRecommendation extends StatefulWidget {
+  final String queryString;
+  final Function(String) changeSearchString;
+
+  const SearchRecommendation({
     Key? key,
-    required this.queryString
+    required this.queryString,
+    required this.changeSearchString,
   }) : super(key: key);
+
+  @override
+  _SearchRecommendationState createState() => _SearchRecommendationState();
+}
+
+class _SearchRecommendationState extends State<SearchRecommendation> {
+  HiveServices hiveService = HiveServices();
+  List<dynamic> tempList = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    init();
+  }
+
+  Future<void> init() async {
+    String username = Utils.username;
+    tempList = await hiveService.getBoxes( username + "SearchRecommendations" );
+
+    setState(() { });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +67,8 @@ class SearchRecommendation extends StatelessWidget {
             ),
           ),
         ),
-        queryString.isEmpty ? Container(
+        widget.queryString.isEmpty ? Container(
+          color: Colors.white,
           alignment: Alignment.centerLeft,
           margin: const EdgeInsets.only(top: 12.0, left: 12.0 ),
           child: Column(
@@ -51,68 +80,28 @@ class SearchRecommendation extends StatelessWidget {
                 child: Text("Recent email searches"),
               ),
               Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: tempList.map( (recommendation) => GestureDetector(
+                  onTap: () {
+                    widget.changeSearchString( recommendation );
+                  },
+                  child: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     width: MediaQuery.of(context).size.width,
                     child: Row(
-                      children: const [
-                        Padding(
+                      children: [
+                        const Padding(
                           padding: EdgeInsets.only( right: 16.0, top: 4.0, bottom: 4.0),
                           child: Icon(
                             Icons.history_sharp,
                           ),
                         ),
-                        Text("Recent Search 1")
+                        Text(recommendation.toString())
                       ],
                     ),
                   ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    width: MediaQuery.of(context).size.width,
-                    child: Row(
-                      children: const [
-                        Padding(
-                          padding: EdgeInsets.only( right: 16.0, top: 4.0, bottom: 4.0),
-                          child: Icon(
-                            Icons.history_sharp,
-                          ),
-                        ),
-                        Text("Recent Search 2")
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    width: MediaQuery.of(context).size.width,
-                    child: Row(
-                      children: const [
-                        Padding(
-                          padding: EdgeInsets.only( right: 16.0, top: 4.0, bottom: 4.0),
-                          child: Icon(
-                            Icons.history_sharp,
-                          ),
-                        ),
-                        Text("Recent Search 3")
-                      ],
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    width: MediaQuery.of(context).size.width,
-                    child: Row(
-                      children: const [
-                        Padding(
-                          padding: EdgeInsets.only( right: 16.0, top: 4.0, bottom: 4.0),
-                          child: Icon(
-                            Icons.history_sharp,
-                          ),
-                        ),
-                        Text("Recent Search 4")
-                      ],
-                    ),
-                  ),
-                ],
+                ) ).toList()
               )
             ],
           ),
@@ -127,7 +116,7 @@ class SearchRecommendation extends StatelessWidget {
                   Icons.find_in_page_outlined,
                 ),
               ),
-              Text("Search for '$queryString' in emails"),
+              Text("Search for '${widget.queryString}' in emails"),
             ],
           ),
         )

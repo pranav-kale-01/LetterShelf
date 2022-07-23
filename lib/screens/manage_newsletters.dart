@@ -7,7 +7,8 @@ import 'package:letter_shelf/utils/OAuthClient.dart';
 import 'package:letter_shelf/utils/Utils.dart';
 
 import 'package:googleapis/gmail/v1.dart' as gmail;
-import 'package:letter_shelf/widgets/manage_newsletters_list.dart';
+import 'package:letter_shelf/widgets/profile_screen/manage_newsletters_list.dart';
+
 
 import 'add_new_newsletters.dart';
 

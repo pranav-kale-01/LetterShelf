@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:letter_shelf/screens/newsletter_display_page.dart';
 
-import '../utils/Utils.dart';
+import '../../utils/Utils.dart';
 
 class TopNewsletterTile extends StatelessWidget {
   final Map<String, dynamic> newsletterData;

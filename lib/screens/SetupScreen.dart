@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:googleapis/people/v1.dart' as people;
 import 'package:letter_shelf/screens/HomeScreen.dart';
-import 'package:letter_shelf/widgets/SetupScreenList.dart';
+import 'package:letter_shelf/widgets/setup_screen/SetupScreenList.dart';
 
 import '../models/subscribed_newsletters.dart';
 import '../utils/Utils.dart';

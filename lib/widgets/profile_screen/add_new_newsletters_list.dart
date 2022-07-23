@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:letter_shelf/widgets/add_new_newsletters_list_tile.dart';
+import 'package:letter_shelf/widgets/profile_screen/add_new_newsletters_list_tile.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 
-import '../models/subscribed_newsletters.dart';
+import '../../models/subscribed_newsletters.dart';
 
 class AddNewNewslettersList extends StatefulWidget {
   final gmail.GmailApi gmailApi;

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:letter_shelf/screens/preferences_screen.dart';
-import 'package:letter_shelf/widgets/profile_card.dart';
+import 'package:letter_shelf/widgets/profile_screen/profile_card.dart';
 
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:googleapis/people/v1.dart' as people;

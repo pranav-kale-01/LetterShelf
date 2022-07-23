@@ -6,7 +6,7 @@ import 'package:letter_shelf/models/subscribed_newsletters.dart';
 
 
 import 'package:letter_shelf/utils/Utils.dart';
-import 'package:letter_shelf/widgets/manage_newsletter_list_tile.dart';
+import 'package:letter_shelf/widgets/profile_screen/manage_newsletter_list_tile.dart';
 
 class ManageNewslettersList extends StatefulWidget {
   final dynamic newslettersList;

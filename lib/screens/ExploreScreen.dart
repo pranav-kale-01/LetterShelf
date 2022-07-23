@@ -1,10 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:letter_shelf/screens/top_25.dart';
-import 'package:letter_shelf/widgets/explore_screen_carousel_tile.dart';
-import 'package:letter_shelf/widgets/browse_categories_tile.dart';
-import 'package:letter_shelf/widgets/category_card.dart';
-import 'package:letter_shelf/widgets/top_newsletter_card.dart';
+import 'package:letter_shelf/widgets/explore_screen/browse_categories_tile.dart';
+import 'package:letter_shelf/widgets/explore_screen/category_card.dart';
+import 'package:letter_shelf/widgets/explore_screen/explore_screen_carousel_tile.dart';
+import 'package:letter_shelf/widgets/explore_screen/top_newsletter_card.dart';
 
 import '../utils/Utils.dart';
 

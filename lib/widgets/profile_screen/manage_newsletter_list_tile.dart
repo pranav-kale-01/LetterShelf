@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:letter_shelf/models/subscribed_newsletters.dart';
+import 'package:letter_shelf/utils/Utils.dart';
 
-import '../models/subscribed_newsletters.dart';
-import '../utils/Utils.dart';
 
 class ManageNewsletterListTile extends StatefulWidget {
   final SubscribedNewsletter newsletter;

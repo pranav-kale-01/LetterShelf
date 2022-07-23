@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:letter_shelf/widgets/search_filter_button.dart';
 
-import '../utils/Utils.dart';
-import '../utils/hive_services.dart';
+import '../../utils/Utils.dart';
+import '../../utils/hive_services.dart';
 
 class SearchRecommendation extends StatefulWidget {
   final String queryString;

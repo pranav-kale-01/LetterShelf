@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:letter_shelf/widgets/SelectAccountListTile.dart';
+import 'package:letter_shelf/widgets/profile_screen/SelectAccountListTile.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 

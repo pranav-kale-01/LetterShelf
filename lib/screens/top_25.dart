@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:letter_shelf/widgets/explore_screen/top_newsletter_card.dart';
 
-import '../widgets/top_newsletter_card.dart';
+
 
 class Top25 extends StatelessWidget {
   const Top25({Key? key}) : super(key: key);

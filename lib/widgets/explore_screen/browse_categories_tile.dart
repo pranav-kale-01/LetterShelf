@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:letter_shelf/screens/categorized_list.dart';
 
-import '../screens/categorized_list.dart';
+
 
 class BrowseCategoriesTile extends StatelessWidget {
   final String title;
@@ -21,7 +22,7 @@ class BrowseCategoriesTile extends StatelessWidget {
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8)
         ),
-        margin: EdgeInsets.symmetric( horizontal: 6),
+        margin: const EdgeInsets.symmetric( horizontal: 6),
         child: Card(
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8)
@@ -32,7 +33,7 @@ class BrowseCategoriesTile extends StatelessWidget {
             child: Text(
               title,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.black87,
                 fontSize: 18,
                 fontWeight: FontWeight.w400,

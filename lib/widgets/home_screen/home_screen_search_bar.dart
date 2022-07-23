@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
-import '../utils/Utils.dart';
-import '../utils/hive_services.dart';
+import '../../utils/Utils.dart';
+import '../../utils/hive_services.dart';
 
 class HomeScreenSearchBar extends StatefulWidget {
   String initialString;

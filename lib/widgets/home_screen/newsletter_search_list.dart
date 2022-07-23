@@ -8,8 +8,7 @@ import 'package:letter_shelf/utils/OAuthClient.dart';
 import 'package:letter_shelf/utils/Utils.dart';
 
 import 'package:letter_shelf/utils/hive_services.dart';
-
-import 'HomeScreenListTile.dart';
+import 'package:letter_shelf/widgets/home_screen/HomeScreenListTile.dart';
 
 class NewsletterSearchList extends StatefulWidget {
   final gmail.GmailApi gmailApi;

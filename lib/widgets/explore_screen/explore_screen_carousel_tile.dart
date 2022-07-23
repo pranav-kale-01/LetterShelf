@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:letter_shelf/widgets/editors_choice_list.dart';
+import 'package:letter_shelf/widgets/explore_screen/editors_choice_list.dart';
+
 
 class ExploreScreenCarouselTile extends StatelessWidget {
   final String title;
@@ -24,10 +25,10 @@ class ExploreScreenCarouselTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(15)
         ),
         width: MediaQuery.of(context).size.width,
-        margin: EdgeInsets.symmetric(horizontal: 5),
+        margin: const EdgeInsets.symmetric(horizontal: 5),
         child: Stack(
           children: [
-            Container(
+            SizedBox(
               width: MediaQuery.of(context).size.width,
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
@@ -46,7 +47,7 @@ class ExploreScreenCarouselTile extends StatelessWidget {
                   width: MediaQuery.of(context).size.width / 1.3,
                   child: Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 28,
                       color: Colors.white,
                     ),

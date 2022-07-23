@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:googleapis/gmail/v1.dart' as gmail;
-import '../models/subscribed_newsletters.dart';
-import '../utils/OAuthClient.dart';
-import '../utils/Utils.dart';
+import '../../models/subscribed_newsletters.dart';
+import '../../utils/OAuthClient.dart';
+import '../../utils/Utils.dart';
 
 class AddNewNewslettersListTile extends StatefulWidget {
   final SubscribedNewsletter newsletter;

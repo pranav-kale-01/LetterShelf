@@ -10,7 +10,7 @@ import 'package:letter_shelf/utils/OAuthClient.dart';
 import 'package:letter_shelf/utils/hive_services.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../utils/Utils.dart';
+import '../../utils/Utils.dart';
 
 class SelectAccountListTile extends StatefulWidget {
   final String username;

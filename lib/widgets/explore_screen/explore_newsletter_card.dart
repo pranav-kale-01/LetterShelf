@@ -8,8 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:letter_shelf/screens/newsletter_display_page.dart';
 import 'package:letter_shelf/utils/hive_services.dart';
 
-import '../firebase_operations/storage_service.dart';
-import '../utils/Utils.dart';
+import '../../firebase_operations/storage_service.dart';
+import '../../utils/Utils.dart';
 
 class ExploreNewsletterCard extends StatefulWidget {
   final Map<String, dynamic> newsletterData;

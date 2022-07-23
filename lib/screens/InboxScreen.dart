@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:letter_shelf/models/emailMessage.dart';
-import 'package:letter_shelf/widgets/HomeScreenList.dart';
+
 import 'package:letter_shelf/widgets/bottom_popup_dialog.dart';
-import 'package:letter_shelf/widgets/home_screen_search_bar.dart';
-import 'package:letter_shelf/widgets/newsletter_search_list.dart';
-import 'package:letter_shelf/widgets/search_recommendation.dart';
+import 'package:letter_shelf/widgets/home_screen/HomeScreenList.dart';
+import 'package:letter_shelf/widgets/home_screen/home_screen_search_bar.dart';
+
+import 'package:letter_shelf/widgets/home_screen/newsletter_search_list.dart';
+import 'package:letter_shelf/widgets/home_screen/search_filter_button.dart';
+import 'package:letter_shelf/widgets/home_screen/search_recommendation.dart';
 
 import '../utils/OAuthClient.dart';
 import '../utils/Utils.dart';
-import '../widgets/search_filter_button.dart';
+
 
 class InboxScreen extends StatefulWidget {
   static const stateOpen = 0;

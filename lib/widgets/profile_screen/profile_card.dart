@@ -7,8 +7,8 @@ import 'package:googleapis/people/v1.dart' as people;
 import 'package:hive/hive.dart';
 import 'package:letter_shelf/utils/hive_services.dart';
 
-import '../utils/OAuthClient.dart';
-import '../utils/Utils.dart';
+import '../../utils/OAuthClient.dart';
+import '../../utils/Utils.dart';
 
 class ProfileCard extends StatefulWidget {
   final double bottomPadding;

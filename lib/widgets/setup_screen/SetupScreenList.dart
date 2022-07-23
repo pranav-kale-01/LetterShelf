@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:letter_shelf/models/subscribed_newsletters.dart';
-import 'package:letter_shelf/widgets/SetupScreenListTile.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:letter_shelf/widgets/setup_screen/SetupScreenListTile.dart';
 
-import '../firebase_operations/firebase_utils.dart';
+import '../../firebase_operations/firebase_utils.dart';
 
 // ignore: must_be_immutable
 class SetupScreenList extends StatefulWidget {

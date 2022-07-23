@@ -9,11 +9,11 @@ import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:hive/hive.dart';
 import 'package:letter_shelf/models/emailMessage.dart';
 import 'package:http/http.dart' as http;
-import 'package:letter_shelf/widgets/home_screen_bottom_dialog.dart';
+import 'package:letter_shelf/widgets/home_screen/home_screen_bottom_dialog.dart';
 
-import '../firebase_operations/storage_service.dart';
-import '../utils/Utils.dart';
-import '../utils/hive_services.dart';
+import '../../firebase_operations/storage_service.dart';
+import '../../utils/Utils.dart';
+import '../../utils/hive_services.dart';
 import 'MessageBody.dart';
 
 class HomeScreenListTile extends StatefulWidget {

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:letter_shelf/widgets/add_new_newsletters_list.dart';
+import 'package:letter_shelf/widgets/profile_screen/add_new_newsletters_list.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import '../firebase_operations/firebase_utils.dart';
 

@@ -1,7 +1,6 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
-import '../widgets/top_newsletter_card.dart';
+import 'package:letter_shelf/widgets/explore_screen/top_newsletter_card.dart';
+
 
 class EditorsChoiceList extends StatefulWidget {
   final String titleString;
@@ -37,7 +36,7 @@ class _EditorsChoiceListState extends State<EditorsChoiceList> {
         color: Colors.transparent,
       ),
       Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
@@ -52,7 +51,7 @@ class _EditorsChoiceListState extends State<EditorsChoiceList> {
       featuredNewslettersCards.add(
         Container(
           color: Colors.white,
-          padding: EdgeInsets.symmetric(horizontal: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -84,12 +83,12 @@ class _EditorsChoiceListState extends State<EditorsChoiceList> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(251, 251, 251, 1),
+        backgroundColor: const Color.fromRGBO(251, 251, 251, 1),
         elevation: 0,
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
             color: Colors.black
         ),
-        title: Text(
+        title: const Text(
           "",
           style: TextStyle(
               color: Colors.black
@@ -97,18 +96,18 @@ class _EditorsChoiceListState extends State<EditorsChoiceList> {
         ),
       ),
       body: Container(
-        color: Color.fromRGBO(247, 247, 247, 1),
+        color: const Color.fromRGBO(247, 247, 247, 1),
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: SafeArea(
           child: Stack(
             children: [
-              Container(
+              SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: 170,
                 child: Stack(
                   children: [
-                    Container(
+                     SizedBox(
                         width: MediaQuery.of(context).size.width,
                         child: image,
                     ),
@@ -116,11 +115,11 @@ class _EditorsChoiceListState extends State<EditorsChoiceList> {
                       color: Colors.black26,
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       alignment: Alignment.center,
                       child: Text(
                         widget.titleString,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 32,
                         ),

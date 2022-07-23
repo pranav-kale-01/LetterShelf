@@ -7,12 +7,12 @@ import 'package:googleapis/people/v1.dart' as people;
 import 'package:letter_shelf/screens/ExploreScreen.dart';
 import 'package:letter_shelf/screens/InboxScreen.dart';
 import 'package:letter_shelf/screens/ProfileScreen.dart';
-import 'package:letter_shelf/widgets/HomeScreenList.dart';
+import 'package:letter_shelf/widgets/home_screen/HomeScreenList.dart';
+import 'package:letter_shelf/widgets/home_screen/home_screen_drawer.dart';
 
 import '../models/emailMessage.dart';
-import '../widgets/home_screen_drawer.dart';
-import '../widgets/mail_display_list.dart';
-import '../widgets/saved_screen_list.dart';
+import '../widgets/home_screen/mail_display_list.dart';
+import '../widgets/home_screen/saved_screen_list.dart';
 
 class HomeScreen extends StatefulWidget {
   final gmail.GmailApi gmailApi;

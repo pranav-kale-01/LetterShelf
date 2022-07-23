@@ -11,7 +11,11 @@ class HomeScreenSearchBar extends StatefulWidget {
   final Function() showSearchRecommendation;
   final Function(String) onQueryStringChange;
   final VoidCallback onSearchExiting;
+  String externalSearchValue;
   bool reset;
+
+  // defines if the search was triggered externally
+  bool searchTriggeredExternally;
 
   HomeScreenSearchBar({
     Key? key,
@@ -21,6 +25,8 @@ class HomeScreenSearchBar extends StatefulWidget {
     required this.showSearchRecommendation,
     required this.onQueryStringChange,
     required this.onSearchExiting,
+    this.externalSearchValue = "",
+    this.searchTriggeredExternally = false,
     required this.reset }) : super(key: key);
 
   @override
@@ -112,6 +118,42 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    if( widget.searchTriggeredExternally ) {
+      updateText = false;
+      searchBarFocusNode.unfocus();
+
+      // saving the current search string for future recommendations
+      String username = Utils.username;
+
+      hiveService.getBoxes( username + "SearchRecommendations" ).then((tempList) async {
+        // checking if the search string is already one of the recommendations, if yes then removing that particular recommendation from the list
+        if( tempList.contains(searchBarTextController.text) ) {
+          tempList.remove(searchBarTextController.text);
+        }
+
+        // limiting the list to contain only 6 elements at max
+        if( tempList.length > 5 ) {
+          tempList.removeLast();
+        }
+
+        // inserting the current recommendation in the list of recommendations
+        tempList.insert(0, searchBarTextController.text);
+
+        // deleting the old values
+        Box _box = await Hive.openBox( username + "SearchRecommendations" );
+        _box.deleteAll(_box.keys);
+
+        // adding the new list
+        await hiveService.addBoxes(  tempList, username + "SearchRecommendations");
+      });
+
+      // triggering the search screen
+      searchTriggered = true;
+      widget.triggerSearchScreen(true, searchBarTextController.text);
+
+      widget.searchTriggeredExternally = false;
+    }
+
     if( updateText ) {
       searchBarTextController = TextEditingController( text: widget.initialString );
       searchBarTextController.selection = TextSelection.fromPosition(
@@ -150,6 +192,8 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
         previousValue = "";
 
         searchBarTextController.text = "";
+
+        widget.onSearchExiting();
 
         rotate();
         rotationAllowed = !rotationAllowed;
@@ -229,10 +273,8 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
                     },
                     child: Container(
                       margin: const EdgeInsets.only(left: 3),
-                      child: IconButton(
-                        icon: menuIcon,
-                        onPressed: null,
-                      ),
+                      padding: const EdgeInsets.symmetric( horizontal: 8.0 ),
+                      child: menuIcon,
                     ),
                   ),
                 ),
@@ -241,6 +283,9 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
                     margin: const EdgeInsets.only( left: 5 ),
                     child: TextField(
                       controller: searchBarTextController,
+                      onChanged: (value) {
+                        widget.onQueryStringChange(searchBarTextController.text);
+                      },
                       onSubmitted: (value) async {
                         if( searchBarTextController.text.isNotEmpty ) {
                           updateText = false;

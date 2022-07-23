@@ -7,10 +7,8 @@ import 'package:letter_shelf/models/emailMessage.dart';
 import 'package:letter_shelf/utils/OAuthClient.dart';
 import 'package:letter_shelf/utils/Utils.dart';
 
-import 'package:hive/hive.dart';
 import 'package:letter_shelf/utils/hive_services.dart';
 
-import '../utils/CreateLoggedinUser.dart';
 import 'HomeScreenListTile.dart';
 
 class NewsletterSearchList extends StatefulWidget {
@@ -18,6 +16,7 @@ class NewsletterSearchList extends StatefulWidget {
   final String queryStringAddOn;
   final Function addToListMethod;
   final Function removeFromListMethod;
+  final List<String> queryFilters;
 
   late Function addElementToTop;
   late Function removeElement;
@@ -25,6 +24,7 @@ class NewsletterSearchList extends StatefulWidget {
   bool loaded = false;
   bool queryStringBuilt = false;
   bool breakLoop = false;
+  bool refreshList;
 
   NewsletterSearchList({
     Key? key,
@@ -32,6 +32,8 @@ class NewsletterSearchList extends StatefulWidget {
     required this.queryStringAddOn,
     required this.addToListMethod,
     required this.removeFromListMethod,
+    required this.queryFilters,
+    this.refreshList = false,
   }) : super(key: key);
 
   @override
@@ -51,15 +53,12 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
   int maxResults = 500;
   bool executeOnTap = true;
   late String username;
-  ScrollPhysics _physics = ClampingScrollPhysics();
+  ScrollPhysics _physics = const ClampingScrollPhysics();
 
   bool hasInternetConnection = true;
   bool loadingMore = false;
 
   late List<EmailMessage> top = [];
-
-  @override
-  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -104,10 +103,10 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
       if( controller.position.pixels < 0 ) {
         controller.jumpTo(0);
       }
-      setState(() => _physics = ClampingScrollPhysics());
+      setState(() => _physics = const ClampingScrollPhysics());
     }
     else {
-      setState(() => _physics = BouncingScrollPhysics());
+      setState(() => _physics = const BouncingScrollPhysics());
     }
   }
 
@@ -276,8 +275,31 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
     });
   }
 
+  Future<void> refreshCurrentList( ) async {
+    await _getEmailMessages(false);
+
+    setState(() {
+      loadingMore = false;
+      widget.loaded = false;
+    });
+
+    widget.breakLoop = true;
+
+    setState(() {
+      visibleMessages = {};
+    });
+
+    currentIndex=0;
+    await _getEmailMessages( true );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if( widget.refreshList ) {
+      refreshCurrentList();
+      widget.refreshList = false;
+    }
+
     const Key centerKey = ValueKey('second-sliver-list');
 
     // setting the super class's addToList and removeFromList methods
@@ -287,23 +309,9 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
     int messagesLength = visibleMessages.length;
 
     return RefreshIndicator(
-      onRefresh: () async {
-        setState(() {
-          loadingMore = false;
-          widget.loaded = false;
-        });
-
-        widget.breakLoop = true;
-
-        setState(() {
-          visibleMessages = {};
-        });
-
-        currentIndex=0;
-        await _getEmailMessages( true );
-      },
+      onRefresh: refreshCurrentList,
       child: CustomScrollView(
-        physics: messagesLength < 7 ? AlwaysScrollableScrollPhysics( ) : _physics,
+        physics: messagesLength < 7 ? const AlwaysScrollableScrollPhysics( ) : _physics,
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         controller: controller,
         center: centerKey,
@@ -365,7 +373,7 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
               alignment: Alignment.center,
               width: MediaQuery.of(context).size.width,
               height: 50,
-              child: CircularProgressIndicator.adaptive(),
+              child: const CircularProgressIndicator.adaptive(),
             ),
           ): const SliverToBoxAdapter( ),
         ],

@@ -6,13 +6,15 @@ class SearchFilterButton extends StatefulWidget {
 
   final String label;
   final bool showDropDownIcon;
-  final behaviour;
+  final int behaviour;
+  final Function(String) onTap;
 
   const SearchFilterButton({
     Key? key,
     required this.label,
     this.showDropDownIcon = true,
     this.behaviour = SearchFilterButton.pushButton,
+    required this.onTap,
   }) : super(key: key);
 
   @override
@@ -43,6 +45,10 @@ class _SearchFilterButtonState extends State<SearchFilterButton> {
               _toggleState = !_toggleState;
             });
           }
+
+
+          // calling the user defined function
+          widget.onTap(widget.label);
         },
         child: Container(
           decoration: BoxDecoration(

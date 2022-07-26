@@ -4,7 +4,9 @@ import 'package:letter_shelf/models/emailMessage.dart';
 
 import 'package:letter_shelf/widgets/bottom_popup_dialog.dart';
 import 'package:letter_shelf/widgets/home_screen/HomeScreenList.dart';
+import 'package:letter_shelf/widgets/home_screen/date_filter_bottom_dialog.dart';
 import 'package:letter_shelf/widgets/home_screen/home_screen_search_bar.dart';
+import 'package:letter_shelf/widgets/home_screen/labels_bottom_dialog.dart';
 
 import 'package:letter_shelf/widgets/home_screen/newsletter_search_list.dart';
 import 'package:letter_shelf/widgets/home_screen/search_filter_button.dart';
@@ -15,8 +17,10 @@ import '../utils/Utils.dart';
 
 
 class InboxScreen extends StatefulWidget {
+  // static values
   static const stateOpen = 0;
   static const stateClosed = 1;
+
   bool queryStringBuilt = false;
 
   final gmail.GmailApi gmailApi;
@@ -28,7 +32,7 @@ class InboxScreen extends StatefulWidget {
   Widget currentDisplayScreen;
   int index;
 
-  List<String> searchQueryFilters = [];
+  Map<String,dynamic> searchQueryFilters = {};
 
   InboxScreen({
     Key? key,
@@ -44,17 +48,17 @@ class InboxScreen extends StatefulWidget {
   _InboxScreenState createState() => _InboxScreenState();
 }
 
-class _InboxScreenState extends State<InboxScreen>
-    with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+class _InboxScreenState extends State<InboxScreen> with AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin {
+
   late String username;
   String queryString = "";
+
   late List<Widget> homeScreenTabsList;
   late AppBar _appBar;
   Widget? previousScreen;
   late Widget _searchRecommendationScreen;
 
   int selectedDrawer = 0;
-
   bool firstTimeSearchTriggered = false;
   bool _reset = false;
 
@@ -62,10 +66,35 @@ class _InboxScreenState extends State<InboxScreen>
 
   // for showing search filters
   bool showSearchFilters= false;
-
   String previousSearchValue = "";
-
   bool externalSearchTriggered = false;
+
+  // for storing labels
+  Map<String,dynamic> labels = {
+    "starred" : false,
+    "snoozed" : false,
+    "important" : false,
+    "sent" : false,
+  };
+
+  // for date filters
+  List<String> dateFilters = [
+    "any time",
+    "older than a week",
+    "older than a month",
+    "older than 6 months",
+    "older than a year",
+  ];
+
+  String initialDateFilter = "any time";
+
+  // for label icons
+  final Map<String, IconData> labelIcons = {
+    "starred" : Icons.star_outline_rounded,
+    "snoozed" : Icons.snooze_sharp,
+    "important" : Icons.label_important_outline_sharp,
+    "sent" : Icons.send_outlined,
+  };
 
   @override
   void initState() {
@@ -238,11 +267,11 @@ class _InboxScreenState extends State<InboxScreen>
                         showDropDownIcon: false,
                         behaviour: SearchFilterButton.toggleButton,
                         onTap: (value) {
-                          if( widget.searchQueryFilters.contains(value) ) {
-                            widget.searchQueryFilters.remove(value);
+                          if( widget.searchQueryFilters[value] == null || widget.searchQueryFilters[value] == false ) {
+                            widget.searchQueryFilters.addAll( {value:true} );
                           }
                           else {
-                            widget.searchQueryFilters.add(value);
+                            widget.searchQueryFilters.addAll( {value:false} );
                           }
 
                           externalSearchTriggered = true;
@@ -258,11 +287,11 @@ class _InboxScreenState extends State<InboxScreen>
                         showDropDownIcon: false,
                         behaviour: SearchFilterButton.toggleButton,
                         onTap: (value) {
-                          if( widget.searchQueryFilters.contains(value) ) {
-                            widget.searchQueryFilters.remove(value);
+                          if( widget.searchQueryFilters[value] == null || widget.searchQueryFilters[value] == false ) {
+                            widget.searchQueryFilters.addAll( {value:true} );
                           }
                           else {
-                            widget.searchQueryFilters.add(value);
+                            widget.searchQueryFilters.addAll( {value:false} );
                           }
 
                           externalSearchTriggered = true;
@@ -278,149 +307,19 @@ class _InboxScreenState extends State<InboxScreen>
                         onTap: (value) {
                           showDialog(
                             context: context,
-                            builder: (context) => BottomPopupDialog(
-                              maxFloatingHeight: 0.1,
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height - widget.topPadding,
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                                      child: Row(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Padding(
-                                              padding: EdgeInsets.symmetric( horizontal: 18.0 ),
-                                              child: Icon(
-                                                Icons.clear
-                                              ),
-                                            ),
-                                          ),
-                                          const Text(
-                                              "Labels",
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold
-                                              ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0),
-                                      child: Container(
-                                        color: const Color(0xFFBDBDBD),
-                                        height: 1,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 8.0,),
-                                                child: Icon(
-                                                  Icons.star_border_purple500_outlined,
-                                                ),
-                                              ),
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                                child: Text("Starred"),
-                                              ),
-                                              Expanded(
-                                                child: Container(
-                                                  alignment: Alignment.centerRight,
-                                                  child: Checkbox(
-                                                      value: false,
-                                                      onChanged: (value) {},
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 8.0,),
-                                                child: Icon(
-                                                  Icons.snooze,
-                                                ),
-                                              ),
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                                child: Text("Snoozed"),
-                                              ),
-                                              Expanded(
-                                                child: Container(
-                                                  alignment: Alignment.centerRight,
-                                                  child: Checkbox(
-                                                    value: false,
-                                                    onChanged: (value) {},
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 8.0,),
-                                                child: Icon(
-                                                  Icons.label_important_outline,
-                                                ),
-                                              ),
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                                child: Text("Important"),
-                                              ),
-                                              Expanded(
-                                                child: Container(
-                                                  alignment: Alignment.centerRight,
-                                                  child: Checkbox(
-                                                    value: false,
-                                                    onChanged: (value) {},
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 8.0,),
-                                                child: Icon(
-                                                  Icons.send_outlined,
-                                                ),
-                                              ),
-                                              const Padding(
-                                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                                child: Text("Sent"),
-                                              ),
-                                              Expanded(
-                                                child: Container(
-                                                  alignment: Alignment.centerRight,
-                                                  child: Checkbox(
-                                                    value: false,
-                                                    onChanged: (value) {},
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            )
-                          );
+                            builder: (context) => LabelsBottomDialog(
+                              topPadding: widget.topPadding,
+                              labels: labels,
+                              labelIcons: labelIcons,
+                            ),
+                          ).then( (_) {
+                            widget.searchQueryFilters.addAll({ "labels": labels });
+
+                            setState(() {
+                              // triggering search
+                              toggleSearchScreen(true, initialSearchString);
+                            });
+                          });
                         },
                       ),
                       SearchFilterButton(
@@ -428,131 +327,37 @@ class _InboxScreenState extends State<InboxScreen>
                         onTap: (value) {
                           showDialog(
                             context: context,
-                            builder: (context) => BottomPopupDialog(
-                              maxFloatingHeight: 0.55,
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                                      child: Row(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            child: const Padding(
-                                              padding: EdgeInsets.symmetric( horizontal: 18.0 ),
-                                              child: Icon(
-                                                  Icons.clear
-                                              ),
-                                            ),
-                                          ),
-                                          const Text(
-                                            "Date",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 4.0),
-                                      child: Container(
-                                        color: const Color(0xFFBDBDBD),
-                                        height: 1,
-                                      ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Radio(
-                                              value: true,
-                                              groupValue: Object(),
-                                              onChanged: (_) {},
-                                          ),
-                                        ),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Text("Any Time"),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Radio(
-                                            value: true,
-                                            groupValue: Object(),
-                                            onChanged: (_) {},
-                                          ),
-                                        ),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Text("Older than a week"),
-                                        ),
-                                      ],
-                                    ),
+                            builder: (context) => DateFilterBottomDialog(
+                                topPadding: widget.topPadding,
+                                dateFilters: dateFilters,
+                                initialDateFilter: initialDateFilter,
+                                notifyParent: (value) {
+                                  initialDateFilter = value;
 
-                                    Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Radio(
-                                            value: true,
-                                            groupValue: Object(),
-                                            onChanged: (_) {},
-                                          ),
-                                        ),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Text("Older than a month"),
-                                        ),
-                                      ],
-                                    ),
+                                  for( String i in dateFilters ) {
+                                    if( i == value ) {
+                                      initialDateFilter = value;
+                                    }
+                                  }
 
-                                    Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Radio(
-                                            value: true,
-                                            groupValue: Object(),
-                                            onChanged: (_) {},
-                                          ),
-                                        ),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Text("Older than 6 months"),
-                                        ),
-                                      ],
-                                    ),
+                                  widget.searchQueryFilters.addAll( {"date" : initialDateFilter } );
+                                },
+                            ),
+                          ).then( (_) {
 
-                                    Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Radio(
-                                            value: true,
-                                            groupValue: Object(),
-                                            onChanged: (_) {},
-                                          ),
-                                        ),
-                                        const Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                          child: Text("Older than a year"),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          );
+                            //
+                            //
+                            // for( var i in dateFilters.keys.toList() ) {
+                            //   if( dateFilters[i] == true ) {
+                            //     debugPrint("this is true" + i );
+                            //     initialDateFilter = i;
+                            //   }
+                            // }
+                            //
+                            // setState(() {
+                            //   toggleSearchScreen(true, initialSearchString);
+                            // });
+                          });
                         },
                       ),
                     ],

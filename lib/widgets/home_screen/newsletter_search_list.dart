@@ -15,7 +15,7 @@ class NewsletterSearchList extends StatefulWidget {
   final String queryStringAddOn;
   final Function addToListMethod;
   final Function removeFromListMethod;
-  final List<String> queryFilters;
+  final Map<String,dynamic> queryFilters;
 
   late Function addElementToTop;
   late Function removeElement;
@@ -24,6 +24,15 @@ class NewsletterSearchList extends StatefulWidget {
   bool queryStringBuilt = false;
   bool breakLoop = false;
   bool refreshList;
+
+  // for date filters
+  final List<String> dateFilters = [
+    "any time",
+    "older than a week",
+    "older than a month",
+    "older than 6 months",
+    "older than a year",
+  ];
 
   NewsletterSearchList({
     Key? key,
@@ -181,39 +190,74 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
     }
     widget.queryStringBuilt = true;
 
-    // loading the newsletters file from memory
-    final localPath = await Utils.localPath;
-    final String username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
+    // debugPrint("queryString - " + widget.queryFilters.toString() );
 
-    final File newslettersFile = File(localPath.path + '/newsletterslist_' + username + '.json');
+    if( widget.queryFilters["search in all mails"] != null || widget.queryFilters["search in all mails"] == false) {
+      queryString = widget.queryStringAddOn.trim();
+    }
+    else {
+      // loading the newsletters file from memory
+      final localPath = await Utils.localPath;
+      final String username = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
 
-    // reading the file
-    List<dynamic> jsonList = jsonDecode(await newslettersFile.readAsString());
+      final File newslettersFile = File(localPath.path + '/newsletterslist_' + username + '.json');
 
-    int count=0;
-    for (var json in jsonList) {
-      if (json['email'] != null && json['enabled'] == true ) {
-        queryString += '( from: "' + json['name'] + '" AND { "${widget.queryStringAddOn}" (';
+      // reading the file
+      List<dynamic> jsonList = jsonDecode(await newslettersFile.readAsString());
 
-        // trimming the string
-        String searchString = widget.queryStringAddOn.trim();
-        for( var i in searchString.split(" ") ) {
-          queryString += " $i";
+      int count=1;
+      for (var json in jsonList) {
+        if (json['email'] != null && json['enabled'] == true ) {
+          queryString += '( from: "' + json['name'] + '" AND { "${widget.queryStringAddOn}" (';
+
+          // trimming the string
+          String searchString = widget.queryStringAddOn.trim();
+          for( var i in searchString.split(" ") ) {
+            queryString += " $i";
+          }
+          queryString += ") }";
+
+          // checking if the searched string is the same as the newsletter's name
+          if( json['name'].toString().toUpperCase().contains( searchString.toUpperCase() ) ) {
+            queryString += ') OR ( from:"${json['name']}" ';
+          }
+
+          debugPrint( count.toString() );
+          if( count < jsonList.length - 1 ) {
+            queryString += ") OR ";
+          }
+          else{
+            queryString += ") ";
+          }
+          count+=1;
         }
-        queryString += ") }";
+      }
+    }
 
-        // checking if the searched string is the same as the newsletter's name
-        if( json['name'].toString().toUpperCase().contains( searchString.toUpperCase() ) ) {
-          queryString += ') OR ( from:"${json['name']}" ';
-        }
+    // adding the is unread filter if selected
+    if( widget.queryFilters["Is unread"] != null && widget.queryFilters["Is unread"] == true ) {
+      queryString += " is:unread";
+    }
 
-        if( count < jsonList.length - 1 ) {
-          queryString += ") OR ";
+    // adding the labels for searching if the user selected any
+    if( widget.queryFilters["labels"] != null ) {
+      Map<String,dynamic> labels =  widget.queryFilters["labels"];
+
+      for( String i in labels.keys.toList() ) {
+        // if the label is enabled in the search filters then adding the label query in the query string
+        if( labels[i] == true ) {
+          queryString += " label:$i";
         }
-        else{
-          queryString += ") ";
+      }
+    }
+
+    // adding the date filters if the user selected any
+    if( widget.queryFilters["date"] != null ) {
+
+      for( String i in widget.dateFilters ) {
+        if( i == widget.queryFilters["date"]  && i != "any time" ) {
+          debugPrint( i );
         }
-        count+=1;
       }
     }
 
@@ -221,6 +265,8 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
     if( queryString.length == 2 ) {
       queryString = "{from: _}";
     }
+
+    debugPrint("final QueryString - " + queryString );
 
     return queryString;
   }
@@ -233,7 +279,7 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
       if ( hasInternetConnection ) {
         String result = '' ;
 
-        if ( queryString.isEmpty ) {
+        if ( queryString.isEmpty) {
           queryString = await _createQueryString();
         }
 
@@ -275,18 +321,16 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
   }
 
   Future<void> refreshCurrentList( ) async {
+    widget.queryStringBuilt = false;
+    queryString = "";
+
     await _getEmailMessages(false);
 
-    setState(() {
-      loadingMore = false;
-      widget.loaded = false;
-    });
-
+    loadingMore = false;
+    widget.loaded = false;
     widget.breakLoop = true;
 
-    setState(() {
-      visibleMessages = {};
-    });
+    visibleMessages = {};
 
     currentIndex=0;
     await _getEmailMessages( true );
@@ -295,8 +339,8 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
   @override
   Widget build(BuildContext context) {
     if( widget.refreshList ) {
-      refreshCurrentList();
       widget.refreshList = false;
+      refreshCurrentList();
     }
 
     const Key centerKey = ValueKey('second-sliver-list');

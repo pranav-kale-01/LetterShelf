@@ -35,6 +35,44 @@ Profile Page:
 
 <img src="https://user-images.githubusercontent.com/70502672/178279252-5dd0ef42-abbe-4fde-acf3-b575f325e1bd.png" width="200"> <img src="https://user-images.githubusercontent.com/70502672/178279267-36f4cc6b-0e62-40d8-95b3-40caf6030f5e.png" width="200"> 
 
+## External dependencies
+
+### 1. googleapis - Gmail API (gmail.v1):
+
+The Gmail API lets you view and manage Gmail mailbox data like threads, messages, and labels. 
+
+* [Documentation](https://developers.google.com/gmail/api/)
+
+* [Api Details](https://pub.dev/documentation/googleapis/latest/gmail.v1/gmail.v1-library.html)
+
+### 2. googleapis - People API (people.v1):
+
+Provides access to information about profiles and contacts. Used to get user details like username and public profile picture.
+
+* [Documentation](https://developers.google.com/people/)
+
+* [Api Details](https://pub.dev/documentation/googleapis/latest/people.v1/people.v1-library.html)
+
+### 3. googleapis_auth 
+
+Provides support for obtaining OAuth2 credentials to access Google APIs. Used to securely authenticate the user to access user information.
+
+* [Api Details](https://pub.dev/packages/googleapis_auth)
+
+### 4. Firebase - Google (firebase_storage and cloud_firestore):
+
+For Cloud Storage, Analytics, and crash reports. 
+
+* [Api deatils](https://pub.dev/packages/googleapis_auth)
+
+### 5. Hive :
+
+For Local Storage, and caching of data and images. 
+
+* [Api Details](https://pub.dev/packages/hive)
+
+
+----
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.

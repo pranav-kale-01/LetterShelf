@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
+import 'package:intl/intl.dart';
 import 'package:letter_shelf/models/emailMessage.dart';
 import 'package:letter_shelf/utils/OAuthClient.dart';
 import 'package:letter_shelf/utils/Utils.dart';
@@ -192,7 +193,7 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
 
     // debugPrint("queryString - " + widget.queryFilters.toString() );
 
-    if( widget.queryFilters["search in all mails"] != null || widget.queryFilters["search in all mails"] == false) {
+    if( widget.queryFilters["search in all mails"] != null && widget.queryFilters["search in all mails"] == true) {
       queryString = widget.queryStringAddOn.trim();
     }
     else {
@@ -253,11 +254,29 @@ class _NewsletterSearchListState extends State<NewsletterSearchList> {
 
     // adding the date filters if the user selected any
     if( widget.queryFilters["date"] != null ) {
+      // getting the current date
+      DateTime today = DateTime.now();
+      DateFormat dateFormat = DateFormat("y/MM/d");
 
-      for( String i in widget.dateFilters ) {
-        if( i == widget.queryFilters["date"]  && i != "any time" ) {
-          debugPrint( i );
-        }
+
+      if( widget.queryFilters["date"] == widget.dateFilters[1] ) {
+        // older than a week
+        queryString += " older:${dateFormat.format( today.subtract( const Duration(days: 7) ) )}";
+      }
+      else if( widget.queryFilters["date"] == widget.dateFilters[2] ) {
+        // older than a month
+        DateTime newDate = DateTime( today.year, today.month -1, today.day, );
+        queryString += " older:${dateFormat.format(newDate)}";
+      }
+      else if( widget.queryFilters["date"] == widget.dateFilters[3] ) {
+        // older than 6 months
+        DateTime newDate = DateTime( today.year, today.month - 6, today.day, );
+        queryString += " older:${dateFormat.format(newDate)}";
+      }
+      else if( widget.queryFilters["date"] == widget.dateFilters[4] ) {
+        // older than a year
+        DateTime newDate = DateTime( today.year - 1, today.month, today.day, );
+        queryString += " older:${dateFormat.format(newDate)}";
       }
     }
 

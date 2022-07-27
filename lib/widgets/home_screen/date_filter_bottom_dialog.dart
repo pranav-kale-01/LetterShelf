@@ -71,35 +71,39 @@ class _DateFilterBottomDialogState extends State<DateFilterBottomDialog> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 6.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: widget.dateFilters.map((e) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        debugPrint("value changed");
-                        widget.notifyParent(e);
-                        dateFilter = e;
-                      });
-                    },
-                    child: Container(
-                      color: Colors.white,
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Radio(
-                              value: e,
-                              groupValue: dateFilter,
-                              onChanged: (value) { },
+                  return SizedBox(
+                    height: 45,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          widget.notifyParent(e);
+                          dateFilter = e;
+                        });
+
+                        Navigator.of(context).pop();
+                      },
+                      child: Container(
+                        color: Colors.white,
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                              child: Radio(
+                                value: e,
+                                groupValue: dateFilter,
+                                onChanged: (value) { },
+                              ),
                             ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text( e[0].toUpperCase() + e.substring(1) ),
-                          ),
-                        ],
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                              child: Text( e[0].toUpperCase() + e.substring(1) ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );

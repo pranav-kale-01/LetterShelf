@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:letter_shelf/models/emailMessage.dart';
 
-import 'package:letter_shelf/widgets/bottom_popup_dialog.dart';
 import 'package:letter_shelf/widgets/home_screen/HomeScreenList.dart';
 import 'package:letter_shelf/widgets/home_screen/date_filter_bottom_dialog.dart';
 import 'package:letter_shelf/widgets/home_screen/home_screen_search_bar.dart';
@@ -249,6 +248,7 @@ class _InboxScreenState extends State<InboxScreen> with AutomaticKeepAliveClient
     return DefaultTabController(
       length: 2,
       child: Scaffold(
+        backgroundColor: Colors.white,
         resizeToAvoidBottomInset: false,
         appBar: _appBar,
         body: SizedBox(
@@ -257,7 +257,8 @@ class _InboxScreenState extends State<InboxScreen> with AutomaticKeepAliveClient
             children: [
               if( showSearchFilters )
                 Container(
-                margin: const EdgeInsets.only(top: 12.0, bottom: 4.0 ),
+                margin: const EdgeInsets.only(top: 8.0, bottom: 8.0 ),
+                color: Colors.white,
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -341,23 +342,14 @@ class _InboxScreenState extends State<InboxScreen> with AutomaticKeepAliveClient
                                   }
 
                                   widget.searchQueryFilters.addAll( {"date" : initialDateFilter } );
+
+                                  setState(() {
+                                    // triggering search
+                                    toggleSearchScreen(true, initialSearchString);
+                                  });
                                 },
                             ),
-                          ).then( (_) {
-
-                            //
-                            //
-                            // for( var i in dateFilters.keys.toList() ) {
-                            //   if( dateFilters[i] == true ) {
-                            //     debugPrint("this is true" + i );
-                            //     initialDateFilter = i;
-                            //   }
-                            // }
-                            //
-                            // setState(() {
-                            //   toggleSearchScreen(true, initialSearchString);
-                            // });
-                          });
+                          );
                         },
                       ),
                     ],
@@ -386,6 +378,10 @@ class _InboxScreenState extends State<InboxScreen> with AutomaticKeepAliveClient
 
   @override
   void dispose() {
+
+    widget.currentDisplayScreen = previousScreen!;
+    _reset = true;
+
     Utils.firstHomeScreenLoad = false;
     super.dispose();
   }

@@ -1,22 +1,24 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+import 'package:letter_shelf/screens/SignInScreen.dart';
 import 'package:letter_shelf/screens/preferences_screen.dart';
+import 'package:letter_shelf/utils/google_user.dart';
 import 'package:letter_shelf/widgets/profile_screen/profile_card.dart';
 
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:googleapis/people/v1.dart' as people;
 
-import '../utils/Utils.dart';
-import 'SelectAccount.dart';
 import 'manage_newsletters_settings.dart';
 
 class ProfileScreen extends StatelessWidget {
   final double bottomPadding;
   final gmail.GmailApi gmailApi;
   final people.PeopleServiceApi peopleApi;
+  final GoogleSignInAccount user;
 
-  const ProfileScreen({Key? key, required this.bottomPadding, required this.gmailApi, required this.peopleApi}) : super(key: key);
+
+  const ProfileScreen({Key? key, required this.user, required this.bottomPadding, required this.gmailApi, required this.peopleApi}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -40,12 +42,12 @@ class ProfileScreen extends StatelessWidget {
               // User Profile
               Padding(
                 padding: const EdgeInsets.only(top: 15.0),
-                child: ProfileCard( gmailApi: gmailApi, peopleApi: peopleApi, bottomPadding: bottomPadding),
+                child: ProfileCard( user: user, bottomPadding: bottomPadding),
               ),
 
               // Manage newsletters
               Container(
-                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 1),
+                margin: const EdgeInsets.symmetric( horizontal: 7, vertical: 1),
                 child: GestureDetector(
                   onTap: () {
                     // redirecting to manage_newsletters_settings screen
@@ -56,13 +58,13 @@ class ProfileScreen extends StatelessWidget {
                     );
 
                   },
-                  child: Container(
+                  child: SizedBox(
                     height: 70,
                     child: Card(
                       elevation: 1,
                       child: Row(
                         children: [
-                          Padding(
+                          const Padding(
                             padding: EdgeInsets.only(left: 15, top: 2),
                             child: Icon(
                               Icons.mail_outline_rounded,
@@ -89,12 +91,12 @@ class ProfileScreen extends StatelessWidget {
 
               // Preferences
               Container(
-                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 1),
+                margin: const EdgeInsets.symmetric( horizontal: 7, vertical: 1),
                 child: GestureDetector(
                   onTap: () {
                     // redirecting to manage newsletters list screen
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => PreferredScreen() )
+                      MaterialPageRoute(builder: (context) => const PreferredScreen() )
                     );
                   },
                   child: SizedBox(
@@ -103,7 +105,7 @@ class ProfileScreen extends StatelessWidget {
                       elevation: 1,
                       child: Row(
                         children: [
-                          Padding(
+                          const Padding(
                             padding: EdgeInsets.only(left: 15, top: 2),
                             child: Icon(
                               Icons.settings_outlined,
@@ -169,19 +171,19 @@ class ProfileScreen extends StatelessWidget {
 
               // Log Out
               Container(
-                margin: EdgeInsets.symmetric( horizontal: 7, vertical: 1),
+                margin: const EdgeInsets.symmetric( horizontal: 7, vertical: 1),
                 child: GestureDetector(
                   onTap: () async {
                     // logging out the user
-                    final path = (await Utils.localPath).path;
-                    final file = File(path + '/currentUser.json');
-                    file.delete();
+                    bool result = await signOutGoogle();
 
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => SelectAccount( ),
-                      ),
-                    );
+                    if( result ) {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const SignInScreen(),
+                        ),
+                      );
+                    }
                   },
                   child: SizedBox(
                     height: 70,
@@ -189,7 +191,7 @@ class ProfileScreen extends StatelessWidget {
                       elevation: 1,
                       child: Row(
                         children: [
-                          Padding(
+                          const Padding(
                             padding: EdgeInsets.only(left: 15, top: 2, right: 2),
                             child: Icon(
                               Icons.login_outlined,

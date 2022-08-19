@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:googleapis/people/v1.dart' as people;
 import 'package:hive/hive.dart';
@@ -12,14 +13,12 @@ import '../../utils/Utils.dart';
 
 class ProfileCard extends StatefulWidget {
   final double bottomPadding;
-  final gmail.GmailApi gmailApi;
-  final people.PeopleServiceApi peopleApi;
+  final GoogleSignInAccount user;
 
   const ProfileCard(
       {Key? key,
       required this.bottomPadding,
-      required this.gmailApi,
-      required this.peopleApi})
+      required this.user})
       : super(key: key);
 
   @override
@@ -43,9 +42,9 @@ class _ProfileCardState extends State<ProfileCard>
     try {
       HiveServices hiveService = HiveServices();
 
-      userEmail = await OAuthClient.getCurrentUserNameFromApi(widget.gmailApi);
+      userEmail = widget.user.email;
 
-      // checking if email messages are already cached
+      // checking if profile data are already cached
       bool exists = await hiveService.isExists(boxName: "profile_data" + userEmail);
       // exists = false;
 
@@ -56,23 +55,16 @@ class _ProfileCardState extends State<ProfileCard>
         Map<dynamic, dynamic> result = (await hiveService.getBoxes("profile_data" + userEmail ))[0];
 
         setState(() {
-          userEmail = result['email'];
-          userName = result['username'];
           profilePhoto = Image.memory(result['photo']);
+          userName = widget.user.displayName!;
         });
       }
       else {
         Utils.firstProfileScreenLoad = false;
 
-        // getting username from People api
-        people.Person person = await widget.peopleApi.people.get('people/me', personFields: 'names,photos');
-
-        // setting user's profile Photo
-        List<people.Photo>? photos = person.photos;
-
         Uint8List bytes =
-            (await NetworkAssetBundle(Uri.parse(photos![0].url.toString()))
-                .load(photos[0].url.toString()))
+            (await NetworkAssetBundle(Uri.parse(widget.user.photoUrl!))
+                .load(widget.user.photoUrl!))
                 .buffer
                 .asUint8List();
 
@@ -84,15 +76,13 @@ class _ProfileCardState extends State<ProfileCard>
         // adding data to box
         hiveService.addBoxes([
           {
-            'username': person.names![0].displayName,
-            'email': userEmail,
             'photo': bytes,
           }
         ], "profile_data" + userEmail );
 
         setState(() {
           profilePhoto = Image.memory(bytes);
-          userName = person.names![0].displayName!;
+          userName = widget.user.displayName!;
         });
       }
     } catch (e, stacktrace) {

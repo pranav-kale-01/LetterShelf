@@ -1,14 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:googleapis/gmail/v1.dart' as gmail;
-import 'package:googleapis/people/v1.dart' as people;
+import 'package:google_sign_in/google_sign_in.dart';
 
-import 'package:letter_shelf/screen_loaders/loggedinuserCheckLoader.dart';
-import 'package:letter_shelf/screen_loaders/screenCheckLoader.dart';
-
-import '../screens/SignInScreen.dart';
-import '../utils/Utils.dart';
+import 'package:letter_shelf/screen_loaders/newsletterslistCheckLoader.dart';
+import 'package:letter_shelf/utils/google_user.dart';
+import 'package:letter_shelf/screens/SignInScreen.dart';
 
 class CredentialCheckLoader extends StatefulWidget {
   const CredentialCheckLoader({Key? key}) : super(key: key);
@@ -17,47 +12,28 @@ class CredentialCheckLoader extends StatefulWidget {
   _CredentialCheckLoaderState createState() => _CredentialCheckLoaderState();
 }
 
-class _CredentialCheckLoaderState extends State<CredentialCheckLoader> implements ScreenCheckLoader {
-  late Future<void> credentialsPresent;
+class _CredentialCheckLoaderState extends State<CredentialCheckLoader> {
   late Widget redirectedScreen;
+  late Future<void> userPresent;
+
+  GoogleSignInAccount? user;
 
   @override
   void initState() {
     super.initState();
-    credentialsPresent = init();
+    userPresent = init();
   }
 
   @override
   Future<void> init() async {
-    await checkForFile( null, null );
-  }
-
-  @override
-  Future<void> checkForFile( gmail.GmailApi? gmailApi, people.PeopleServiceApi? peoplApi ) async {
-    redirectedScreen = await fileExists() ? const LoggedinUserCheckLoader() : const SignInScreen() ;
-  }
-
-  // if present, creates a reference to the credentials file stored in the documents directory
-  @override
-  Future<bool> fileExists() async {
-    final path = await Utils.localPath;
-    final files = path.listSync();
-
-    RegExp re = RegExp(r'credentials');
-    bool filePresent = false;
-
-    for( FileSystemEntity ent in files ) {
-      if( re.hasMatch(ent.toString() ) ) {
-        filePresent = true;
-      }
-    }
-    return filePresent;
+    user = await ensureLoggedInOnStartUp();
+    redirectedScreen = user != null ? NewsletterListCheckLoader(user: user!) : const SignInScreen();
   }
 
   @override
   FutureBuilder buildFutureBuilder() {
     return FutureBuilder(
-        future: credentialsPresent,
+        future: userPresent,
         builder: (context, snapshot) {
           if( snapshot.connectionState == ConnectionState.done ){
             return redirectedScreen;

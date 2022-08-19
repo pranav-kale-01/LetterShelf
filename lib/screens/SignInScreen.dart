@@ -1,13 +1,18 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:googleapis/people/v1.dart' as people;
-import 'package:googleapis_auth/auth_io.dart';
-import 'package:http/http.dart' as http;
-import 'package:letter_shelf/utils/OAuthClient.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:letter_shelf/screen_loaders/newsletterslistCheckLoader.dart';
 
+import 'package:letter_shelf/utils/google_auth_client.dart';
+import 'package:letter_shelf/utils/google_user.dart';
+
+import '../utils/Utils.dart';
 import 'SetupScreen.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -20,79 +25,41 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   late gmail.GmailApi gmailApi;
   late people.PeopleServiceApi peopleApi;
-  late http.Client client;
+  // late http.Client client;
+
+  Future? waitForInit;
 
   List<String> imgList = [
     'assets/images/image-1.jpg',
     'assets/images/image-2.jpg',
     'assets/images/image-3.jpg',
   ];
+  //
+  // final GoogleSignIn _googleSignIn = GoogleSignIn.standard(
+  //   scopes: <String>[
+  //     gmail.GmailApi.gmailModifyScope,
+  //     gmail.GmailApi.gmailReadonlyScope,
+  //     people.PeopleServiceApi.contactsOtherReadonlyScope,
+  //   ],
+  // );
 
   int _current = 0;
+  GoogleSignInAccount? user;
 
-  // prompt for user to sign-in using the consent Screen
-  void _prompt(String url, BuildContext ctx) {
-    showDialog(
-      context: ctx,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: GestureDetector(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only( top: 16.0, bottom: 24),
-                    child: Text(
-                      "Google Sign In",
-                      style: TextStyle(
-                        fontSize: 26,
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    'Please go the following URL to Sign in with your Google Account',
-                    style: TextStyle(
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                  Container(
-                    height: 2,
-                    color: Colors.black12,
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      launch(url);
-                      Navigator.of(context).pop();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.only(right: 8.0,top: 12),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Open Link',
-                        style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w500
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
+  @override
+  void initState() {
+    super.initState();
+    // waitForInit = init();
   }
+
+  // Future<void> _handleSignIn() async {
+  //   try {
+  //     user = await _googleSignIn.signIn();
+  //   } catch (error, stacktrace ) {
+  //     debugPrint( error.toString() );
+  //     debugPrint( stacktrace.toString() );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -112,8 +79,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     Padding(
                       padding: EdgeInsets.only( top: 8.0),
                       child: Image(
-                        image: AssetImage(
-                            'assets/images/letter_shelf_logo_trimmed.png'),
+                        image: AssetImage( 'assets/images/letter_shelf_logo_trimmed.png'),
                         width: 50,
                       ),
                     ),
@@ -123,7 +89,7 @@ class _SignInScreenState extends State<SignInScreen> {
               Container(
                 padding: const EdgeInsets.only(top: 20, left: 8),
                 width: MediaQuery.of(context).size.width,
-                child: Text(
+                child: const Text(
                     'Welcome To LetterShelf..',
                     style: TextStyle(
                         fontSize: 38,
@@ -208,7 +174,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                           ),
                           const Text(
-                            'Explore and find new & intresting newsletters',
+                            'Explore and find new & interesting newsletters',
                             style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.w600
@@ -257,20 +223,28 @@ class _SignInScreenState extends State<SignInScreen> {
                     backgroundColor: MaterialStateProperty.all<Color>( const Color.fromRGBO(230, 62, 107, 1), ),
                   ),
                   onPressed: () async {
-                    OAuthClient client = OAuthClient(username: '');
+                    // await _handleSignIn();
+                    try {
+                      user = await signInWithGoogle();
+                    }
+                    catch( e, stacktrace ) {
+                      debugPrint( e.toString() );
+                      debugPrint( stacktrace.toString() );
+                    }
 
-                    bool successful = await client.obtainCredentials( context: context, prompt: _prompt);
+                    // if the signing in process was completed successfully
+                    if( user != null )
+                    {
+                      debugPrint( user.toString() );
+                      final authHeaders = await user!.authHeaders;
+                      final authenticatedClient =  GoogleAuthClient( authHeaders );
 
-                    if (successful) {
-                      // getting the AutoRefreshingAuthClient
-                      AutoRefreshingAuthClient _authClient = await client.getClient();
-
-                      gmailApi = client.getGmailApi( _authClient );
-                      peopleApi = client.getPeopleApi( _authClient );
+                      gmailApi = gmail.GmailApi(authenticatedClient);
+                      peopleApi = people.PeopleServiceApi( authenticatedClient );
 
                       Navigator.of(context).push(
                         MaterialPageRoute(builder: (context) {
-                          return SetupScreen( gmailApi: gmailApi, peopleApi: peopleApi );
+                          return NewsletterListCheckLoader( user: user!, );
                         }),
                       );
                     }

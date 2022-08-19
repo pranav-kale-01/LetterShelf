@@ -2,11 +2,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import 'package:googleapis/gmail/v1.dart' as gmail;
 import 'package:googleapis/people/v1.dart' as people;
-import 'package:googleapis_auth/googleapis_auth.dart';
+
 import 'package:hive/hive.dart';
-import 'package:letter_shelf/utils/OAuthClient.dart';
 import 'package:letter_shelf/utils/hive_services.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -44,14 +44,22 @@ class _SelectAccountListTileState extends State<SelectAccountListTile> {
 
       userEmail = widget.username;
 
-      OAuthClient client = OAuthClient(username: widget.username);
-      AutoRefreshingAuthClient _authClient =  await client.getClient();
+      // GoogleSignInAccount? googleSignInAccount = await getUser(widget.username);
+/*
+      final authHeaders = await googleSignInAccount!.authHeaders;
+      final authenticatedClient =  GoogleAuthClient( authHeaders );
+
+      // gmail.GmailApi gmailApi = gmail.GmailApi(authenticatedClient);
+      people.PeopleServiceApi peopleApi = people.PeopleServiceApi( authenticatedClient );*/
+
+      // OAuthClient client = OAuthClient(username: widget.username);
+      // AutoRefreshingAuthClient _authClient =  await client.getClient();
 
       // loading the Google's Gmail API
-      gmailApi = client.getGmailApi(_authClient);
+      // gmailApi = client.getGmailApi(_authClient);
 
       // loading the Google's People API
-      peopleApi = client.getPeopleApi(_authClient);
+      // peopleApi = client.getPeopleApi(_authClient);
 
       // checking if email messages are already cached
       Hive.init((await getApplicationDocumentsDirectory()).path);

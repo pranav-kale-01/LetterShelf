@@ -91,8 +91,7 @@ class Utils {
         return Utils.backgroundColorsList[ colorIndex ];
       }
       catch( e ) {
-        print( ((displayText.codeUnitAt(0) - 64) / colorPerIndex ) );
-        print( 'pleease not from here - ' +  colorIndex.toString() );
+        debugPrint( e.toString() );
         return Colors.pink;
       }
     }

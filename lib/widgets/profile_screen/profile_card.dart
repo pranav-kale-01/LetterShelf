@@ -115,7 +115,6 @@ class _ProfileCardState extends State<ProfileCard>
 
             Container(
               padding: const EdgeInsets.symmetric(vertical: 10 , horizontal: 10),
-             
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,

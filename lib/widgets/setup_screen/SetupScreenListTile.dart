@@ -63,7 +63,7 @@ class _SetupScreenListTileState extends State<SetupScreenListTile> {
               widget.newsletter.name,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 28.0,
+                fontSize: 20.0,
                 fontWeight: FontWeight.w600,
                 color: textColor,
               ),
@@ -75,37 +75,39 @@ class _SetupScreenListTileState extends State<SetupScreenListTile> {
               widget.newsletter.email,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  fontSize: 16.0,
                   fontWeight: FontWeight.w500,
                   color: textColor,
               ),
             ),
           ),
           trailing: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               AnimatedRotation(
                 curve: Curves.easeOutExpo,
                 duration: const Duration( milliseconds: 600),
                 turns: turns,
-                child: GestureDetector(
-                  onTap: () {
-                    // rotating the button and changing the flag to avoid repetition
-                    rotate();
-                    rotationAllowed = !rotationAllowed;
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 8.0,),
+                  child: GestureDetector(
+                    onTap: () {
+                      // rotating the button and changing the flag to avoid repetition
+                      rotate();
+                      rotationAllowed = !rotationAllowed;
 
-                    setState(() {
-                      // reversing the current value of the newsletter, means if it is enabled it would be disabled and vice versa
-                      widget.newsletter.enabled = !widget.newsletter.enabled;
-                      addIconColor = addIconColor == Colors.black ? Colors.grey : Colors.black;
-                      textColor = textColor == Colors.black ? Colors.grey : Colors.black;
-                      iconLogo = iconLogo == Icons.remove_circle_outline_sharp ? Icons.add : Icons.remove_circle_outline_sharp;
-                    });
-                  },
-                  child: Icon(
-                    iconLogo,
-                    size: 32.0,
-                    color: addIconColor,
+                      setState(() {
+                        // reversing the current value of the newsletter, means if it is enabled it would be disabled and vice versa
+                        widget.newsletter.enabled = !widget.newsletter.enabled;
+                        addIconColor = addIconColor == Colors.black ? Colors.grey : Colors.black;
+                        textColor = textColor == Colors.black ? Colors.grey : Colors.black;
+                        iconLogo = iconLogo == Icons.remove_circle_outline_sharp ? Icons.add : Icons.remove_circle_outline_sharp;
+                      });
+                    },
+                    child: Icon(
+                      iconLogo,
+                      size: 28.0,
+                      color: addIconColor,
+                    ),
                   ),
                 ),
               ),

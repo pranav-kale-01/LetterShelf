@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import 'package:letter_shelf/screens/SignInScreen.dart';
+import 'package:letter_shelf/screens/sign_in_screen.dart';
 import 'package:letter_shelf/screens/preferences_screen.dart';
 import 'package:letter_shelf/utils/google_user.dart';
 import 'package:letter_shelf/widgets/profile_screen/profile_card.dart';
@@ -180,7 +180,9 @@ class ProfileScreen extends StatelessWidget {
                     if( result ) {
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (context) => const SignInScreen(),
+                          builder: (context) => SignInScreen(
+                            mediaQuery: MediaQuery.of(context),
+                          ),
                         ),
                       );
                     }

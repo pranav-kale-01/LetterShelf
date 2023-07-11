@@ -54,7 +54,7 @@ class _NewsletterListCheckLoaderState extends State<NewsletterListCheckLoader> {
 
   Future<void> checkForFile(GoogleSignInAccount user) async {
     final bool exists = await fileExists();
-    redirectedScreen = exists ? HomeScreen(user: user, gmailApi: gmailApi, peopleApi: peopleApi, ) : SetupScreen( user: user,);
+    redirectedScreen = exists ? HomeScreen(user: user, gmailApi: gmailApi, peopleApi: peopleApi, ) : SetupScreen( user: user, gmailApi: gmailApi, peopleApi: peopleApi,);
   }
 
   Future<bool> fileExists() async {

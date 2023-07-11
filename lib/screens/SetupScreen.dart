@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:letter_shelf/models/subscribed_newsletters.dart';
 import 'package:letter_shelf/screens/HomeScreen.dart';
-import 'package:letter_shelf/screens/SignInScreen.dart';
-import 'package:letter_shelf/utils/google_auth_client.dart';
+import 'package:letter_shelf/screens/sign_in_screen.dart';
 import 'package:letter_shelf/utils/google_user.dart';
 import 'package:letter_shelf/utils/Utils.dart';
 import 'package:letter_shelf/widgets/setup_screen/SetupScreenList.dart';
@@ -17,16 +16,18 @@ import 'package:googleapis/people/v1.dart' as people;
 
 class SetupScreen extends StatefulWidget {
   final GoogleSignInAccount user;
+  final gmail.GmailApi? gmailApi;
+  final people.PeopleServiceApi? peopleApi;
 
-  const SetupScreen({Key? key, required this.user}) : super(key: key);
+  const SetupScreen({Key? key, required this.user, required this.gmailApi, required this.peopleApi}) : super(key: key);
 
   @override
   SetupScreenState createState() => SetupScreenState();
 }
 
 class SetupScreenState extends State<SetupScreen> {
-  late gmail.GmailApi gmailApi;
-  late people.PeopleServiceApi peopleApi;
+  // late gmail.GmailApi gmailApi;
+  // late people.PeopleServiceApi peopleApi;
   late Future<void> loaded;
 
   List<SubscribedNewsletter> subscribedNewsletters = [];
@@ -53,11 +54,11 @@ class SetupScreenState extends State<SetupScreen> {
   }
 
   Future<void> loadGoogleApis() async {
-    final authHeaders = await widget.user.authHeaders;
-    final authenticatedClient =  GoogleAuthClient( authHeaders );
-
-    gmailApi = gmail.GmailApi(authenticatedClient);
-    peopleApi = people.PeopleServiceApi( authenticatedClient );
+    // final authHeaders = await widget.user.authHeaders;
+    // final authenticatedClient =  GoogleAuthClient( authHeaders );
+    //
+    // gmailApi = gmail.GmailApi(authenticatedClient);
+    // peopleApi = people.PeopleServiceApi( authenticatedClient );
   }
 
   void onLoadingComplete(List<SubscribedNewsletter> subscribedNewsletters) {
@@ -70,7 +71,7 @@ class SetupScreenState extends State<SetupScreen> {
   }
 
   Future<String> getCurrentUserName() async {
-    gmail.Profile userProfile = await gmailApi.users.getProfile('me');
+    gmail.Profile userProfile = await widget.gmailApi!.users.getProfile('me');
     return userProfile.emailAddress!;
   }
 
@@ -107,8 +108,8 @@ class SetupScreenState extends State<SetupScreen> {
       MaterialPageRoute(
         builder: (context) => HomeScreen(
           user: widget.user,
-          gmailApi: gmailApi,
-          peopleApi: peopleApi,
+          gmailApi: widget.gmailApi,
+          peopleApi: widget.peopleApi,
         ),
       ),
     );
@@ -125,44 +126,53 @@ class SetupScreenState extends State<SetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        leading: GestureDetector(
-          onTap: () async {
-            // signing out
-            signingOut = true;
-            if( await signOutGoogle() ) {
-              if( Navigator.canPop(context) ) {
-                Navigator.of(context).pop();
+        automaticallyImplyLeading: false,
+        actions: [
+          GestureDetector(
+            onTap: () async {
+              // signing out
+              signingOut = true;
+              if( await signOutGoogle() ) {
+                if( Navigator.canPop(context) ) {
+                  Navigator.of(context).pop();
+                }
+                else {
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => SignInScreen(
+                          mediaQuery: mediaQuery,
+                        ),
+                      )
+                  );
+                }
               }
               else {
-                Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const SignInScreen(),
-                    )
-                );
+                // this part of the code would execute only if there is an issue signing out (for example, no internet connectivity)
+                // if signing out fails we want to continue the processing of setting -up
+                signingOut = false;
               }
-            }
-            else {
-              // this part of the code would execute only if there is an issue signing out (for example, no internet connectivity)
-              // if signing out fails we want to continue the processing of setting -up
-              signingOut = false;
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.only(left: 10.0),
-            child: Row(
-              children: const [
-                Icon(
-                  Icons.arrow_back_ios
-                ),
-                Text("Back")
-              ],
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10.0, top: 0.0),
+              child: Row(
+                children: const [
+                  Icon(
+                      Icons.arrow_back_ios
+                  ),
+                  Text("Back")
+                ],
+              ),
             ),
           ),
-        )
+          Expanded(
+            child: Container(),
+          ),
+        ],
       ),
       body: Container(
         alignment: Alignment.topCenter,
@@ -175,15 +185,17 @@ class SetupScreenState extends State<SetupScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 5.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.only(left: 8, right: 8, top: 10, bottom: 14),
+                width: mediaQuery.size.width * 0.7,
+                padding: const EdgeInsets.only(left: 8, right: 8, top: 40, bottom: 14),
                 child: Text(
                   setupListLoadingComplete
                       ? 'Select which newsletters you want to read'
                       : 'Looking for the already present newsletters in your account..',
                   style: const TextStyle(
-                    fontSize: 28,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
                   ),
                   textAlign: TextAlign.start,
@@ -214,7 +226,7 @@ class SetupScreenState extends State<SetupScreen> {
               ),
               Expanded(
                 child: SetupScreenList(
-                  api: gmailApi,
+                  api: widget.gmailApi!,
                   onLoadingComplete: onLoadingComplete,
                   subscribedNewsletters: subscribedNewsletters,
                   allNewsletters: allNewsletters,
@@ -263,7 +275,7 @@ class SetupScreenState extends State<SetupScreen> {
                                     child: const Text(
                                         'Cancel',
                                         style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 16,
                                         ),
                                     ),
                                     onPressed: () {
@@ -274,7 +286,7 @@ class SetupScreenState extends State<SetupScreen> {
                                     child: const Text(
                                       'Continue',
                                       style: TextStyle(
-                                        fontSize: 28,
+                                        fontSize: 16,
                                       ),
                                     ),
                                     onPressed: () {

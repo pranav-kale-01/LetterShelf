@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:letter_shelf/models/subscribed_newsletters.dart';
 import 'package:letter_shelf/screens/HomeScreen.dart';
@@ -132,6 +133,7 @@ class SetupScreenState extends State<SetupScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         automaticallyImplyLeading: false,
+        elevation: 0,
         actions: [
           GestureDetector(
             onTap: () async {
@@ -187,15 +189,29 @@ class SetupScreenState extends State<SetupScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(
+                height: 30,
+              ),
+              Center(
+                child: SizedBox(
+                  height: 150,
+                  width: 300,
+                  child: setupListLoadingComplete ? SvgPicture.asset(
+                    'assets/svg/mail_select.svg'
+                  ) : Image.asset(
+                      'assets/images/mail_search.png'
+                  ),
+                ),
+              ),
               Container(
-                width: mediaQuery.size.width * 0.7,
+                width: mediaQuery.size.width * 0.9,
                 padding: const EdgeInsets.only(left: 8, right: 8, top: 40, bottom: 14),
                 child: Text(
                   setupListLoadingComplete
-                      ? 'Select which newsletters you want to read'
+                      ? 'Pick you Readings List'
                       : 'Looking for the already present newsletters in your account..',
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.w700,
                   ),
                   textAlign: TextAlign.start,

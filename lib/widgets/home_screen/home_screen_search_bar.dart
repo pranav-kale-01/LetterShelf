@@ -223,7 +223,7 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
           padding: EdgeInsets.zero,
           child: Card(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10)
+                borderRadius: BorderRadius.circular(10)
             ),
             elevation: _elevationAnimation.value,
             child: Row(
@@ -239,33 +239,33 @@ class _HomeScreenSearchBarState extends State<HomeScreenSearchBar> with SingleTi
                   child: GestureDetector(
                     onTap: () {
                       if( searchBarFocusNode.hasFocus || searchTriggered) {
-                          widget.onSearchExiting();
+                        widget.onSearchExiting();
 
-                          // clearing previous value
-                          previousValue = "";
+                        // clearing previous value
+                        previousValue = "";
 
-                          searchTriggered = false;
+                        searchTriggered = false;
 
-                          // rotating the button and changing the flag to avoid repetition
-                          rotate();
-                          rotationAllowed = !rotationAllowed;
+                        // rotating the button and changing the flag to avoid repetition
+                        rotate();
+                        rotationAllowed = !rotationAllowed;
 
-                          // adding back elevation to the search bar
-                          // searchBarElevation = 3;
-                          _elevationController.forward();
+                        // adding back elevation to the search bar
+                        // searchBarElevation = 3;
+                        _elevationController.forward();
 
-                          // changing the menu icon
-                          menuIcon = const Icon( Icons.menu, color: Colors.black, );
+                        // changing the menu icon
+                        menuIcon = const Icon( Icons.menu, color: Colors.black, );
 
-                          // removing focus from the text field and clearing previous data
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          searchBarTextController.clear();
+                        // removing focus from the text field and clearing previous data
+                        FocusScope.of(context).requestFocus(FocusNode());
+                        searchBarTextController.clear();
 
-                          // closing the searchScreen
-                          widget.triggerSearchScreen(false, '' );
+                        // closing the searchScreen
+                        widget.triggerSearchScreen(false, '' );
 
-                          setState(() { });
-                        }
+                        setState(() { });
+                      }
                       else {
                         // behaviour for menu button
                         widget.scaffoldKey.currentState!.openDrawer();

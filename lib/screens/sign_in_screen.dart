@@ -8,7 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:letter_shelf/screen_loaders/credentialCheckLoader.dart';
 
 import 'package:letter_shelf/utils/google_user.dart';
-import 'package:letter_shelf/widgets/home_screen/dashed_path_painter.dart';
+import 'package:letter_shelf/widgets/sign_in_screen/dashed_path_painter.dart';
 
 class SignInScreen extends StatefulWidget {
   final MediaQueryData mediaQuery;

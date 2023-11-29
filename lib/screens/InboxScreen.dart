@@ -116,7 +116,7 @@ class _InboxScreenState extends State<InboxScreen> with AutomaticKeepAliveClient
 
   Future<void> addToHomeScreenList( {required String listName, required EmailMessage msg}) async {
     for (HomeScreenList homeScreenTab
-        in homeScreenTabsList as List<HomeScreenList>) {
+    in homeScreenTabsList as List<HomeScreenList>) {
       if (homeScreenTab.key.toString() == listName) {
         // the correct list is found, adding the element to the top of the list
         homeScreenTab.addElementToTop(msg);
@@ -126,7 +126,7 @@ class _InboxScreenState extends State<InboxScreen> with AutomaticKeepAliveClient
 
   Future<void> removeFromHomeScreenList( {required String listName, required String msgId}) async {
     for (HomeScreenList homeScreenTab
-        in homeScreenTabsList as List<HomeScreenList>) {
+    in homeScreenTabsList as List<HomeScreenList>) {
       if (homeScreenTab.key.toString() == listName) {
         // the correct list is found, removing the element from the list
         homeScreenTab.removeElement(msgId);
@@ -257,78 +257,78 @@ class _InboxScreenState extends State<InboxScreen> with AutomaticKeepAliveClient
             children: [
               if( showSearchFilters )
                 Container(
-                margin: const EdgeInsets.only(top: 8.0, bottom: 8.0 ),
-                color: Colors.white,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      SearchFilterButton(
-                        label: "search in all mails",
-                        showDropDownIcon: false,
-                        behaviour: SearchFilterButton.toggleButton,
-                        onTap: (value) {
-                          if( widget.searchQueryFilters[value] == null || widget.searchQueryFilters[value] == false ) {
-                            widget.searchQueryFilters.addAll( {value:true} );
-                          }
-                          else {
-                            widget.searchQueryFilters.addAll( {value:false} );
-                          }
+                  margin: const EdgeInsets.only(top: 8.0, bottom: 8.0 ),
+                  color: Colors.white,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        SearchFilterButton(
+                          label: "search in all mails",
+                          showDropDownIcon: false,
+                          behaviour: SearchFilterButton.toggleButton,
+                          onTap: (value) {
+                            if( widget.searchQueryFilters[value] == null || widget.searchQueryFilters[value] == false ) {
+                              widget.searchQueryFilters.addAll( {value:true} );
+                            }
+                            else {
+                              widget.searchQueryFilters.addAll( {value:false} );
+                            }
 
-                          externalSearchTriggered = true;
-
-                          setState(() {
-                            // triggering search
-                            toggleSearchScreen(true, initialSearchString);
-                          });
-                        },
-                      ),
-                      SearchFilterButton(
-                        label: "Is unread",
-                        showDropDownIcon: false,
-                        behaviour: SearchFilterButton.toggleButton,
-                        onTap: (value) {
-                          if( widget.searchQueryFilters[value] == null || widget.searchQueryFilters[value] == false ) {
-                            widget.searchQueryFilters.addAll( {value:true} );
-                          }
-                          else {
-                            widget.searchQueryFilters.addAll( {value:false} );
-                          }
-
-                          externalSearchTriggered = true;
-
-                          setState(() {
-                            // triggering search
-                            toggleSearchScreen(true, initialSearchString);
-                          });
-                        },
-                      ),
-                      SearchFilterButton(
-                          label: "Labels",
-                        onTap: (value) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => LabelsBottomDialog(
-                              topPadding: widget.topPadding,
-                              labels: labels,
-                              labelIcons: labelIcons,
-                            ),
-                          ).then( (_) {
-                            widget.searchQueryFilters.addAll({ "labels": labels });
+                            externalSearchTriggered = true;
 
                             setState(() {
                               // triggering search
                               toggleSearchScreen(true, initialSearchString);
                             });
-                          });
-                        },
-                      ),
-                      SearchFilterButton(
-                        label: "Date",
-                        onTap: (value) {
-                          showDialog(
-                            context: context,
-                            builder: (context) => DateFilterBottomDialog(
+                          },
+                        ),
+                        SearchFilterButton(
+                          label: "Is unread",
+                          showDropDownIcon: false,
+                          behaviour: SearchFilterButton.toggleButton,
+                          onTap: (value) {
+                            if( widget.searchQueryFilters[value] == null || widget.searchQueryFilters[value] == false ) {
+                              widget.searchQueryFilters.addAll( {value:true} );
+                            }
+                            else {
+                              widget.searchQueryFilters.addAll( {value:false} );
+                            }
+
+                            externalSearchTriggered = true;
+
+                            setState(() {
+                              // triggering search
+                              toggleSearchScreen(true, initialSearchString);
+                            });
+                          },
+                        ),
+                        SearchFilterButton(
+                          label: "Labels",
+                          onTap: (value) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => LabelsBottomDialog(
+                                topPadding: widget.topPadding,
+                                labels: labels,
+                                labelIcons: labelIcons,
+                              ),
+                            ).then( (_) {
+                              widget.searchQueryFilters.addAll({ "labels": labels });
+
+                              setState(() {
+                                // triggering search
+                                toggleSearchScreen(true, initialSearchString);
+                              });
+                            });
+                          },
+                        ),
+                        SearchFilterButton(
+                          label: "Date",
+                          onTap: (value) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => DateFilterBottomDialog(
                                 topPadding: widget.topPadding,
                                 dateFilters: dateFilters,
                                 initialDateFilter: initialDateFilter,
@@ -348,14 +348,14 @@ class _InboxScreenState extends State<InboxScreen> with AutomaticKeepAliveClient
                                     toggleSearchScreen(true, initialSearchString);
                                   });
                                 },
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
               SizedBox(
                 height: MediaQuery.of(context).size.height -
                     _appBar.preferredSize.height -
